@@ -57,7 +57,7 @@ export default function Home() {
           <div className="card" style={{ padding: 30 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>02</span>
-              <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 8px", background: "var(--ink)", color: "var(--surface)", borderRadius: 3 }}>준비 중</span>
+              <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 8px", background: "var(--ink)", color: "var(--surface)", borderRadius: 3 }}>샘플 공개</span>
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
@@ -68,6 +68,7 @@ export default function Home() {
               <div style={{ display: "flex", gap: 9 }}><Check />결제 퍼널과 전환 붕괴 지점</div>
               <div style={{ display: "flex", gap: 9 }}><Check />우선순위가 매겨진 개선 가설</div>
             </div>
+            <Link href="/diagnose?sample" style={{ display: "inline-block", marginTop: 20, fontSize: 14, fontWeight: 500 }}>샘플 게임 리포트 보기 →</Link>
           </div>
         </section>
 

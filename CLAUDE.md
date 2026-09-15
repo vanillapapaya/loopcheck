@@ -28,14 +28,16 @@
 | 설계기 `app/design/page.tsx` + `ResultView.tsx` | 됨 (프리셋 4종 기반) |
 | 프리셋 JSON `public/presets/*.json` | 됨 (puzzle, idle, gacha-rpg, roguelike) |
 | 자유 입력 → LLM 호출 | **안 됨** (API 키 미정) |
-| 진단 업로드/리포트 | **안 됨** |
+| 진단 엔진 `lib/diagnose/engine.ts` + 해석 규칙 `findings.ts` | 됨. `npm run check:diagnose` 29/29 (시그널 5개·광고 함정 통과) |
+| 진단 리포트 `app/diagnose` | 됨 (샘플 데모, `/diagnose?sample`). 해석 문장은 규칙 기반, LLM 미연결 |
+| 진단 CSV 업로드 | **안 됨** |
 | 배포 | 됨 — https://loopcheck-lac.vercel.app (GitHub `vanillapapaya/loopcheck` main push 시 자동 배포) |
 
 ## 남은 작업 (우선순위)
 
 1. ~~`npm install` 다시 돌리고 `npm run build` 통과시키기.~~ **됨 (2026-09-15).** 아래 "알려진 문제" 참조.
 2. ~~배포. Vercel + GitHub 연동.~~ **됨 (2026-09-15).** https://loopcheck-lac.vercel.app — 저장소는 public, 심사 종료(10/17) 후 private 전환 예정.
-3. **진단 기능.** 아래 "진단 엔진 설계" 참조. 데모 모드(샘플 데이터 내장)가 최우선이고 실제 업로드는 그다음.
+3. **진단 기능.** 데모 모드 **됨 (2026-09-15)**. 남은 것: CSV 업로드(표준 스키마 → 컬럼 매핑), LLM 해석 연결. 결제 퍼널은 샘플에 노출·클릭 로그가 없어 계산하지 않고 리포트에 그 사실을 적는다(결정 2026-09-15).
 4. **자유 입력 설계기.** `prompts/designer.v1.md`의 시스템 프롬프트를 그대로 쓰고 결과 JSON을 프리셋과 동일한 형태로 받는다. 스키마 검증 실패 시 1회 재시도.
 5. 연락 경로. 랜딩 푸터의 `[연락처 미정]`을 실제 값으로 교체. 심사 기간 한 달이 리드 수집 창이다.
 

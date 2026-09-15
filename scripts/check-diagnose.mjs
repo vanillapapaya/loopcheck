@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseCsv, diagnose } from "../lib/diagnose/engine.ts";
+import { buildReport } from "../lib/diagnose/findings.ts";
 
 const dir = process.argv[2] ?? join(import.meta.dirname, "../../data");
 const read = (f) => parseCsv(readFileSync(join(dir, f), "utf8"));
@@ -84,6 +85,15 @@ const bs = m.monetization.buyAfterFailStreak;
 check("시그널5 연속 실패가 쌓일수록 결제 비율 상승 (1회 < 3회 < 5회+)", bs[0].r.rate < bs[2].r.rate && bs[2].r.rate < bs[4].r.rate,
   bs.map((b) => `${b.streak}${b.streak === 5 ? "+" : ""}회 ${(b.r.rate * 100).toFixed(2)}%`).join(", "));
 check("시그널1×5 충돌: 최대 정체 레벨 = 첫 결제 최다 레벨", topStuck.level === fpl.level, `L${topStuck.level} = L${fpl.level}`);
+
+// 리포트 해석 규칙이 정답지의 결론에 도달하는가
+const rep = buildReport(m);
+check("리포트 1순위 = 레벨 벽, 2순위 = 저사양, 3순위 = 채널", rep.findings.map((f) => f.id).join(",") === "level_wall,device_perf,channel_quality", rep.findings.map((f) => f.id).join(","));
+check("리포트 벽 = L12, 매출 충돌 인지", rep.wall?.level.level === 12 && rep.wall.conflict, `L${rep.wall?.level.level} conflict=${rep.wall?.conflict}`);
+check("리포트 목표 클리어율이 정답지 권고(45-50%) 안", rep.wall.targetClearPct >= 45 && rep.wall.targetClearPct <= 50, `${rep.wall.targetClearPct}%`);
+check("리포트 1순위 개선안에 1,200원 오퍼", rep.findings[0].body.includes("1,200원"), rep.findings[0].title);
+check("리포트 광고: 정점 3-4회, 이후 하락, 마지막 구간 표본 부족 단서", rep.ads.peakLabel === "3-4회" && rep.ads.declinesAfterPeak && rep.ads.last.lowSample && rep.ads.last.n === 39, JSON.stringify(rep.ads));
+check("리포트 연속 실패 → 결제 상승 인지", rep.streakRises, String(rep.streakRises));
 
 // 개인정보: 결과에 user_id가 섞여 나가면 안 된다
 check("결과 JSON에 user_id 없음", !/u\d{6}/.test(JSON.stringify(m)), "OK");

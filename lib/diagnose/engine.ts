@@ -51,6 +51,8 @@ export type DiagnosisMetrics = {
     obsEnd: string;
   };
   retention: { day: number; r: Rate }[];
+  /** D0부터 일별 classic 리텐션. 분모가 줄어드는 뒤쪽은 화면에서 잘라 쓴다 */
+  retentionCurve: { day: number; r: Rate }[];
   segments: {
     channel: SegmentStat[];
     deviceTier: SegmentStat[];
@@ -63,7 +65,7 @@ export type DiagnosisMetrics = {
     payers: Rate;
     revenueKrw: number;
     arppuKrw: number | null;
-    byProduct: { productId: string; count: number; revenueKrw: number }[];
+    byProduct: { productId: string; productType: string; priceKrw: number; count: number; revenueKrw: number }[];
     firstPurchaseLevel: { level: number; count: number }[];
     /** 레벨 실패 직후 결제 비율. 연속 실패 수(세션 내, 5 이상은 5) 별. 분모 = 해당 연속 실패 수의 실패 시도 */
     buyAfterFailStreak: { streak: number; r: Rate }[];
@@ -202,6 +204,8 @@ export function diagnose(t: RawTables): DiagnosisMetrics {
   };
 
   const retention = RETENTION_DAYS.map((day) => ({ day, r: classic(userIds, day) })).filter((x) => x.r.den > 0);
+  const retentionCurve: DiagnosisMetrics["retentionCurve"] = [];
+  for (let day = 0; day <= obsEnd - obsStart; day++) retentionCurve.push({ day, r: classic(userIds, day) });
 
   // 세그먼트
   const segment = (col: string): SegmentStat[] => {
@@ -282,12 +286,13 @@ export function diagnose(t: RawTables): DiagnosisMetrics {
   // 결제
   const payerSet = new Set<string>();
   let revenue = 0;
-  const prod = new Map<string, { count: number; revenueKrw: number }>();
+  const prod = new Map<string, { productType: string; priceKrw: number; count: number; revenueKrw: number }>();
   for (const p of t.purchases) {
     payerSet.add(p.user_id);
     const price = +p.price_krw || 0;
     revenue += price;
-    const e = prod.get(p.product_id) ?? { count: 0, revenueKrw: 0 };
+    const e = prod.get(p.product_id) ?? { productType: p.product_type ?? "", priceKrw: price, count: 0, revenueKrw: 0 };
+    e.priceKrw = Math.min(e.priceKrw, price);
     e.count++;
     e.revenueKrw += price;
     prod.set(p.product_id, e);
@@ -380,6 +385,7 @@ export function diagnose(t: RawTables): DiagnosisMetrics {
       obsEnd: dayStr(obsEnd),
     },
     retention,
+    retentionCurve,
     segments: {
       channel: segment("acquisition_channel"),
       deviceTier: segment("device_tier"),
