@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { DiagnosisMetrics } from "@/lib/diagnose/engine";
-import { buildReport, num, pct, won, type Finding } from "@/lib/diagnose/findings";
+import { buildReport, num, pct, won } from "@/lib/diagnose/findings";
+import { buildFacts, type AiReport } from "@/lib/diagnose/interpret";
 import { ChannelChart, DeviceChart, Legend, LevelChart, MiniColumns, RetentionChart, adItems } from "./charts";
 
 const RANK_STYLE = [
@@ -28,7 +30,25 @@ function WarnIcon() {
   );
 }
 
-function FindingCard({ f, rank }: { f: Finding; rank: number }) {
+function InterpretStatus({ ai, showRules, onToggle }: { ai: Ai; showRules: boolean; onToggle: () => void }) {
+  const chip: React.CSSProperties = { fontSize: 12, color: "var(--ink-2)", display: "inline-flex", alignItems: "center", gap: 8 };
+  if (ai.status === "loading") return <span role="status" style={chip}>AI 해석을 받는 중 · 지금은 규칙 기반 해석입니다</span>;
+  if (ai.status === "failed") return <span style={chip}>{ai.message}. 규칙 기반 해석을 보여 드립니다</span>;
+  return (
+    <span style={chip}>
+      <span className="mono" style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3 }}>
+        {showRules ? "규칙 기반 해석" : `AI 해석 · ${ai.model}`}
+      </span>
+      <button onClick={onToggle} style={{ background: "none", border: "none", padding: 0, fontFamily: "var(--sans)", fontSize: 12, color: "var(--link)", cursor: "pointer" }}>
+        {showRules ? "AI 해석 보기" : "규칙 기반과 비교"}
+      </button>
+    </span>
+  );
+}
+
+type CardFinding = { title: string; body: string; tag?: string | null; evidence: { label: string; text: string }[] };
+
+function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   return (
     <div className="card" style={{ padding: "24px 26px" }}>
       <div style={{ display: "flex", gap: 20 }}>
@@ -73,8 +93,37 @@ const grid2: React.CSSProperties = { display: "grid", gridTemplateColumns: "repe
 const th: React.CSSProperties = { textAlign: "right", padding: "6px 10px", fontWeight: 600, color: "var(--muted)", borderBottom: "1px solid var(--line)", whiteSpace: "nowrap" };
 const td: React.CSSProperties = { textAlign: "right", padding: "5px 10px", borderBottom: "1px solid var(--line-2)", whiteSpace: "nowrap" };
 
+type Ai =
+  | { status: "loading" }
+  | { status: "done"; report: AiReport; model: string }
+  | { status: "failed"; message: string };
+
 export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; title: string; sourceNote: string }) {
-  const rep = buildReport(m);
+  const rep = useMemo(() => buildReport(m), [m]);
+  const [ai, setAi] = useState<Ai>({ status: "loading" });
+  const [showRules, setShowRules] = useState(false);
+
+  // 규칙 해석을 먼저 보여주고, AI 해석이 오면 바꿔 끼운다. 서버로 가는 것은 집계 수치 문장(사실표)뿐이다.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/interpret", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ facts: buildFacts(m, rep) }),
+      signal: ctrl.signal,
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.report) setAi({ status: "done", report: data.report, model: data.model });
+        else setAi({ status: "failed", message: data.error === "no_key" ? "AI 해석이 연결되지 않은 환경입니다" : data.message ?? "AI 해석을 받지 못했습니다" });
+      })
+      .catch((e) => { if (e?.name !== "AbortError") setAi({ status: "failed", message: "네트워크 문제로 AI 해석을 받지 못했습니다" }); });
+    return () => ctrl.abort();
+  }, [m, rep]);
+
+  const useAi = ai.status === "done" && !showRules;
+  const summary = useAi ? ai.report.summary : rep.summary;
+  const findings: CardFinding[] = useAi ? ai.report.findings : rep.findings;
   const d1 = m.retention.find((r) => r.day === 1)?.r;
   const d7 = m.retention.find((r) => r.day === 7)?.r;
   const fixed = m.ads.fixedDay;
@@ -97,22 +146,25 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 32 }}>
           {d1 && <Stat label="D1" value={pct(d1.rate)} />}
           {d7 && <Stat label="D7" value={pct(d7.rate)} />}
-          <Stat label="결제 전환" value={pct(m.monetization.payers.rate)} />
-          <Stat label="설치당 매출" value={won(m.monetization.revenueKrw / Math.max(1, m.meta.users))} />
+          {m.meta.purchases > 0 && <Stat label="결제 전환" value={pct(m.monetization.payers.rate)} />}
+          {m.meta.purchases > 0 && <Stat label="설치당 매출" value={won(m.monetization.revenueKrw / Math.max(1, m.meta.users))} />}
         </div>
       </div>
 
       {/* 요약 */}
       <div className="card" style={{ marginTop: 28, padding: "26px 30px", borderLeft: "3px solid var(--ink)" }}>
-        <div className="eyebrow" style={{ marginBottom: 12 }}>한 문단 요약</div>
-        <p style={{ margin: 0, fontSize: 16, lineHeight: 1.85, maxWidth: 1080 }}>{rep.summary}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
+          <div className="eyebrow">한 문단 요약</div>
+          <InterpretStatus ai={ai} showRules={showRules} onToggle={() => setShowRules((v) => !v)} />
+        </div>
+        <p style={{ margin: 0, fontSize: 16, lineHeight: 1.85, maxWidth: 1080 }}>{summary}</p>
       </div>
 
       {/* 개선안 */}
       <h2 style={{ fontSize: 22, fontWeight: 600, margin: "40px 0 16px" }}>먼저 고칠 것</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {rep.findings.map((f, i) => <FindingCard key={f.id} f={f} rank={i + 1} />)}
-        {!rep.findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
+        {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} />)}
+        {!findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
       </div>
 
       {/* 근거 차트 */}
@@ -122,22 +174,22 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <ChartCard title="코호트 리텐션" note="classic N-day" sub="설치 후 N일째에 접속한 비율입니다. 분모는 N일째가 관측 기간 안에 들어온 유저만 셉니다.">
           <RetentionChart m={m} />
         </ChartCard>
-        <ChartCard title="레벨별 클리어율" note="레벨 1–20" sub="두 선이 크게 벌어지는 레벨은 재도전이 몰리는 구간입니다.">
+        {m.levels.length > 0 && <ChartCard title="레벨별 클리어율" note="레벨 1–20" sub="두 선이 크게 벌어지는 레벨은 재도전이 몰리는 구간입니다.">
           <Legend items={[
             { label: "시도 대비 (분모: 시도 수)", swatch: "bar", color: "var(--series)" },
             { label: "도달자 대비 (분모: 도달 유저)", swatch: "line", color: "var(--ink-2)" },
           ]} />
           <LevelChart levels={m.levels} wallLevel={rep.wall?.level.level ?? null} />
-        </ChartCard>
+        </ChartCard>}
       </div>
 
       <div style={grid2}>
-        <ChartCard title="획득 채널별 D7 리텐션" sub="오른쪽 회색 글자는 D1과 설치 비중입니다.">
+        {m.segments.channel.length > 1 && <ChartCard title="획득 채널별 D7 리텐션" sub="오른쪽 회색 글자는 D1과 설치 비중입니다.">
           <ChannelChart channels={m.segments.channel} worstKey={worstChannel} />
-        </ChartCard>
-        <ChartCard title="기기 등급별 평균 세션 길이" sub={`저사양 기기가 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)}입니다.`}>
+        </ChartCard>}
+        {m.segments.deviceTier.length > 1 && <ChartCard title="기기 등급별 평균 세션 길이" sub={`저사양 기기가 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)}입니다.`}>
           <DeviceChart tiers={m.segments.deviceTier} />
-        </ChartCard>
+        </ChartCard>}
       </div>
 
       {/* 광고 트랩 */}
@@ -182,8 +234,10 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       {/* 수익화 */}
       <div className="card" style={{ padding: "24px 26px", marginBottom: 16 }}>
         <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>수익화</h3>
-        <p style={{ margin: "0 0 20px", fontSize: 12, color: "var(--muted)" }}>결제 전환율의 분모는 설치 유저 수입니다.</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
+        <p style={{ margin: "0 0 20px", fontSize: 12, color: "var(--muted)" }}>
+          {m.meta.purchases ? "결제 전환율의 분모는 설치 유저 수입니다." : "결제 데이터를 올리지 않아 수익화 수치는 비어 있습니다."}
+        </p>
+        {m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>결제자</div>
             <div className="mono" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{num(m.monetization.payers.num)}명</div>
@@ -206,11 +260,11 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               <div style={{ fontSize: 12, color: "var(--ink-2)" }}><span className="mono">{num(fp.count)}</span>건 · 레벨 중 1위{rep.wall?.conflict ? " · 최대 정체 레벨과 같음" : ""}</div>
             </div>
           )}
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 24, marginTop: 22, paddingTop: 20, borderTop: "1px solid var(--line-2)", alignItems: "center" }}>
+        </div>}
+        {m.meta.attempts > 0 && m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 24, marginTop: 22, paddingTop: 20, borderTop: "1px solid var(--line-2)", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>연속 실패 수별, 실패 직후 결제 비율</div>
-            <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" max={Math.max(...m.monetization.buyAfterFailStreak.map((s) => s.r.rate)) * 1.25} digits={2}
+            <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" max={Math.max(...m.monetization.buyAfterFailStreak.map((s) => s.r.rate)) * 1.25 || 1} digits={2}
               items={m.monetization.buyAfterFailStreak.map((s) => ({ label: s.streak === 5 ? "5회+" : `${s.streak}회`, r: s.r }))}
               caption="분모: 해당 연속 실패 수에 이른 실패 시도 (세션 안 기준, %)" /></div>
           </div>
@@ -219,7 +273,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               ? "연속 실패가 쌓일수록 실패 직후 결제 비율이 올라갑니다. 좌절이 결제 트리거로 작동하고 있다는 뜻이고, 그래서 난이도 조정은 매출 가드레일을 달고 진행해야 합니다."
               : "연속 실패 수와 결제 비율 사이에 뚜렷한 증가 경향은 보이지 않습니다."}
           </p>
-        </div>
+        </div>}
         <div style={{ display: "flex", gap: 12, marginTop: 20, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4 }}>
           <WarnIcon />
           <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
@@ -245,7 +299,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               </tbody>
             </table>
           </div>
-          <div style={{ overflowX: "auto" }}>
+          {m.levels.length > 0 && <div style={{ overflowX: "auto" }}>
             <table className="mono" style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
               <caption style={{ textAlign: "left", fontFamily: "var(--sans)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>레벨 (1–20)</caption>
               <thead><tr><th style={{ ...th, textAlign: "left" }}>레벨</th><th style={th}>도달</th><th style={th}>시도 대비</th><th style={th}>도달자 대비</th><th style={th}>미도달</th></tr></thead>
@@ -257,13 +311,16 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
                 ))}
               </tbody>
             </table>
-          </div>
+          </div>}
         </div>
       </details>
 
       <p style={{ margin: "28px 0 0", fontSize: 13, lineHeight: 1.7, color: "var(--muted)" }}>
         모든 숫자는 이 브라우저에서 코드로 계산했습니다. {sourceNote}
-        {" "}위의 해석 문장은 계산 결과에 규칙을 적용해 만든 초안이며, AI 해석 연결은 준비 중입니다.
+        {" "}
+        {useAi
+          ? "요약과 개선안 문장은 AI가 계산 결과만 보고 썼고, 계산 결과에 없는 숫자가 들어간 답은 코드가 걸러 냈습니다."
+          : "요약과 개선안 문장은 계산 결과에 규칙을 적용해 만든 해석입니다."}
       </p>
     </div>
   );

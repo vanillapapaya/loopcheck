@@ -32,7 +32,7 @@ function Badge({ priority }: { priority: string }) {
   );
 }
 
-export default function ResultView({ data, label }: { data: DesignResult; label: string }) {
+export default function ResultView({ data, label, source }: { data: DesignResult; label: string; source?: string }) {
   const [tab, setTab] = useState<Tab>("events");
   const [copied, setCopied] = useState(false);
 
@@ -60,7 +60,10 @@ export default function ResultView({ data, label }: { data: DesignResult; label:
     <div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-end", justifyContent: "space-between", marginBottom: 22 }}>
         <div style={{ maxWidth: 760 }}>
-          <div className="eyebrow" style={{ marginBottom: 10 }}>지표 설계 결과</div>
+          <div className="eyebrow" style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+            지표 설계 결과
+            {source && <span className="mono" style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3, color: "var(--ink-2)" }}>{source}</span>}
+          </div>
           <h2 style={{ fontSize: 27, fontWeight: 600, marginBottom: 10 }}>{label}</h2>
           <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0, lineHeight: 1.7 }}>{data.game_summary}</p>
         </div>

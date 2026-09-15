@@ -5,6 +5,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseCsv, diagnose } from "../lib/diagnose/engine.ts";
 import { buildReport } from "../lib/diagnose/findings.ts";
+import { buildFacts, validateAiReport } from "../lib/diagnose/interpret.ts";
+import { autoMap, identifyTable, missingRequired, normalizeTable } from "../lib/diagnose/schema.ts";
+import { validateDesign } from "../lib/llm/designer.ts";
 
 const dir = process.argv[2] ?? join(import.meta.dirname, "../../data");
 const read = (f) => parseCsv(readFileSync(join(dir, f), "utf8"));
@@ -97,6 +100,68 @@ check("리포트 연속 실패 → 결제 상승 인지", rep.streakRises, Strin
 
 // 개인정보: 결과에 user_id가 섞여 나가면 안 된다
 check("결과 JSON에 user_id 없음", !/u\d{6}/.test(JSON.stringify(m)), "OK");
+
+// AI 해석 입력(사실표)과 숫자 근거 검사
+const facts = buildFacts(m, rep);
+check("사실표에 user_id 없음, 크기 12KB 이하", !/u\d{6}/.test(facts) && facts.length <= 12_000, `${(facts.length / 1024).toFixed(1)}KB`);
+check("사실표에 핵심 수치 포함 (L12 28.3%, 7회 이상 표본 39·표본 부족, 1,200원)", facts.includes("28.3%") && /7회 이상 66\.7% \(표본 39, 표본 부족\)/.test(facts) && facts.includes("1,200원"), "OK");
+const grounded = {
+  summary: rep.summary,
+  findings: rep.findings.map((f) => ({ title: f.title, body: "근거를 보면 이 문제를 먼저 다뤄야 합니다.", tag: f.tag ?? null, evidence: f.evidence, basis: f.id })),
+};
+const vOk = validateAiReport(grounded, facts);
+check("사실표 숫자만 쓴 AI 답은 통과", vOk.ok, vOk.ok ? "OK" : vOk.errors.join(" / "));
+const invented = structuredClone(grounded);
+invented.findings[0].body = "클리어율을 52.5%로 올리면 D7이 17.3%까지 오를 것입니다.";
+const vBad = validateAiReport(invented, facts);
+check("사실표에 없는 숫자(52.5, 17.3)를 쓴 AI 답은 거부", !vBad.ok && /52\.5/.test(vBad.errors[0]) && /17\.3/.test(vBad.errors[0]), vBad.ok ? "통과해 버림" : vBad.errors[0]);
+
+// 업로드: 컬럼 이름과 값 형식이 달라도 같은 결과가 나와야 한다
+const rename = (rows, map, fn = (r) => r) => rows.map((r) => fn(Object.fromEntries(Object.entries(r).map(([k, v]) => [map[k] ?? k, v]))));
+const odd = {
+  "players.csv": rename(tables.users, { user_id: "uid", install_date: "first_open" }, (r) => ({ ...r, first_open: r.first_open.replace(/-0?/g, "/"), device_tier: r.device_tier.toUpperCase() })),
+  "session_log.csv": rename(tables.sessions, { user_id: "player_id", duration_sec: "playtime_sec", session_start: "started_at" }),
+  "stage_log.csv": rename(tables.attempts, { level_id: "stage_no", result: "is_success" }, (r) => ({ ...r, is_success: r.is_success === "clear" ? "true" : "false" })),
+  "iap.csv": rename(tables.purchases, { price_krw: "amount" }, (r) => ({ ...r, amount: Number(r.amount).toLocaleString("en-US") })),
+  "rewarded_ads.csv": tables.ads,
+};
+const mapped = { users: [], sessions: [], attempts: [], purchases: [], ads: [] };
+const ids = {};
+for (const [name, rows] of Object.entries(odd)) {
+  const headers = Object.keys(rows[0]);
+  const t = identifyTable(headers, name);
+  ids[name] = t;
+  const mapping = autoMap(t, headers);
+  const miss = missingRequired(t, mapping);
+  if (miss.length) ids[name] += ` (누락 ${miss})`;
+  mapped[t] = normalizeTable(t, rows, mapping).rows;
+}
+check("업로드: 이름이 다른 CSV 5개를 올바른 테이블로 인식하고 필수 컬럼 자동 매핑",
+  JSON.stringify(ids) === JSON.stringify({ "players.csv": "users", "session_log.csv": "sessions", "stage_log.csv": "attempts", "iap.csv": "purchases", "rewarded_ads.csv": "ads" }), JSON.stringify(ids));
+const tricky = identifyTable(["attempt_id", "user_id", "session_id", "stg", "is_success", "duration_sec", "boosters_used", "ts"], "stage_log.csv");
+check("업로드: duration_sec·ts가 있어도 성공/실패 컬럼이 있으면 레벨 시도로 인식", tricky === "attempts", String(tricky));
+const m2 = diagnose(mapped);
+check("업로드: 변환한 데이터의 계산 결과가 원본과 동일", JSON.stringify(m2) === JSON.stringify(m), JSON.stringify(m2) === JSON.stringify(m) ? "동일" : "다름");
+
+// 업로드: 유저·세션만 있어도 리포트·사실표가 깨지지 않아야 한다
+let partialOk = true;
+try {
+  const mp = diagnose({ users: tables.users, sessions: tables.sessions, attempts: [], purchases: [], ads: [] });
+  const rp = buildReport(mp);
+  const fp2 = buildFacts(mp, rp);
+  partialOk = mp.levels.length === 0 && rp.wall === null && rp.ads === null && fp2.includes("레벨 시도 데이터 없음");
+} catch (e) { partialOk = false; console.error(e); }
+check("업로드: 유저·세션만 올려도 계산·리포트·사실표 생성", partialOk, String(partialOk));
+
+// 설계기 검증기: 프리셋은 통과, 규칙 위반은 거부
+const presetDir = join(import.meta.dirname, "../public/presets");
+const presetResults = ["puzzle", "idle", "gacha-rpg", "roguelike"].map((p) => [p, validateDesign(JSON.parse(readFileSync(join(presetDir, `${p}.json`), "utf8")))]);
+check("설계기 검증: 프리셋 4종 통과", presetResults.every(([, v]) => v.ok), presetResults.map(([p, v]) => `${p}:${v.ok ? "ok" : v.errors.join("|")}`).join(" "));
+const tooMany = JSON.parse(readFileSync(join(presetDir, "puzzle.json"), "utf8"));
+tooMany.events.push(tooMany.events[0]);
+delete tooMany.sql_ddl;
+const vt = validateDesign(tooMany);
+check("설계기 검증: 이벤트 13개·DDL 누락은 거부", !vt.ok && vt.errors.some((e) => e.includes("4-12")) && vt.errors.some((e) => e.includes("sql_ddl")), vt.ok ? "통과해 버림" : vt.errors.join(" / "));
 
 console.log(failed ? `\n${failed}개 실패` : "\n전부 통과");
 process.exit(failed ? 1 : 0);

@@ -2,7 +2,7 @@
 // 숫자는 전부 DiagnosisMetrics에서 가져온다. 문장에 숫자를 손으로 적지 않는다.
 // LLM 해석이 붙기 전의 기본 해석이자, LLM이 실패해도 리포트가 서게 하는 바닥이다.
 
-import type { DiagnosisMetrics, LevelStat, SegmentStat } from "./engine";
+import type { DiagnosisMetrics, LevelStat, SegmentStat } from "./engine.ts";
 
 export type Evidence = { label: string; text: string };
 
@@ -93,7 +93,9 @@ function wallFinding(m: DiagnosisMetrics, w: WallReading): Finding {
       { label: "근거", text: `L${w.prev.level} ${pct(w.prev.attemptClear.rate)} → L${L} ${pct(w.level.attemptClear.rate)}, 도달자 ${num(w.level.reached)}명 중 ${num(w.level.stuck.num)}명 정체` },
       w.conflict
         ? { label: "상충 지점", text: `첫 결제 발생 레벨 1위, ${num(w.firstBuyCount)}건` }
-        : { label: "결제", text: w.firstBuyCount ? `첫 결제 ${num(w.firstBuyCount)}건 (레벨 중 ${w.firstBuyRank}위)` : "이 레벨의 첫 결제 기록 없음" },
+        : m.meta.purchases === 0
+          ? { label: "한계", text: "결제 데이터가 없어 이 레벨의 매출 영향은 확인하지 못했습니다. 조정 전에 결제 로그를 함께 보세요" }
+          : { label: "결제", text: w.firstBuyCount ? `첫 결제 ${num(w.firstBuyCount)}건 (레벨 중 ${w.firstBuyRank}위)` : "이 레벨의 첫 결제 기록 없음" },
       { label: "검증 방법", text: `이동 수 조정 A/B. 1차 지표 D3 리텐션, 가드레일 설치당 매출` },
     ],
     impactUsers: w.level.stuck.num,

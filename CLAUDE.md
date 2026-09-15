@@ -27,18 +27,19 @@
 | 랜딩 `app/page.tsx` | 됨 |
 | 설계기 `app/design/page.tsx` + `ResultView.tsx` | 됨 (프리셋 4종 기반) |
 | 프리셋 JSON `public/presets/*.json` | 됨 (puzzle, idle, gacha-rpg, roguelike) |
-| 자유 입력 → LLM 호출 | **안 됨** (API 키 미정) |
-| 진단 엔진 `lib/diagnose/engine.ts` + 해석 규칙 `findings.ts` | 됨. `npm run check:diagnose` 29/29 (시그널 5개·광고 함정 통과) |
-| 진단 리포트 `app/diagnose` | 됨 (샘플 데모, `/diagnose?sample`). 해석 문장은 규칙 기반, LLM 미연결 |
-| 진단 CSV 업로드 | **안 됨** |
+| 자유 입력 → LLM 호출 `app/api/design` + `lib/llm/designer.ts` | 됨 (Gemini). 프롬프트 원본 그대로, 형식 검증 실패 시 1회 재시도. 키 없으면 프리셋 안내 |
+| 진단 엔진 `lib/diagnose/engine.ts` + 해석 규칙 `findings.ts` | 됨. `npm run check:diagnose` 40/40 (시그널 5개·광고 함정·업로드·숫자 근거 검사 포함) |
+| 진단 리포트 `app/diagnose` | 됨 (샘플 데모 `/diagnose?sample` + 업로드) |
+| 진단 AI 해석 `app/api/interpret` + `lib/diagnose/interpret.ts` | 됨 (Gemini). 사실표에 없는 숫자가 나오면 거부·재시도, 실패 시 규칙 해석 유지 |
+| 진단 CSV 업로드 `lib/diagnose/schema.ts` | 됨. 헤더로 테이블 인식, 별칭 자동 매핑 + 수동 매핑, 유저·세션만 필수 |
 | 배포 | 됨 — https://loopcheck-lac.vercel.app (GitHub `vanillapapaya/loopcheck` main push 시 자동 배포) |
 
 ## 남은 작업 (우선순위)
 
 1. ~~`npm install` 다시 돌리고 `npm run build` 통과시키기.~~ **됨 (2026-09-15).** 아래 "알려진 문제" 참조.
 2. ~~배포. Vercel + GitHub 연동.~~ **됨 (2026-09-15).** https://loopcheck-lac.vercel.app — 저장소는 public, 심사 종료(10/17) 후 private 전환 예정.
-3. **진단 기능.** 데모 모드 **됨 (2026-09-15)**. 남은 것: CSV 업로드(표준 스키마 → 컬럼 매핑), LLM 해석 연결. 결제 퍼널은 샘플에 노출·클릭 로그가 없어 계산하지 않고 리포트에 그 사실을 적는다(결정 2026-09-15).
-4. **자유 입력 설계기.** `prompts/designer.v1.md`의 시스템 프롬프트를 그대로 쓰고 결과 JSON을 프리셋과 동일한 형태로 받는다. 스키마 검증 실패 시 1회 재시도.
+3. ~~진단 기능.~~ **됨 (2026-09-15).** 데모·업로드·AI 해석. 결제 퍼널은 샘플에 노출·클릭 로그가 없어 계산하지 않고 리포트에 그 사실을 적는다(결정 2026-09-15).
+4. ~~자유 입력 설계기.~~ **됨 (2026-09-15).** 남은 것: **`GEMINI_API_KEY`를 Vercel과 `.env.local`에 넣고** 실제 출력 품질을 `designer.v1.md`의 합격선 6항목으로 확인.
 5. 연락 경로. 랜딩 푸터의 `[연락처 미정]`을 실제 값으로 교체. 심사 기간 한 달이 리드 수집 창이다.
 
 ## 알려진 문제
@@ -53,6 +54,13 @@ Node 22(nvm)로 바꾸고 클린 재설치하니 빌드가 통과했다. `.nvmrc
 
 **로컬 터미널에서 `rm -rf node_modules package-lock.json && npm install`** 하면 대부분 해결된다.
 그래도 남으면 `tsconfig.json`에 `"skipLibCheck": true`가 있는지 확인한다.
+
+## LLM (Gemini)
+
+- 키: `GEMINI_API_KEY` (Vercel 환경변수 / 로컬 `.env.local`, 예시는 `.env.example`). 모델은 `GEMINI_MODEL`로 바꿀 수 있다.
+- 호출은 `lib/llm/gemini.ts` 한 곳. SDK 없이 REST. 404면 다음 모델로, 429·키 없음은 `LlmUnavailable`로 던져 호출부가 프리셋·규칙 해석으로 물러난다.
+- 진단 해석은 브라우저가 만든 **사실표**(집계 수치 문장, `buildFacts`)만 서버로 보낸다. 출력에 사실표에 없는 숫자가 있으면 거부한다(10 이하 정수만 예외). 원칙 1을 코드로 강제하는 지점이니 느슨하게 만들지 말 것.
+- 공개 링크라 IP당 호출 제한(`allowRequest`)과 같은 사실표 캐시가 있다. 둘 다 인스턴스 메모리 기준이다.
 
 ## 설계 원칙 (바꾸지 말 것)
 
