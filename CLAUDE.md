@@ -29,12 +29,12 @@
 | 프리셋 JSON `public/presets/*.json` | 됨 (puzzle, idle, gacha-rpg, roguelike) |
 | 자유 입력 → LLM 호출 | **안 됨** (API 키 미정) |
 | 진단 업로드/리포트 | **안 됨** |
-| 배포 | **안 됨** |
+| 배포 | 됨 — https://loopcheck-lac.vercel.app (GitHub `vanillapapaya/loopcheck` main push 시 자동 배포) |
 
 ## 남은 작업 (우선순위)
 
 1. ~~`npm install` 다시 돌리고 `npm run build` 통과시키기.~~ **됨 (2026-09-15).** 아래 "알려진 문제" 참조.
-2. **배포.** Vercel + GitHub 연동. 불완전해도 먼저 링크를 확보한다. 마지막 날 배포 실패가 이런 대회의 가장 흔한 사인이다.
+2. ~~배포. Vercel + GitHub 연동.~~ **됨 (2026-09-15).** https://loopcheck-lac.vercel.app — 저장소는 public, 심사 종료(10/17) 후 private 전환 예정.
 3. **진단 기능.** 아래 "진단 엔진 설계" 참조. 데모 모드(샘플 데이터 내장)가 최우선이고 실제 업로드는 그다음.
 4. **자유 입력 설계기.** `prompts/designer.v1.md`의 시스템 프롬프트를 그대로 쓰고 결과 JSON을 프리셋과 동일한 형태로 받는다. 스키마 검증 실패 시 1회 재시도.
 5. 연락 경로. 랜딩 푸터의 `[연락처 미정]`을 실제 값으로 교체. 심사 기간 한 달이 리드 수집 창이다.
