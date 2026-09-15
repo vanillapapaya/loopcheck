@@ -1,0 +1,353 @@
+{
+  "game_summary": "스테이지 클리어로 재화를 축적하고 그 재화를 가챠에 투입해 캐릭터를 얻은 뒤, 육성 재화로 강화해 더 높은 스테이지에 재진입하는 순환이며, 일일 임무와 주간 레이드가 순환 빈도를, 한정 픽업 배너가 순환의 결제 밀도를 결정한다. 따라서 측정 축은 (1) 스테이지 진입-성공-실패-중단, (2) 가챠 투입과 결과의 1행 연결, (3) 재화 획득-소비 원장, (4) 배너 주기에 묶인 결제 퍼널 네 가지다.",
+  "events": [
+    {
+      "name": "session_start",
+      "why": "day_n 기준 코호트 리텐션과 뽑기 직후 복귀 여부를 계산할 수 있는 유일한 일별 심박 이벤트이며, 이것이 없으면 가챠 결과에 따른 이탈을 결과값과 연결할 수 없다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드, UTC 저장 후 표시에서 현지 변환"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드, 설치일=0 기준 경과일"},
+        {"name": "entry_point", "type": "string", "note": "icon | push | deeplink | unknown"},
+        {"name": "app_version", "type": "string", "note": "클라이언트 빌드 버전"},
+        {"name": "active_banner_id", "type": "string", "note": "세션 시작 시점에 열려 있는 픽업 배너, 없으면 none"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 오픈일=0 기준 경과일, 배너 없으면 -1"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "stage_attempt_start",
+      "why": "진입을 찍지 않고 종료만 찍으면 특정 스테이지에서 몇 번 재도전하다 포기했는지, 스태미나를 쓰고도 시작을 접었는지 구분할 수 없다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "attempt_id", "type": "string", "note": "stage_attempt_end와 1:1로 잇는 키. 반드시 발급"},
+        {"name": "stage_id", "type": "string", "note": "스테이지 고유 ID. 챕터-스테이지 형태 권장"},
+        {"name": "stage_type", "type": "string", "note": "story | daily | event | raid"},
+        {"name": "stage_difficulty", "type": "int", "note": "기획이 부여한 난이도 등급"},
+        {"name": "team_power", "type": "int", "note": "출전 편성 전투력 합. 난이도 벽과 육성 수준을 잇는 핵심 축"},
+        {"name": "attempt_index", "type": "int", "note": "해당 유저의 이 스테이지 누적 시도 횟수"},
+        {"name": "entry_cost_currency", "type": "string", "note": "stamina 등 입장 소비 재화 코드"},
+        {"name": "entry_cost_amount", "type": "int", "note": "입장 소비량"},
+        {"name": "is_auto", "type": "bool", "note": "자동 전투 여부"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "stage_attempt_end",
+      "why": "성공만 찍고 실패와 중단을 결과값으로 분리하지 않으면 난이도 벽의 위치와 성격(전멸인지 턴 초과인지 이탈인지)을 영원히 못 찾는다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "attempt_id", "type": "string", "note": "stage_attempt_start와 동일 값"},
+        {"name": "stage_id", "type": "string", "note": "조인 없이 바로 집계하기 위한 중복 기록 허용"},
+        {"name": "stage_type", "type": "string", "note": "story | daily | event | raid"},
+        {"name": "result", "type": "string", "note": "clear | fail | retreat | disconnect. retreat가 중단, disconnect가 비정상 종료"},
+        {"name": "fail_reason", "type": "string", "note": "team_wipe | turn_limit | time_out | none | unknown"},
+        {"name": "duration_sec", "type": "int", "note": "전투 소요 시간"},
+        {"name": "team_power", "type": "int", "note": "진입 시점 전투력"},
+        {"name": "star_count", "type": "int", "note": "획득 별 또는 클리어 등급, 없으면 0"},
+        {"name": "is_first_clear", "type": "bool", "note": "최초 클리어 여부. 진도(progression) 속도 계산용"},
+        {"name": "reward_currency_amount", "type": "int", "note": "이 시도로 획득한 주 재화 총량. 상세는 currency_change에 남는다"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "gacha_banner_view",
+      "why": "배너를 봤지만 뽑지 않은 유저를 못 걸러내면 배너 매출 부진이 노출 부족 때문인지 재화 부족 때문인지 구분되지 않는다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "banner_id", "type": "string", "note": "배너 고유 ID"},
+        {"name": "banner_type", "type": "string", "note": "limited_pickup | standard | beginner | rerun"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 오픈일=0 기준 경과일. 배너 주기 분석의 기준축"},
+        {"name": "pity_counter", "type": "int", "note": "조회 시점 천장 누적 카운터"},
+        {"name": "affordable_pulls", "type": "int", "note": "보유 재화로 즉시 가능한 뽑기 횟수. 0이면 재화 병목, 1 이상인데 안 뽑으면 동기 문제"},
+        {"name": "entry_source", "type": "string", "note": "main_banner | push | shop | quest_reward"}
+      ],
+      "priority": "should"
+    },
+    {
+      "name": "gacha_pull",
+      "why": "투입(재화)과 결과(희귀도, 픽업 여부, 천장)를 한 행에 남기지 않으면 어떤 결과를 받은 유저가 이탈하는지 결과-이탈 연결이 불가능하다. 이 장르에서 가장 중요한 단일 이벤트다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "banner_id", "type": "string", "note": "배너 고유 ID"},
+        {"name": "banner_type", "type": "string", "note": "limited_pickup | standard | beginner | rerun"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 오픈 후 경과일"},
+        {"name": "pull_count", "type": "int", "note": "1 또는 10. 1행=1회 뽑기 행위"},
+        {"name": "currency_type", "type": "string", "note": "소비 재화 코드. 유료 재화와 무료 재화를 별도 코드로 분리할 것"},
+        {"name": "currency_amount", "type": "int", "note": "소비량"},
+        {"name": "paid_currency_ratio", "type": "float", "note": "0~1. 이번 뽑기에서 유료 재화가 차지한 비중. 매출 귀속의 근거"},
+        {"name": "pity_counter_before", "type": "int", "note": "뽑기 직전 천장 카운터"},
+        {"name": "pity_triggered", "type": "bool", "note": "천장 발동 여부"},
+        {"name": "max_rarity", "type": "int", "note": "이번 뽑기에서 나온 최고 희귀도"},
+        {"name": "pickup_count", "type": "int", "note": "픽업 캐릭터 획득 수. 0이면 목표 미달"},
+        {"name": "new_char_count", "type": "int", "note": "신규 캐릭터 수"},
+        {"name": "dupe_count", "type": "int", "note": "중복 수. 중복 비율이 높으면 체감 만족도가 무너진다"},
+        {"name": "cumulative_pulls_on_banner", "type": "int", "note": "이 배너에서의 누적 뽑기 수"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "character_upgrade_attempt",
+      "why": "육성 병목을 재화 잔고가 아니라 막힌 시도 그 자체로 관측해야, 어느 재료가 진행을 멈추게 하는지를 추정이 아니라 관측으로 알 수 있다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "char_id", "type": "string", "note": "캐릭터 ID"},
+        {"name": "char_rarity", "type": "int", "note": "희귀도"},
+        {"name": "upgrade_type", "type": "string", "note": "level | ascension | skill | gear | limit_break"},
+        {"name": "result", "type": "string", "note": "success | blocked_material | blocked_currency | blocked_gate. blocked 계열이 병목 신호"},
+        {"name": "blocking_resource", "type": "string", "note": "막혔을 때 부족한 재료/재화 코드, 성공 시 none"},
+        {"name": "blocking_shortfall", "type": "int", "note": "부족 수량. 얼마나 모자란지가 밸런싱 폭을 결정한다"},
+        {"name": "level_before", "type": "int", "note": "강화 전 단계"},
+        {"name": "level_after", "type": "int", "note": "강화 후 단계, 실패 시 level_before와 동일"},
+        {"name": "is_pulled_recently", "type": "bool", "note": "최근 7일 내 뽑은 캐릭터인지. 뽑기-육성 연결 여부 확인용"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "currency_change",
+      "why": "획득과 소비를 하나의 원장에 reason 코드로 남기지 않으면 인게임 경제의 인플레와 병목을 사후에 재구성할 수 없다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "currency_type", "type": "string", "note": "재화 코드. 유료 보석/무료 보석/골드/스태미나/육성 재료를 각각 별도 코드로"},
+        {"name": "delta", "type": "int", "note": "획득은 양수, 소비는 음수. 두 방향을 한 테이블에 둔다"},
+        {"name": "balance_after", "type": "int", "note": "변동 후 잔고. 원장 무결성 검증과 잔고 분포 분석에 쓴다"},
+        {"name": "reason_code", "type": "string", "note": "stage_clear | daily_mission | raid_reward | gacha_pull | upgrade_spend | stage_entry | iap_grant | compensation | expire 등 폐쇄 집합"},
+        {"name": "reason_detail", "type": "string", "note": "stage_id, banner_id, product_id 등 원인 개체 ID"},
+        {"name": "is_paid_currency", "type": "bool", "note": "유료 구매로 획득된 재화인지. 매출 귀속과 환불 대응의 근거"},
+        {"name": "ref_event_id", "type": "string", "note": "원인 이벤트(attempt_id, transaction_id 등)와 잇는 키"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "daily_mission_claim",
+      "why": "반복 동기가 살아 있는지 여부는 일일 임무 완주율에서 가장 먼저 꺾이며, 이 신호는 리텐션 하락보다 며칠 앞선다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "mission_id", "type": "string", "note": "임무 ID"},
+        {"name": "mission_type", "type": "string", "note": "login | stage_clear | gacha | upgrade | raid 등"},
+        {"name": "missions_completed_today", "type": "int", "note": "수령 시점 당일 완료 수"},
+        {"name": "missions_total_today", "type": "int", "note": "당일 총 임무 수. 완주율의 분모"},
+        {"name": "is_full_clear", "type": "bool", "note": "당일 전량 완주 여부"},
+        {"name": "reward_currency_type", "type": "string", "note": "보상 재화 코드"},
+        {"name": "reward_amount", "type": "int", "note": "보상량"}
+      ],
+      "priority": "should"
+    },
+    {
+      "name": "weekly_raid_attempt",
+      "why": "주간 레이드는 상위 육성 수요와 주간 복귀 리듬을 동시에 만드는 지점이라, 참여 이탈이 장기 리텐션 하락의 선행 신호가 된다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "raid_id", "type": "string", "note": "주차 단위 레이드 인스턴스 ID"},
+        {"name": "boss_id", "type": "string", "note": "보스 ID"},
+        {"name": "raid_tier", "type": "int", "note": "도전 난이도 티어"},
+        {"name": "result", "type": "string", "note": "clear | fail | timeout | retreat"},
+        {"name": "damage_dealt", "type": "int", "note": "누적 딜량. 클리어 실패 구간에서도 진척을 측정한다"},
+        {"name": "attempt_index_this_week", "type": "int", "note": "이번 주 몇 번째 시도인지. 주간 횟수 소진율의 분자"},
+        {"name": "party_power", "type": "int", "note": "편성 전투력"},
+        {"name": "clear_time_sec", "type": "int", "note": "클리어까지 소요 시간, 미클리어 시 0"}
+      ],
+      "priority": "should"
+    },
+    {
+      "name": "store_offer_impression",
+      "why": "구매만 찍으면 퍼널이 보이지 않는다. 노출을 분리해야 매출 변동이 오퍼를 덜 보여준 탓인지 덜 팔린 탓인지 나뉜다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "offer_id", "type": "string", "note": "오퍼 고유 ID"},
+        {"name": "offer_type", "type": "string", "note": "banner_bundle | daily_pack | first_purchase | battle_pass | currency_shop"},
+        {"name": "placement", "type": "string", "note": "노출 위치. shop_main | gacha_insufficient | stage_fail | popup_on_login"},
+        {"name": "price_tier", "type": "string", "note": "가격대 구간 라벨. 국가별 실가격과 분리해 둔다"},
+        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 오퍼면 배너 ID, 아니면 none. 배너 매출 귀속의 핵심"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
+        {"name": "is_first_view_today", "type": "bool", "note": "당일 첫 노출 여부. 중복 노출로 분모가 부풀지 않게 한다"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "store_offer_click",
+      "why": "노출과 구매 사이의 이탈 지점을 분리해야, 오퍼가 안 보이는 문제인지 가격이 안 맞는 문제인지 판별된다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "offer_id", "type": "string", "note": "오퍼 고유 ID"},
+        {"name": "offer_type", "type": "string", "note": "impression과 동일 집합"},
+        {"name": "placement", "type": "string", "note": "impression과 동일 집합"},
+        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 오퍼면 배너 ID"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
+        {"name": "time_since_impression_sec", "type": "int", "note": "같은 세션 내 해당 오퍼 최근 노출로부터 경과 초"}
+      ],
+      "priority": "must"
+    },
+    {
+      "name": "iap_purchase",
+      "why": "배너 ID와 배너 경과일을 결제에 직접 붙이지 않으면 매출이 어느 배너의 며칠차에 몰렸는지 사후 추정에 의존하게 된다.",
+      "properties": [
+        {"name": "user_id", "type": "string", "note": "공통 필드"},
+        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
+        {"name": "session_id", "type": "string", "note": "공통 필드"},
+        {"name": "day_n", "type": "int", "note": "공통 필드"},
+        {"name": "transaction_id", "type": "string", "note": "스토어 거래 ID. 중복 집계와 환불 처리의 키"},
+        {"name": "product_id", "type": "string", "note": "스토어 상품 ID"},
+        {"name": "offer_id", "type": "string", "note": "구매를 유발한 오퍼 ID. 퍼널 연결 키"},
+        {"name": "offer_type", "type": "string", "note": "impression과 동일 집합"},
+        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 구매면 배너 ID, 아니면 none"},
+        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
+        {"name": "price_local", "type": "float", "note": "현지 통화 결제 금액"},
+        {"name": "currency_code", "type": "string", "note": "ISO 4217 통화 코드"},
+        {"name": "price_usd", "type": "float", "note": "결제 시점 환율로 환산한 USD. 국가 혼합 집계의 기준"},
+        {"name": "store", "type": "string", "note": "google_play | app_store"},
+        {"name": "is_first_purchase", "type": "bool", "note": "생애 첫 결제 여부"},
+        {"name": "lifetime_purchase_count", "type": "int", "note": "결제 후 누적 결제 횟수"},
+        {"name": "is_verified", "type": "bool", "note": "영수증 검증 통과 여부. false 건은 매출 집계에서 제외"}
+      ],
+      "priority": "must"
+    }
+  ],
+  "user_properties": [
+    {"name": "user_id", "type": "string", "note": "모든 이벤트의 조인 키"},
+    {"name": "install_ts", "type": "timestamp", "note": "최초 실행 시각. day_n 계산의 기준점"},
+    {"name": "install_date", "type": "string", "note": "설치 코호트 라벨 YYYY-MM-DD, 리텐션 집계의 그룹 키"},
+    {"name": "platform", "type": "string", "note": "android | ios. 이벤트마다 반복 기록하지 말 것"},
+    {"name": "os_version", "type": "string", "note": "최초 설치 시점 값, 변동 시 갱신"},
+    {"name": "device_model", "type": "string", "note": "저사양 기기 이탈 확인용"},
+    {"name": "country", "type": "string", "note": "ISO 국가 코드, 스토어 국가 기준"},
+    {"name": "acquisition_channel", "type": "string", "note": "organic | 각 광고 매체. 유입 품질 비교의 축"},
+    {"name": "campaign_id", "type": "string", "note": "캠페인 단위 식별자"},
+    {"name": "first_open_version", "type": "string", "note": "최초 접속 앱 버전. 빌드별 코호트 비교용"},
+    {"name": "is_payer", "type": "bool", "note": "일 1회 배치 갱신 스냅샷 속성"},
+    {"name": "first_purchase_ts", "type": "timestamp", "note": "첫 결제 시각, 미결제 시 null"},
+    {"name": "account_level", "type": "int", "note": "일 1회 스냅샷. 진도 구간별 분석의 세그먼트 키"},
+    {"name": "max_team_power", "type": "int", "note": "일 1회 스냅샷. 육성 수준과 스테이지 벽을 잇는 축"},
+    {"name": "owned_top_rarity_count", "type": "int", "note": "일 1회 스냅샷. 최고 희귀도 보유 수, 뽑기 만족도 세그먼트"}
+  ],
+  "kpis": [
+    {
+      "name": "N-day 리텐션 (D1 / D7 / D30)",
+      "formula": "classic N-day 정의. 분자 = install_date 코호트 중 day_n = N 인 session_start가 1건 이상 있는 user_id 수, 분모 = 해당 install_date 코호트의 전체 user_id 수. rolling(N일 이내 아무 날) 정의와 절대 혼용하지 않는다.",
+      "why_this_game": "배너 주기가 리텐션을 인위적으로 출렁이게 하므로, 설치 코호트 기준의 고정 정의가 없으면 배너 효과와 게임 자체 유지력이 뒤섞인다.",
+      "watch_out": "배너 오픈일에 설치된 코호트는 D1이 과대평가된다. 코호트의 install_date가 배너 몇 일차였는지를 함께 놓고 보지 않으면 개선을 착각한다."
+    },
+    {
+      "name": "뽑기 후 24시간 미복귀율 (pull_churn_24h)",
+      "formula": "분모 = 특정 배너에서 gacha_pull이 1건 이상 있는 user_id. 분자 = 그 유저의 해당 배너 마지막 gacha_pull 시각 이후 24시간 내 session_start가 0건인 user_id 수. pickup_count = 0 그룹과 pickup_count >= 1 그룹, pity_triggered 여부로 각각 쪼개 계산한다.",
+      "why_this_game": "이 장르의 이탈은 콘텐츠 소진보다 뽑기 실패 직후의 감정에서 더 자주 터진다. 결과와 이탈을 같은 행에서 잇는 유일한 지표다.",
+      "watch_out": "전체 평균만 보면 항상 완만하게 보인다. 반드시 결과(픽업 획득 여부, 천장 도달 여부)로 분해해야 의미가 생기며, 24시간 창이 배너 종료일을 넘는 뽑기는 분모에서 제외해야 한다."
+    },
+    {
+      "name": "픽업 획득까지 소요 뽑기 수 (pulls_to_pickup, 중앙값)",
+      "formula": "배너별로, 각 유저의 첫 pickup_count >= 1 시점의 cumulative_pulls_on_banner 값을 모아 중앙값과 90퍼센타일을 낸다. 배너 종료까지 픽업 미획득 유저는 별도 비율(미획득자 비중)로 따로 보고한다.",
+      "why_this_game": "체감 확률과 실제 분포의 간극이 배너 신뢰도를 좌우하고, 그 간극이 곧 다음 배너의 참여율로 이어진다.",
+      "watch_out": "평균을 쓰면 천장 근처 소수 유저에 끌려간다. 반드시 중앙값과 90퍼센타일을 같이 보고, 미획득자를 분모에서 빼면 수치가 낙관적으로 왜곡된다."
+    },
+    {
+      "name": "배너 매출 집중도 (revenue_concentration_first_3days)",
+      "formula": "분자 = 해당 banner_id에 연결된 is_verified = true 인 iap_purchase 중 banner_day_index <= 2 의 price_usd 합. 분모 = 같은 banner_id에 연결된 전체 기간 price_usd 합.",
+      "why_this_game": "한정 픽업 배너가 매출을 며칠에 몰아넣는지 알아야 배너 간격과 후반부 테코 설계를 결정할 수 있다.",
+      "watch_out": "배너 무관 상시 상품(배틀패스, 스태미나 팩)까지 분모에 넣으면 집중도가 희석된다. linked_banner_id가 none인 결제는 별도 집계한다."
+    },
+    {
+      "name": "배너 주기별 ARPDAU 곡선",
+      "formula": "일자별 ARPDAU = (그날 is_verified = true 인 iap_purchase의 price_usd 합) / (그날 session_start 기준 고유 user_id 수). 이를 banner_day_index를 x축으로 정렬해 배너 오픈 전 3일 / 배너 중 / 배너 종료 후 3일 구간으로 묶어 본다.",
+      "why_this_game": "IAP 중심 수익 구조에서 배너가 매출을 만드는지, 아니면 배너 사이 구간의 매출을 앞당겨 쓰는 것뿐인지를 이 곡선이 판별한다.",
+      "watch_out": "배너 오픈 직전 소비 위축(대기 구간)을 빼고 배너 기간만 보면 순증처럼 보인다. 반드시 오픈 전 구간을 포함해 사이클 단위로 비교한다."
+    },
+    {
+      "name": "결제 전환율 (DAU 기준 / 설치 코호트 기준 병기)",
+      "formula": "DAU 기준 = 그날 is_verified 결제 유저 수 / 그날 session_start 고유 유저 수. 설치 코호트 기준 = 코호트 중 day_n <= 7 내 첫 결제 발생 유저 수 / 코호트 전체 유저 수. 두 분모를 반드시 라벨에 명시해 나란히 본다.",
+      "why_this_game": "가챠 게임은 소수 고액 결제자에 매출이 쏠려, 전환율과 객단가 중 어느 쪽이 움직였는지 분리하지 않으면 원인을 잘못 짚는다.",
+      "watch_out": "분모를 설치 기준과 DAU 기준 중 무엇으로 썼는지 밝히지 않으면 같은 게임에서 열 배 차이 나는 두 숫자가 돌아다니게 된다."
+    },
+    {
+      "name": "ARPDAU (주 지표) 와 ARPPU (보조 지표)",
+      "formula": "ARPDAU = 일 매출(price_usd, is_verified) / 일 활성 유저 수(session_start 고유). ARPPU = 일 매출 / 그날 결제한 고유 유저 수. IAP 단일 수익 모델이므로 일상 운영 판단은 ARPDAU를 주 지표로 쓰고, ARPPU는 고래 편중 여부를 확인하는 보조로만 쓴다.",
+      "why_this_game": "광고 수익이 없어 매출 전량이 결제에서 나오므로, 활성 규모 변동과 결제 강도 변동을 ARPDAU 하나로 묶어 보되 ARPPU로 쏠림을 감시해야 한다.",
+      "watch_out": "ARPPU는 결제자 수가 줄면 오히려 올라간다. ARPPU 상승을 단독으로 개선 신호로 읽는 것이 가장 흔한 오독이다."
+    },
+    {
+      "name": "결제 오퍼 퍼널 전환율 (impression -> click -> purchase)",
+      "formula": "노출 대비 클릭률 = store_offer_click 고유 (user_id, offer_id) 수 / is_first_view_today = true 인 store_offer_impression 고유 (user_id, offer_id) 수. 클릭 대비 구매율 = iap_purchase 고유 (user_id, offer_id) 수 / store_offer_click 고유 (user_id, offer_id) 수. placement 별, linked_banner_id 별로 분해한다.",
+      "why_this_game": "가챠 재화 부족 시점(gacha_insufficient)과 스테이지 실패 시점(stage_fail)의 오퍼 성과 차이가 노출 배치 의사결정을 직접 바꾼다.",
+      "watch_out": "중복 노출을 그대로 분모에 넣으면 전환율이 구조적으로 낮게 나온다. is_first_view_today로 분모를 정규화하지 않은 수치를 기간 비교에 쓰면 안 된다."
+    },
+    {
+      "name": "스테이지별 클리어율 및 스테이지 이탈률",
+      "formula": "클리어율 = stage_id별 result = clear 인 stage_attempt_end 수 / 같은 stage_id의 stage_attempt_start 수. 스테이지 이탈률 = 해당 stage_id에서 최초 시도 후 7일간 그 stage_id를 클리어하지 못하고 session_start도 끊긴 유저 수 / 해당 stage_id를 처음 시도한 유저 수. fail_reason 분포와 team_power 분위수를 함께 낸다.",
+      "why_this_game": "육성 부족이 만든 난이도 벽이 어디인지 스테이지 단위로 짚어야, 재화 지급량을 바꿀지 스테이지 수치를 바꿀지 결정할 수 있다.",
+      "watch_out": "시도 기준 클리어율만 보면 반복 도전이 많은 스테이지가 낮게 나온다. 유저 기준 최종 클리어율과 시도 기준 클리어율을 반드시 구분해 표기한다."
+    },
+    {
+      "name": "육성 차단율 (upgrade_block_rate) 과 병목 재료 순위",
+      "formula": "차단율 = result가 blocked_ 로 시작하는 character_upgrade_attempt 수 / 전체 character_upgrade_attempt 수. 병목 순위 = blocking_resource별 차단 건수와 blocking_shortfall 중앙값을 내림차순 정렬. account_level 구간별로 쪼개 본다.",
+      "why_this_game": "육성 재화 병목은 스테이지 벽과 추가 결제 동기를 동시에 만들며, 어느 재료에서 막히는지에 따라 처방이 완전히 달라진다.",
+      "watch_out": "잔고가 적다는 사실만으로 병목이라 단정하지 말 것. 막힌 시도가 실제로 발생했는지(blocked 이벤트)와 잔고 부족은 다른 현상이다."
+    },
+    {
+      "name": "재화별 source / sink 수지",
+      "formula": "재화 코드별 일자별 source = currency_change의 delta > 0 합, sink = delta < 0 의 절댓값 합, 수지비 = source / sink. reason_code별로 상위 기여 항목을 함께 낸다. 유료 재화와 무료 재화는 절대 합산하지 않는다.",
+      "why_this_game": "스테이지 보상 -> 가챠 -> 육성으로 이어지는 순환에서 어느 구간이 재화를 과잉 공급하거나 고갈시키는지가 전체 루프 속도를 정한다.",
+      "watch_out": "보상 이벤트나 점검 보상 지급일이 섞이면 수지비가 한 번에 튄다. reason_code = compensation 을 분리하지 않은 추세선은 읽지 말 것."
+    },
+    {
+      "name": "일일 임무 완주율 및 주간 레이드 참여율",
+      "formula": "일일 임무 완주율 = 그날 is_full_clear = true 인 daily_mission_claim 고유 유저 수 / 그날 session_start 고유 유저 수. 주간 레이드 참여율 = 해당 주 weekly_raid_attempt가 1건 이상인 고유 유저 수 / 같은 주 session_start가 1건 이상인 고유 유저 수.",
+      "why_this_game": "반복 동기의 두 축이며, 이 두 비율이 먼저 꺾인 뒤 리텐션이 따라 내려가는 순서가 일반적이라 선행 지표로 쓸 수 있다.",
+      "watch_out": "신규 유저는 임무 해금 전이라 구조적으로 완주율이 낮다. day_n 구간을 나누지 않은 전체 평균은 유입량 변화에 따라 의미 없이 흔들린다."
+    }
+  ],
+  "ab_test": {
+    "hypothesis": "한정 픽업 배너 화면에 천장까지 남은 뽑기 수와 누적 진행도를 상시 노출하면, 픽업을 얻지 못한 유저의 기대 관리가 가능해져 뽑기 직후 24시간 미복귀율이 낮아질 것이다. 재화 소비는 최소한 유지되거나 소폭 증가할 것으로 본다.",
+    "primary_metric": "뽑기 후 24시간 미복귀율 (pull_churn_24h), 배너 첫 gacha_pull 기준",
+    "guardrail_metrics": [
+      "배너 기간 ARPDAU",
+      "유저당 유료 재화 소비량 (currency_change의 is_paid_currency = true, delta < 0 합)",
+      "D7 classic 리텐션",
+      "DAU 기준 결제 전환율",
+      "배너 참여율 (gacha_banner_view 대비 gacha_pull 유저 비율)"
+    ],
+    "unit": "user_id (설치 시점에 고정 배정, 배너 간에도 배정 유지)",
+    "min_duration_days": 14,
+    "sample_size_note": "두 비율 비교이므로 필요한 입력값은 네 가지다. (1) 대조군 기준선 p1: 벤치마크를 쓰지 말고 직전 배너 2주치 pull_churn_24h를 자체 계산해 쓴다. (2) 탐지하고자 하는 최소 효과 MDE: 팀이 이 정도면 배포하겠다고 합의한 절대 차이로 정한다. (3) 유의수준 0.05 양측, (4) 검정력 0.8. 군당 표본 n = (z(0.975) + z(0.8))^2 * [p1(1-p1) + p2(1-p2)] / (p2 - p1)^2, 여기서 p2 = p1 - MDE. 이 n은 분모가 배너에서 실제로 뽑은 유저이므로, 필요한 노출 유저 수 = n / (배너 참여율)로 환산해야 한다. 배너 1주기(오픈-종료)가 온전히 포함되도록 최소 14일을 돌리고, 기간 중간에 다른 배너나 가격 프로모션을 겹치지 않게 한다. 계산한 n에 도달하기 전에 중간 결과를 보고 중단하지 말 것."
+  },
+  "do_not_track": [
+    "전투 중 턴별/스킬별 상세 로그. 볼륨이 이벤트 전체의 수십 배가 되는데 8명 팀이 소화할 수 없다. 특정 스테이지 난이도 조사가 필요해지면 그때 해당 스테이지만 한시적으로 샘플링해 붙인다.",
+    "모든 UI 버튼 탭과 화면 진입 전수 로깅. 히트맵은 지금 단계에서 어떤 의사결정도 바꾸지 못하고, 이벤트 12개 원칙만 깨뜨린다.",
+    "캐릭터별 전체 스탯 스냅샷의 상시 저장. max_team_power와 account_level 스냅샷이면 충분하며, 상세 스탯은 필요할 때 서버 DB에서 조회하면 된다.",
+    "이벤트마다 device_model, os_version, country, acquisition_channel을 반복 기록하는 것. 이들은 유저 테이블의 고정 속성이며 조인으로 붙인다. 중복 기록은 저장 비용과 불일치 위험만 만든다.",
+    "광고 노출/시청/보상 이벤트. 현재 수익 모델이 IAP 단일이라 지금은 찍을 대상이 없다. 리워드 광고를 도입하는 시점에 노출-시청완료-보상수령 3단계로 신설한다.",
+    "길드/친구 소셜 그래프 전체와 채팅 로그. 현재 핵심 루프에 소셜이 들어 있지 않아 분석 질문 자체가 없다.",
+    "LTV 예측값, 이탈 확률 같은 파생/예측 값을 이벤트로 적재하는 것. 파생 지표는 원천 이벤트 위의 계산 레이어에서 만들어야 정의 변경 시 과거 데이터가 함께 바뀐다.",
+    "실시간 스트리밍 파이프라인. 이 팀 규모에서는 일 1회 배치로 충분하고, 실시간 구축은 분석 착수 자체를 몇 달 늦춘다."
+  ],
+  "sql_ddl": "CREATE TABLE users (\n  user_id VARCHAR(64) PRIMARY KEY,\n  install_ts TIMESTAMP NOT NULL,\n  install_date DATE NOT NULL,\n  platform VARCHAR(16) NOT NULL,\n  os_version VARCHAR(32),\n  device_model VARCHAR(64),\n  country CHAR(2),\n  acquisition_channel VARCHAR(64),\n  campaign_id VARCHAR(64),\n  first_open_version VARCHAR(32),\n  is_payer BOOLEAN DEFAULT FALSE,\n  first_purchase_ts TIMESTAMP,\n  account_level INTEGER,\n  max_team_power INTEGER,\n  owned_top_rarity_count INTEGER\n);\n\nCREATE TABLE session_start (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  entry_point VARCHAR(32),\n  app_version VARCHAR(32),\n  active_banner_id VARCHAR(64),\n  banner_day_index INTEGER\n);\n\nCREATE TABLE stage_attempt_start (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  attempt_id VARCHAR(64) NOT NULL,\n  stage_id VARCHAR(64) NOT NULL,\n  stage_type VARCHAR(16) NOT NULL,\n  stage_difficulty INTEGER,\n  team_power INTEGER,\n  attempt_index INTEGER,\n  entry_cost_currency VARCHAR(32),\n  entry_cost_amount INTEGER,\n  is_auto BOOLEAN\n);\n\nCREATE TABLE stage_attempt_end (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  attempt_id VARCHAR(64) NOT NULL,\n  stage_id VARCHAR(64) NOT NULL,\n  stage_type VARCHAR(16) NOT NULL,\n  result VARCHAR(16) NOT NULL,\n  fail_reason VARCHAR(32),\n  duration_sec INTEGER,\n  team_power INTEGER,\n  star_count INTEGER,\n  is_first_clear BOOLEAN,\n  reward_currency_amount INTEGER\n);\n\nCREATE TABLE gacha_banner_view (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  banner_id VARCHAR(64) NOT NULL,\n  banner_type VARCHAR(32) NOT NULL,\n  banner_day_index INTEGER NOT NULL,\n  pity_counter INTEGER,\n  affordable_pulls INTEGER,\n  entry_source VARCHAR(32)\n);\n\nCREATE TABLE gacha_pull (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  banner_id VARCHAR(64) NOT NULL,\n  banner_type VARCHAR(32) NOT NULL,\n  banner_day_index INTEGER NOT NULL,\n  pull_count INTEGER NOT NULL,\n  currency_type VARCHAR(32) NOT NULL,\n  currency_amount INTEGER NOT NULL,\n  paid_currency_ratio DECIMAL(5,4),\n  pity_counter_before INTEGER,\n  pity_triggered BOOLEAN,\n  max_rarity INTEGER,\n  pickup_count INTEGER,\n  new_char_count INTEGER,\n  dupe_count INTEGER,\n  cumulative_pulls_on_banner INTEGER\n);\n\nCREATE TABLE character_upgrade_attempt (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  char_id VARCHAR(64) NOT NULL,\n  char_rarity INTEGER,\n  upgrade_type VARCHAR(32) NOT NULL,\n  result VARCHAR(32) NOT NULL,\n  blocking_resource VARCHAR(64),\n  blocking_shortfall INTEGER,\n  level_before INTEGER,\n  level_after INTEGER,\n  is_pulled_recently BOOLEAN\n);\n\nCREATE TABLE currency_change (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  currency_type VARCHAR(32) NOT NULL,\n  delta BIGINT NOT NULL,\n  balance_after BIGINT NOT NULL,\n  reason_code VARCHAR(48) NOT NULL,\n  reason_detail VARCHAR(128),\n  is_paid_currency BOOLEAN NOT NULL,\n  ref_event_id VARCHAR(64)\n);\n\nCREATE TABLE daily_mission_claim (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  mission_id VARCHAR(64) NOT NULL,\n  mission_type VARCHAR(32),\n  missions_completed_today INTEGER,\n  missions_total_today INTEGER,\n  is_full_clear BOOLEAN,\n  reward_currency_type VARCHAR(32),\n  reward_amount INTEGER\n);\n\nCREATE TABLE weekly_raid_attempt (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  raid_id VARCHAR(64) NOT NULL,\n  boss_id VARCHAR(64),\n  raid_tier INTEGER,\n  result VARCHAR(16) NOT NULL,\n  damage_dealt BIGINT,\n  attempt_index_this_week INTEGER,\n  party_power INTEGER,\n  clear_time_sec INTEGER\n);\n\nCREATE TABLE store_offer_impression (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  offer_id VARCHAR(64) NOT NULL,\n  offer_type VARCHAR(32) NOT NULL,\n  placement VARCHAR(48) NOT NULL,\n  price_tier VARCHAR(32),\n  linked_banner_id VARCHAR(64),\n  banner_day_index INTEGER,\n  is_first_view_today BOOLEAN NOT NULL\n);\n\nCREATE TABLE store_offer_click (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  offer_id VARCHAR(64) NOT NULL,\n  offer_type VARCHAR(32) NOT NULL,\n  placement VARCHAR(48) NOT NULL,\n  linked_banner_id VARCHAR(64),\n  banner_day_index INTEGER,\n  time_since_impression_sec INTEGER\n);\n\nCREATE TABLE iap_purchase (\n  user_id VARCHAR(64) NOT NULL,\n  event_ts TIMESTAMP NOT NULL,\n  session_id VARCHAR(64) NOT NULL,\n  day_n INTEGER NOT NULL,\n  transaction_id VARCHAR(128) NOT NULL,\n  product_id VARCHAR(64) NOT NULL,\n  offer_id VARCHAR(64),\n  offer_type VARCHAR(32),\n  linked_banner_id VARCHAR(64),\n  banner_day_index INTEGER,\n  price_local DECIMAL(12,4) NOT NULL,\n  currency_code CHAR(3) NOT NULL,\n  price_usd DECIMAL(12,4) NOT NULL,\n  store VARCHAR(16) NOT NULL,\n  is_first_purchase BOOLEAN,\n  lifetime_purchase_count INTEGER,\n  is_verified BOOLEAN NOT NULL\n);"
+}
