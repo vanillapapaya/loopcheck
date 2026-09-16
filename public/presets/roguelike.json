@@ -3,187 +3,620 @@
   "events": [
     {
       "name": "run_start",
-      "why": "런 진입 수를 모르면 완주율, 층별 이탈률, 아키타입 승률의 분모가 통째로 사라지고 난이도 단계 진입도 관측되지 않는다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": "런 단위 UUID. 이 스키마의 모든 인게임 이벤트를 묶는 조인 키"},
-        {"name": "ascension_level", "type": "int", "note": "난이도 단계. 0=기본. 난이도 사다리 진입 측정의 유일한 소스"},
-        {"name": "character_id", "type": "string", "note": "선택 캐릭터/클래스"},
-        {"name": "starting_deck_id", "type": "string", "note": "시작 덱 프리셋"},
-        {"name": "run_index", "type": "int", "note": "이 유저의 누적 런 번호(1부터). 첫 런과 50번째 런을 절대 같이 보면 안 된다"},
-        {"name": "cumulative_playtime_min", "type": "int", "note": "런 시작 시점의 누적 플레이 시간(분). Steam 환불 구간(120분) 판정의 기준값"},
-        {"name": "game_version", "type": "string", "note": "패치별 밸런스 비교용"}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": "런 단위 UUID. 이 스키마의 모든 인게임 이벤트를 묶는 조인 키"
+        },
+        {
+          "name": "ascension_level",
+          "type": "int",
+          "note": "난이도 단계. 0=기본. 난이도 사다리 진입 측정의 유일한 소스"
+        },
+        {
+          "name": "character_id",
+          "type": "string",
+          "note": "선택 캐릭터/클래스"
+        },
+        {
+          "name": "starting_deck_id",
+          "type": "string",
+          "note": "시작 덱 프리셋"
+        },
+        {
+          "name": "run_index",
+          "type": "int",
+          "note": "이 유저의 누적 런 번호(1부터). 첫 런과 50번째 런을 절대 같이 보면 안 된다"
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": "런 시작 시점의 누적 플레이 시간(분). Steam 환불 구간(120분) 판정의 기준값"
+        },
+        {
+          "name": "game_version",
+          "type": "string",
+          "note": "패치별 밸런스 비교용"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "런 단위 핵심 루프의 시작 지점인 진입을 기록한다.",
+      "used_for": [
+        "재도전율",
+        "층별 런 이탈률",
+        "난이도 단계 사다리 전환율"
+      ]
     },
     {
       "name": "combat_start",
-      "why": "전투 진입을 따로 찍지 않으면 '전투 중 창을 닫은 이탈'과 '전투에서 진 실패'를 구분할 수 없어 이탈 원인이 섞인다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": ""},
-        {"name": "combat_id", "type": "string", "note": "전투 단위 ID"},
-        {"name": "floor", "type": "int", "note": "층. 층별 이탈 곡선의 x축"},
-        {"name": "act", "type": "int", "note": "막/구간"},
-        {"name": "encounter_id", "type": "string", "note": "적 조합 ID. 특정 적이 난이도 벽인지 찾는 키"},
-        {"name": "encounter_type", "type": "string", "note": "normal | elite | boss | event"},
-        {"name": "hp_before", "type": "int", "note": "전투 전 체력. 사망은 보통 한 판 전에 이미 결정되어 있다"},
-        {"name": "deck_size", "type": "int", "note": ""},
-        {"name": "deck_archetype", "type": "string", "note": "덱 구성에서 클라이언트가 규칙 기반으로 붙이는 태그(예: poison, strength, exhaust, unclassified)"}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "combat_id",
+          "type": "string",
+          "note": "전투 단위 ID"
+        },
+        {
+          "name": "floor",
+          "type": "int",
+          "note": "층. 층별 이탈 곡선의 x축"
+        },
+        {
+          "name": "act",
+          "type": "int",
+          "note": "막/구간"
+        },
+        {
+          "name": "encounter_id",
+          "type": "string",
+          "note": "적 조합 ID. 특정 적이 난이도 벽인지 찾는 키"
+        },
+        {
+          "name": "encounter_type",
+          "type": "string",
+          "note": "normal | elite | boss | event"
+        },
+        {
+          "name": "hp_before",
+          "type": "int",
+          "note": "전투 전 체력. 사망은 보통 한 판 전에 이미 결정되어 있다"
+        },
+        {
+          "name": "deck_size",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "deck_archetype",
+          "type": "string",
+          "note": "덱 구성에서 클라이언트가 규칙 기반으로 붙이는 태그(예: poison, strength, exhaust, unclassified)"
+        }
       ],
-      "priority": "should"
+      "priority": "should",
+      "role": "런 내부 개별 전투 시퀀스로의 진입을 기록한다.",
+      "used_for": [
+        "층별 런 이탈률",
+        "덱 아키타입별 런 승률"
+      ]
     },
     {
       "name": "combat_end",
-      "why": "핵심 루프의 성공/실패 지점 그 자체. 이것이 없으면 어떤 적에게 어떤 덱이 무너지는지 영원히 알 수 없다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": ""},
-        {"name": "combat_id", "type": "string", "note": "combat_start와 1:1 대응. 짝이 없으면 전투 중 이탈"},
-        {"name": "floor", "type": "int", "note": ""},
-        {"name": "encounter_id", "type": "string", "note": ""},
-        {"name": "encounter_type", "type": "string", "note": "normal | elite | boss | event"},
-        {"name": "result", "type": "string", "note": "win | lose | flee"},
-        {"name": "turns", "type": "int", "note": "턴 수. 늘어지는 전투는 이탈 선행 지표다"},
-        {"name": "duration_sec", "type": "float", "note": ""},
-        {"name": "hp_after", "type": "int", "note": ""},
-        {"name": "damage_taken", "type": "int", "note": ""},
-        {"name": "deck_archetype", "type": "string", "note": "전투 시점의 아키타입 태그"}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "combat_id",
+          "type": "string",
+          "note": "combat_start와 1:1 대응. 짝이 없으면 전투 중 이탈"
+        },
+        {
+          "name": "floor",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "encounter_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "encounter_type",
+          "type": "string",
+          "note": "normal | elite | boss | event"
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "note": "win | lose | flee"
+        },
+        {
+          "name": "turns",
+          "type": "int",
+          "note": "턴 수. 늘어지는 전투는 이탈 선행 지표다"
+        },
+        {
+          "name": "duration_sec",
+          "type": "float",
+          "note": ""
+        },
+        {
+          "name": "hp_after",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "damage_taken",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "deck_archetype",
+          "type": "string",
+          "note": "전투 시점의 아키타입 태그"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "개별 전투 단위의 성공 또는 실패 결과를 기록한다.",
+      "used_for": [
+        "층별 런 이탈률",
+        "덱 아키타입별 런 승률"
+      ]
     },
     {
       "name": "card_reward_shown",
-      "why": "무엇이 제시되었는지를 모르면 카드 채택률의 분모가 없어, 인기 없는 카드가 '약한 것'인지 '안 뜬 것'인지 구분할 수 없다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": ""},
-        {"name": "combat_id", "type": "string", "note": "어떤 전투의 보상인지"},
-        {"name": "floor", "type": "int", "note": ""},
-        {"name": "offered_card_ids", "type": "string", "note": "제시된 카드 ID 쉼표 구분 목록"},
-        {"name": "offered_rarities", "type": "string", "note": "제시된 희귀도 쉼표 구분 목록"},
-        {"name": "deck_archetype", "type": "string", "note": "제시 시점의 덱 태그"}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "combat_id",
+          "type": "string",
+          "note": "어떤 전투의 보상인지"
+        },
+        {
+          "name": "floor",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "offered_card_ids",
+          "type": "string",
+          "note": "제시된 카드 ID 쉼표 구분 목록"
+        },
+        {
+          "name": "offered_rarities",
+          "type": "string",
+          "note": "제시된 희귀도 쉼표 구분 목록"
+        },
+        {
+          "name": "deck_archetype",
+          "type": "string",
+          "note": "제시 시점의 덱 태그"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "전투 성공 후 주어지는 카드 보상 선택지의 진입을 기록한다.",
+      "used_for": [
+        "카드 채택률"
+      ]
     },
     {
       "name": "card_reward_pick",
-      "why": "덱 빌딩의 유일한 의사결정 지점. 선택과 스킵을 남기지 않으면 아키타입이 어떻게 형성되는지 재구성할 수 없다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": ""},
-        {"name": "combat_id", "type": "string", "note": "card_reward_shown과 조인"},
-        {"name": "floor", "type": "int", "note": ""},
-        {"name": "action", "type": "string", "note": "pick | skip. 스킵도 반드시 이벤트를 남긴다"},
-        {"name": "picked_card_id", "type": "string", "note": "skip이면 빈 문자열"},
-        {"name": "pick_index", "type": "int", "note": "제시 목록 내 위치. 위치 편향 확인용"},
-        {"name": "decision_sec", "type": "float", "note": "제시부터 선택까지 걸린 시간. 너무 길면 정보 부족 신호"},
-        {"name": "deck_size_after", "type": "int", "note": ""}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "combat_id",
+          "type": "string",
+          "note": "card_reward_shown과 조인"
+        },
+        {
+          "name": "floor",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "note": "pick | skip. 스킵도 반드시 이벤트를 남긴다"
+        },
+        {
+          "name": "picked_card_id",
+          "type": "string",
+          "note": "skip이면 빈 문자열"
+        },
+        {
+          "name": "pick_index",
+          "type": "int",
+          "note": "제시 목록 내 위치. 위치 편향 확인용"
+        },
+        {
+          "name": "decision_sec",
+          "type": "float",
+          "note": "제시부터 선택까지 걸린 시간. 너무 길면 정보 부족 신호"
+        },
+        {
+          "name": "deck_size_after",
+          "type": "int",
+          "note": ""
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "덱 빌딩 루프에서 보상 카드의 채택 혹은 스킵 결정을 완료하는 성공 지점을 기록한다.",
+      "used_for": [
+        "카드 채택률",
+        "덱 아키타입별 런 승률"
+      ]
     },
     {
       "name": "run_end",
-      "why": "런의 성공(클리어), 실패(사망), 중단(메뉴 이탈/강제 종료)을 한 이벤트에서 구분하는 지점. end_reason이 없으면 '어려워서 죽은 것'과 '지겨워서 나간 것'이 한 덩어리가 된다.",
       "properties": [
-        {"name": "run_id", "type": "string", "note": ""},
-        {"name": "end_reason", "type": "string", "note": "victory | death | quit_to_menu | abandoned_app_close | abandoned_crash. 중단 지점은 여기서만 보인다"},
-        {"name": "floor_reached", "type": "int", "note": ""},
-        {"name": "act_reached", "type": "int", "note": ""},
-        {"name": "ascension_level", "type": "int", "note": "난이도 단계별 승률의 키"},
-        {"name": "killed_by_encounter_id", "type": "string", "note": "death가 아니면 빈 문자열"},
-        {"name": "duration_sec", "type": "float", "note": "런 길이. 세션 길이와 구분해서 본다"},
-        {"name": "deck_archetype", "type": "string", "note": "최종 아키타입 태그. 아키타입별 승률의 기준"},
-        {"name": "deck_size", "type": "int", "note": ""},
-        {"name": "final_card_ids", "type": "string", "note": "최종 덱 카드 ID 목록. 태그 규칙이 바뀌어도 사후 재분류가 가능하게 남긴다"},
-        {"name": "run_index", "type": "int", "note": ""},
-        {"name": "cumulative_playtime_min", "type": "int", "note": "환불 위험 구간 판정용"}
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "end_reason",
+          "type": "string",
+          "note": "victory | death | quit_to_menu | abandoned_app_close | abandoned_crash. 중단 지점은 여기서만 보인다"
+        },
+        {
+          "name": "floor_reached",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "act_reached",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "ascension_level",
+          "type": "int",
+          "note": "난이도 단계별 승률의 키"
+        },
+        {
+          "name": "killed_by_encounter_id",
+          "type": "string",
+          "note": "death가 아니면 빈 문자열"
+        },
+        {
+          "name": "duration_sec",
+          "type": "float",
+          "note": "런 길이. 세션 길이와 구분해서 본다"
+        },
+        {
+          "name": "deck_archetype",
+          "type": "string",
+          "note": "최종 아키타입 태그. 아키타입별 승률의 기준"
+        },
+        {
+          "name": "deck_size",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "final_card_ids",
+          "type": "string",
+          "note": "최종 덱 카드 ID 목록. 태그 규칙이 바뀌어도 사후 재분류가 가능하게 남긴다"
+        },
+        {
+          "name": "run_index",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": "환불 위험 구간 판정용"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "단일 런 루프의 최종 성공, 실패, 또는 유저 중단을 기록한다.",
+      "used_for": [
+        "층별 런 이탈률",
+        "덱 아키타입별 런 승률",
+        "난이도 단계 사다리 전환율"
+      ]
     },
     {
       "name": "meta_unlock",
-      "why": "영구 해금이 재도전 동기라면, 무엇이 언제 열렸는지 없이는 '해금이 재런을 유발했는가'를 검증할 수 없다.",
       "properties": [
-        {"name": "unlock_id", "type": "string", "note": ""},
-        {"name": "unlock_type", "type": "string", "note": "card | relic | character | ascension_tier | mode"},
-        {"name": "trigger", "type": "string", "note": "run_count | boss_kill | ascension_clear | achievement"},
-        {"name": "run_id", "type": "string", "note": "런 중 해금이면 해당 런"},
-        {"name": "run_index", "type": "int", "note": "몇 번째 런에서 열렸는지"}
+        {
+          "name": "unlock_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "unlock_type",
+          "type": "string",
+          "note": "card | relic | character | ascension_tier | mode"
+        },
+        {
+          "name": "trigger",
+          "type": "string",
+          "note": "run_count | boss_kill | ascension_clear | achievement"
+        },
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": "런 중 해금이면 해당 런"
+        },
+        {
+          "name": "run_index",
+          "type": "int",
+          "note": "몇 번째 런에서 열렸는지"
+        }
       ],
-      "priority": "should"
+      "priority": "should",
+      "role": "런 종료 후 메타 성장 요소가 영구 활성화되는 성공을 기록한다.",
+      "used_for": [
+        "재도전율",
+        "난이도 단계 사다리 전환율"
+      ]
     },
     {
       "name": "currency_change",
-      "why": "런 내 골드와 메타 재화의 획득/소비를 reason 없이 남기면 상점 가격과 보상량 중 무엇이 깨졌는지 판별할 수 없다.",
       "properties": [
-        {"name": "currency_type", "type": "string", "note": "run_gold | meta_shard"},
-        {"name": "delta", "type": "int", "note": "획득은 양수, 소비는 음수. 한 테이블에 함께 남긴다"},
-        {"name": "balance_after", "type": "int", "note": ""},
-        {"name": "reason", "type": "string", "note": "combat_reward | elite_reward | boss_reward | shop_buy | shop_remove_card | event_choice | rest_site | relic_effect | run_reset"},
-        {"name": "scope", "type": "string", "note": "in_run | meta. 런 종료 시 소멸하는 재화와 영구 재화를 섞지 않는다"},
-        {"name": "run_id", "type": "string", "note": "메타 재화면 빈 문자열 가능"},
-        {"name": "floor", "type": "int", "note": ""}
+        {
+          "name": "currency_type",
+          "type": "string",
+          "note": "run_gold | meta_shard"
+        },
+        {
+          "name": "delta",
+          "type": "int",
+          "note": "획득은 양수, 소비는 음수. 한 테이블에 함께 남긴다"
+        },
+        {
+          "name": "balance_after",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "combat_reward | elite_reward | boss_reward | shop_buy | shop_remove_card | event_choice | rest_site | relic_effect | run_reset"
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "note": "in_run | meta. 런 종료 시 소멸하는 재화와 영구 재화를 섞지 않는다"
+        },
+        {
+          "name": "run_id",
+          "type": "string",
+          "note": "메타 재화면 빈 문자열 가능"
+        },
+        {
+          "name": "floor",
+          "type": "int",
+          "note": ""
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "런 내부 및 메타 시스템에서 발생하는 재화의 획득과 소비를 찍는 경제 활동을 기록한다.",
+      "used_for": [
+        "런 내 재화 수지"
+      ]
     },
     {
       "name": "session_end",
-      "why": "Steam 환불은 누적 플레이 2시간이 기준이므로, 세션 길이와 누적 플레이타임을 남기지 않으면 환불 위험 구간 자체를 정의할 수 없다.",
       "properties": [
-        {"name": "duration_sec", "type": "float", "note": "세션 길이"},
-        {"name": "cumulative_playtime_min", "type": "int", "note": "세션 종료 시점 누적 분. 120분 경계가 환불 위험선"},
-        {"name": "runs_started_in_session", "type": "int", "note": "한 세션에 몇 런을 돌렸는지. 재도전 의지의 직접 신호"},
-        {"name": "ended_in_active_run", "type": "bool", "note": "런 진행 중 종료 여부. 중단 이탈의 핵심 플래그"},
-        {"name": "exit_type", "type": "string", "note": "clean_quit | alt_f4 | crash. 크래시 이탈을 이탈로 오독하지 않기 위해 필요"}
+        {
+          "name": "duration_sec",
+          "type": "float",
+          "note": "세션 길이"
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": "세션 종료 시점 누적 분. 120분 경계가 환불 위험선"
+        },
+        {
+          "name": "runs_started_in_session",
+          "type": "int",
+          "note": "한 세션에 몇 런을 돌렸는지. 재도전 의지의 직접 신호"
+        },
+        {
+          "name": "ended_in_active_run",
+          "type": "bool",
+          "note": "런 진행 중 종료 여부. 중단 이탈의 핵심 플래그"
+        },
+        {
+          "name": "exit_type",
+          "type": "string",
+          "note": "clean_quit | alt_f4 | crash. 크래시 이탈을 이탈로 오독하지 않기 위해 필요"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "클라이언트 실행 세션이 종료되는 전체 게임 플레이 중단을 기록한다.",
+      "used_for": [
+        "환불 위험 구간 이탈률",
+        "Classic N-day 리텐션"
+      ]
     },
     {
       "name": "dlc_promo_impression",
-      "why": "DLC 퍼널의 노출 단계. 이것이 없으면 DLC가 안 팔리는 이유가 '안 보여서'인지 '보고도 안 사서'인지 영원히 알 수 없다.",
       "properties": [
-        {"name": "dlc_id", "type": "string", "note": ""},
-        {"name": "promo_slot", "type": "string", "note": "main_menu_panel | run_end_screen | unlock_screen | character_select"},
-        {"name": "owns_dlc", "type": "bool", "note": "이미 보유한 유저 노출은 분모에서 빼야 한다"},
-        {"name": "run_index", "type": "int", "note": "몇 런째에 본 노출인지"},
-        {"name": "cumulative_playtime_min", "type": "int", "note": ""}
+        {
+          "name": "dlc_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "promo_slot",
+          "type": "string",
+          "note": "main_menu_panel | run_end_screen | unlock_screen | character_select"
+        },
+        {
+          "name": "owns_dlc",
+          "type": "bool",
+          "note": "이미 보유한 유저 노출은 분모에서 빼야 한다"
+        },
+        {
+          "name": "run_index",
+          "type": "int",
+          "note": "몇 런째에 본 노출인지"
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": ""
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "상점 외부 프로모션 영역에서 DLC 상품이 유저에게 노출되는 수익화 진입을 기록한다.",
+      "used_for": [
+        "DLC 퍼널 전환율"
+      ]
     },
     {
       "name": "dlc_promo_click",
-      "why": "노출과 구매 사이의 유일한 관측 가능한 중간 단계. 클릭이 없으면 크리에이티브 문제와 가격 문제를 분리할 수 없다.",
       "properties": [
-        {"name": "dlc_id", "type": "string", "note": ""},
-        {"name": "promo_slot", "type": "string", "note": "impression과 동일 값 집합"},
-        {"name": "destination", "type": "string", "note": "steam_overlay | external_store_page. 여기서부터는 게임 밖이라 관측이 끊긴다"},
-        {"name": "cumulative_playtime_min", "type": "int", "note": ""}
+        {
+          "name": "dlc_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "promo_slot",
+          "type": "string",
+          "note": "impression과 동일 값 집합"
+        },
+        {
+          "name": "destination",
+          "type": "string",
+          "note": "steam_overlay | external_store_page. 여기서부터는 게임 밖이라 관측이 끊긴다"
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": ""
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "노출된 DLC 프로모션을 유저가 클릭하여 외부 상점으로 이동하는 수익화 반응을 기록한다.",
+      "used_for": [
+        "DLC 퍼널 전환율"
+      ]
     },
     {
       "name": "dlc_ownership_detected",
-      "why": "Steam DLC 구매는 오버레이 밖에서 일어나므로, 게임 실행 시 소유권 변화를 감지해 찍는 것이 구매를 관측할 수 있는 유일한 방법이다.",
       "properties": [
-        {"name": "dlc_id", "type": "string", "note": ""},
-        {"name": "detected_at", "type": "string", "note": "launch_ownership_check | session_ownership_check"},
-        {"name": "days_since_first_launch", "type": "int", "note": ""},
-        {"name": "cumulative_playtime_min", "type": "int", "note": "구매 시점의 플레이 깊이"},
-        {"name": "last_promo_slot", "type": "string", "note": "직전에 관측된 노출 슬롯. 없으면 빈 문자열(=오가닉 구매)"},
-        {"name": "hours_since_last_click", "type": "float", "note": "클릭-구매 귀속 창. 값이 없으면 -1"}
+        {
+          "name": "dlc_id",
+          "type": "string",
+          "note": ""
+        },
+        {
+          "name": "detected_at",
+          "type": "string",
+          "note": "launch_ownership_check | session_ownership_check"
+        },
+        {
+          "name": "days_since_first_launch",
+          "type": "int",
+          "note": ""
+        },
+        {
+          "name": "cumulative_playtime_min",
+          "type": "int",
+          "note": "구매 시점의 플레이 깊이"
+        },
+        {
+          "name": "last_promo_slot",
+          "type": "string",
+          "note": "직전에 관측된 노출 슬롯. 없으면 빈 문자열(=오가닉 구매)"
+        },
+        {
+          "name": "hours_since_last_click",
+          "type": "float",
+          "note": "클릭-구매 귀속 창. 값이 없으면 -1"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "외부 플랫폼에서 완료된 유저의 DLC 구매를 게임 내에서 확인하는 최종 수익화 성공을 기록한다.",
+      "used_for": [
+        "DLC 퍼널 전환율"
+      ]
     }
   ],
   "user_properties": [
-    {"name": "user_id", "type": "string", "note": "SteamID를 그대로 쓰지 말고 솔트 해시한 익명 ID. 모든 이벤트의 조인 키"},
-    {"name": "first_launch_ts", "type": "timestamp", "note": "day_n 계산의 기준점. Steam에는 '설치일'이 없으므로 최초 실행일을 설치일로 정의한다"},
-    {"name": "owned_since_ts", "type": "timestamp", "note": "본편 소유 시작 시각. 구매 후 실행까지의 지연(백로그)을 보기 위해 first_launch와 분리한다"},
-    {"name": "country", "type": "string", "note": "Steam 지역 코드. 이벤트마다 반복하지 않는다"},
-    {"name": "language", "type": "string", "note": "게임 언어. 현지화 품질과 이탈의 상관을 보기 위한 고정 속성"},
-    {"name": "os", "type": "string", "note": "windows | macos | linux_proton"},
-    {"name": "gpu_tier", "type": "string", "note": "저사양 구간의 크래시/이탈 분리용. 상세 모델명 대신 구간값"},
-    {"name": "acquisition_context", "type": "string", "note": "wishlist_launch | sale | bundle | full_price | unknown. Steam은 정밀 채널 추적이 불가하므로 구간값만 둔다"},
-    {"name": "owned_dlcs", "type": "string", "note": "현재 보유 DLC 목록. 최신 상태로 덮어쓰는 고정 속성"},
-    {"name": "current_max_ascension", "type": "int", "note": "도달한 최고 난이도 단계. 유저 진도의 단일 지표"},
-    {"name": "input_device", "type": "string", "note": "mouse_keyboard | gamepad | steam_deck. Deck 유저는 세션 길이 분포가 다르다"},
-    {"name": "build_branch", "type": "string", "note": "public | beta. 베타 유저를 본 지표에 섞지 않기 위해 필요"}
+    {
+      "name": "user_id",
+      "type": "string",
+      "note": "SteamID를 그대로 쓰지 말고 솔트 해시한 익명 ID. 모든 이벤트의 조인 키"
+    },
+    {
+      "name": "first_launch_ts",
+      "type": "timestamp",
+      "note": "day_n 계산의 기준점. Steam에는 '설치일'이 없으므로 최초 실행일을 설치일로 정의한다"
+    },
+    {
+      "name": "owned_since_ts",
+      "type": "timestamp",
+      "note": "본편 소유 시작 시각. 구매 후 실행까지의 지연(백로그)을 보기 위해 first_launch와 분리한다"
+    },
+    {
+      "name": "country",
+      "type": "string",
+      "note": "Steam 지역 코드. 이벤트마다 반복하지 않는다"
+    },
+    {
+      "name": "language",
+      "type": "string",
+      "note": "게임 언어. 현지화 품질과 이탈의 상관을 보기 위한 고정 속성"
+    },
+    {
+      "name": "os",
+      "type": "string",
+      "note": "windows | macos | linux_proton"
+    },
+    {
+      "name": "gpu_tier",
+      "type": "string",
+      "note": "저사양 구간의 크래시/이탈 분리용. 상세 모델명 대신 구간값"
+    },
+    {
+      "name": "acquisition_context",
+      "type": "string",
+      "note": "wishlist_launch | sale | bundle | full_price | unknown. Steam은 정밀 채널 추적이 불가하므로 구간값만 둔다"
+    },
+    {
+      "name": "owned_dlcs",
+      "type": "string",
+      "note": "현재 보유 DLC 목록. 최신 상태로 덮어쓰는 고정 속성"
+    },
+    {
+      "name": "current_max_ascension",
+      "type": "int",
+      "note": "도달한 최고 난이도 단계. 유저 진도의 단일 지표"
+    },
+    {
+      "name": "input_device",
+      "type": "string",
+      "note": "mouse_keyboard | gamepad | steam_deck. Deck 유저는 세션 길이 분포가 다르다"
+    },
+    {
+      "name": "build_branch",
+      "type": "string",
+      "note": "public | beta. 베타 유저를 본 지표에 섞지 않기 위해 필요"
+    }
   ],
   "kpis": [
     {

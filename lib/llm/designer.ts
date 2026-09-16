@@ -23,6 +23,11 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
    인게임 경제를 추적하려면 이것이 최소 조건이다.
 6. 기기, OS, 획득 채널, 국가는 유저 테이블의 고정 속성이다. 이벤트마다 반복하지 마라.
 7. 무엇을 찍지 말아야 하는지도 말해 줘라. 과설계는 인디 팀이 분석을 포기하는 첫 번째 이유다.
+8. 각 이벤트마다 역할과 쓰임을 밝혀라. "이게 없으면 못 본다"는 식으로 쓰지 말고,
+   루프의 어느 지점을 찍는 이벤트인지와 어떤 지표의 분자·분모가 되는지를 적는다.
+   used_for에는 이 설계서의 kpis에 실제로 있는 지표 이름을 쓴다.
+9. 출력은 한국어로 쓴다. 이벤트명, 속성명, 테이블·컬럼명 같은 코드 식별자만 영문 snake_case로 쓰고
+   지표 이름과 설명 문장은 한국어로 쓴다.
 
 ## 금지 사항
 
@@ -40,7 +45,8 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
   "events": [
     {
       "name": "snake_case 이벤트명",
-      "why": "이 이벤트가 없으면 무엇을 못 보게 되는지 한 문장",
+      "role": "이 이벤트가 핵심 루프에서 맡는 역할 한 문장 (진입/성공/실패/중단/경제/수익화 중 어디인지가 드러나게)",
+      "used_for": ["이 이벤트로 계산하는 지표 이름", "..."],
       "properties": [{"name": "", "type": "string|int|float|bool|timestamp", "note": ""}],
       "priority": "must | should"
     }
@@ -131,7 +137,8 @@ export function validateDesign(v: unknown): { ok: true; result: DesignResult } |
   if (!Array.isArray(o.events) || o.events.length < 4 || o.events.length > 12) e.push("events는 4-12개여야 함");
   else o.events.forEach((ev, i) => {
     if (!ev || !str(ev.name, 60) || !/^[a-z][a-z0-9_]*$/.test(ev.name)) e.push(`events[${i}].name은 snake_case`);
-    if (!ev || !str(ev.why, 800)) e.push(`events[${i}].why`);
+    if (!ev || !str(ev.role, 400)) e.push(`events[${i}].role`);
+    if (!ev || !Array.isArray(ev.used_for) || !ev.used_for.length || !ev.used_for.every((u) => str(u, 120))) e.push(`events[${i}].used_for는 지표 이름 배열`);
     if (!ev || !props(ev.properties)) e.push(`events[${i}].properties는 {name,type} 배열`);
     if (!ev || !["must", "should"].includes(String(ev.priority).trim())) e.push(`events[${i}].priority는 must 또는 should`);
   });

@@ -1,9 +1,13 @@
 // Gemini REST 호출. 서버(Route Handler)에서만 쓴다. SDK 없이 fetch 한 번.
 // 키가 없거나 한도에 걸리면 LlmUnavailable을 던지고, 호출부는 프리셋·규칙 해석으로 물러난다.
 
+export type LlmErrorCode = "no_key" | "rate_limited" | "timeout" | "upstream" | "bad_output";
+
 export class LlmUnavailable extends Error {
-  constructor(public code: "no_key" | "rate_limited" | "timeout" | "upstream" | "bad_output", message: string) {
+  code: LlmErrorCode;
+  constructor(code: LlmErrorCode, message: string) {
     super(message);
+    this.code = code;
   }
 }
 

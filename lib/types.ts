@@ -2,7 +2,10 @@ export type EventProperty = { name: string; type: string; note?: string };
 
 export type SchemaEvent = {
   name: string;
-  why: string;
+  /** 핵심 루프에서 맡는 역할 */
+  role: string;
+  /** 이 이벤트로 계산하는 지표 이름 */
+  used_for: string[];
   properties: EventProperty[];
   priority: "must" | "should" | string;
 };

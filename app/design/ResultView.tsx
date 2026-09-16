@@ -122,7 +122,13 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                     <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>{e.name}</span>
                     <Badge priority={e.priority} />
                   </div>
-                  <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)", marginBottom: 10 }}>{e.why}</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)", marginBottom: 8 }}>{e.role}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
+                    <span style={{ fontSize: 12, color: "var(--muted)" }}>쓰이는 지표</span>
+                    {e.used_for.map((u) => (
+                      <span key={u} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--ink-2)" }}>{u}</span>
+                    ))}
+                  </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {e.properties.map((p) => (
                       <span key={p.name} className="mono" title={p.note}

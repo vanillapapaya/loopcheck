@@ -3,253 +3,949 @@
   "events": [
     {
       "name": "session_start",
-      "why": "day_n 기준 코호트 리텐션과 뽑기 직후 복귀 여부를 계산할 수 있는 유일한 일별 심박 이벤트이며, 이것이 없으면 가챠 결과에 따른 이탈을 결과값과 연결할 수 없다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드, UTC 저장 후 표시에서 현지 변환"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드, 설치일=0 기준 경과일"},
-        {"name": "entry_point", "type": "string", "note": "icon | push | deeplink | unknown"},
-        {"name": "app_version", "type": "string", "note": "클라이언트 빌드 버전"},
-        {"name": "active_banner_id", "type": "string", "note": "세션 시작 시점에 열려 있는 픽업 배너, 없으면 none"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 오픈일=0 기준 경과일, 배너 없으면 -1"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드, UTC 저장 후 표시에서 현지 변환"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드, 설치일=0 기준 경과일"
+        },
+        {
+          "name": "entry_point",
+          "type": "string",
+          "note": "icon | push | deeplink | unknown"
+        },
+        {
+          "name": "app_version",
+          "type": "string",
+          "note": "클라이언트 빌드 버전"
+        },
+        {
+          "name": "active_banner_id",
+          "type": "string",
+          "note": "세션 시작 시점에 열려 있는 픽업 배너, 없으면 none"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 오픈일=0 기준 경과일, 배너 없으면 -1"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "유저의 게임 접속 시점을 기록하여 활성 상태와 일별 진입을 확인한다.",
+      "used_for": [
+        "N-day 리텐션",
+        "뽑기 후 24시간 미복귀율",
+        "ARPDAU 와 ARPPU"
+      ]
     },
     {
       "name": "stage_attempt_start",
-      "why": "진입을 찍지 않고 종료만 찍으면 특정 스테이지에서 몇 번 재도전하다 포기했는지, 스태미나를 쓰고도 시작을 접었는지 구분할 수 없다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "attempt_id", "type": "string", "note": "stage_attempt_end와 1:1로 잇는 키. 반드시 발급"},
-        {"name": "stage_id", "type": "string", "note": "스테이지 고유 ID. 챕터-스테이지 형태 권장"},
-        {"name": "stage_type", "type": "string", "note": "story | daily | event | raid"},
-        {"name": "stage_difficulty", "type": "int", "note": "기획이 부여한 난이도 등급"},
-        {"name": "team_power", "type": "int", "note": "출전 편성 전투력 합. 난이도 벽과 육성 수준을 잇는 핵심 축"},
-        {"name": "attempt_index", "type": "int", "note": "해당 유저의 이 스테이지 누적 시도 횟수"},
-        {"name": "entry_cost_currency", "type": "string", "note": "stamina 등 입장 소비 재화 코드"},
-        {"name": "entry_cost_amount", "type": "int", "note": "입장 소비량"},
-        {"name": "is_auto", "type": "bool", "note": "자동 전투 여부"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "attempt_id",
+          "type": "string",
+          "note": "stage_attempt_end와 1:1로 잇는 키. 반드시 발급"
+        },
+        {
+          "name": "stage_id",
+          "type": "string",
+          "note": "스테이지 고유 ID. 챕터-스테이지 형태 권장"
+        },
+        {
+          "name": "stage_type",
+          "type": "string",
+          "note": "story | daily | event | raid"
+        },
+        {
+          "name": "stage_difficulty",
+          "type": "int",
+          "note": "기획이 부여한 난이도 등급"
+        },
+        {
+          "name": "team_power",
+          "type": "int",
+          "note": "출전 편성 전투력 합. 난이도 벽과 육성 수준을 잇는 핵심 축"
+        },
+        {
+          "name": "attempt_index",
+          "type": "int",
+          "note": "해당 유저의 이 스테이지 누적 시도 횟수"
+        },
+        {
+          "name": "entry_cost_currency",
+          "type": "string",
+          "note": "stamina 등 입장 소비 재화 코드"
+        },
+        {
+          "name": "entry_cost_amount",
+          "type": "int",
+          "note": "입장 소비량"
+        },
+        {
+          "name": "is_auto",
+          "type": "bool",
+          "note": "자동 전투 여부"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "전투 콘텐츠에 진입하여 스태미나를 소모하고 도전을 시작하는 진입 지점을 기록한다.",
+      "used_for": [
+        "스테이지별 클리어율 및 스테이지 이탈률"
+      ]
     },
     {
       "name": "stage_attempt_end",
-      "why": "성공만 찍고 실패와 중단을 결과값으로 분리하지 않으면 난이도 벽의 위치와 성격(전멸인지 턴 초과인지 이탈인지)을 영원히 못 찾는다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "attempt_id", "type": "string", "note": "stage_attempt_start와 동일 값"},
-        {"name": "stage_id", "type": "string", "note": "조인 없이 바로 집계하기 위한 중복 기록 허용"},
-        {"name": "stage_type", "type": "string", "note": "story | daily | event | raid"},
-        {"name": "result", "type": "string", "note": "clear | fail | retreat | disconnect. retreat가 중단, disconnect가 비정상 종료"},
-        {"name": "fail_reason", "type": "string", "note": "team_wipe | turn_limit | time_out | none | unknown"},
-        {"name": "duration_sec", "type": "int", "note": "전투 소요 시간"},
-        {"name": "team_power", "type": "int", "note": "진입 시점 전투력"},
-        {"name": "star_count", "type": "int", "note": "획득 별 또는 클리어 등급, 없으면 0"},
-        {"name": "is_first_clear", "type": "bool", "note": "최초 클리어 여부. 진도(progression) 속도 계산용"},
-        {"name": "reward_currency_amount", "type": "int", "note": "이 시도로 획득한 주 재화 총량. 상세는 currency_change에 남는다"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "attempt_id",
+          "type": "string",
+          "note": "stage_attempt_start와 동일 값"
+        },
+        {
+          "name": "stage_id",
+          "type": "string",
+          "note": "조인 없이 바로 집계하기 위한 중복 기록 허용"
+        },
+        {
+          "name": "stage_type",
+          "type": "string",
+          "note": "story | daily | event | raid"
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "note": "clear | fail | retreat | disconnect. retreat가 중단, disconnect가 비정상 종료"
+        },
+        {
+          "name": "fail_reason",
+          "type": "string",
+          "note": "team_wipe | turn_limit | time_out | none | unknown"
+        },
+        {
+          "name": "duration_sec",
+          "type": "int",
+          "note": "전투 소요 시간"
+        },
+        {
+          "name": "team_power",
+          "type": "int",
+          "note": "진입 시점 전투력"
+        },
+        {
+          "name": "star_count",
+          "type": "int",
+          "note": "획득 별 또는 클리어 등급, 없으면 0"
+        },
+        {
+          "name": "is_first_clear",
+          "type": "bool",
+          "note": "최초 클리어 여부. 진도(progression) 속도 계산용"
+        },
+        {
+          "name": "reward_currency_amount",
+          "type": "int",
+          "note": "이 시도로 획득한 주 재화 총량. 상세는 currency_change에 남는다"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "전투의 종료 상태를 성공, 실패, 중단으로 구분해 기록함으로써 진행 루프의 결과 지점을 찍는다.",
+      "used_for": [
+        "스테이지별 클리어율 및 스테이지 이탈률"
+      ]
     },
     {
       "name": "gacha_banner_view",
-      "why": "배너를 봤지만 뽑지 않은 유저를 못 걸러내면 배너 매출 부진이 노출 부족 때문인지 재화 부족 때문인지 구분되지 않는다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "banner_id", "type": "string", "note": "배너 고유 ID"},
-        {"name": "banner_type", "type": "string", "note": "limited_pickup | standard | beginner | rerun"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 오픈일=0 기준 경과일. 배너 주기 분석의 기준축"},
-        {"name": "pity_counter", "type": "int", "note": "조회 시점 천장 누적 카운터"},
-        {"name": "affordable_pulls", "type": "int", "note": "보유 재화로 즉시 가능한 뽑기 횟수. 0이면 재화 병목, 1 이상인데 안 뽑으면 동기 문제"},
-        {"name": "entry_source", "type": "string", "note": "main_banner | push | shop | quest_reward"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "banner_id",
+          "type": "string",
+          "note": "배너 고유 ID"
+        },
+        {
+          "name": "banner_type",
+          "type": "string",
+          "note": "limited_pickup | standard | beginner | rerun"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 오픈일=0 기준 경과일. 배너 주기 분석의 기준축"
+        },
+        {
+          "name": "pity_counter",
+          "type": "int",
+          "note": "조회 시점 천장 누적 카운터"
+        },
+        {
+          "name": "affordable_pulls",
+          "type": "int",
+          "note": "보유 재화로 즉시 가능한 뽑기 횟수. 0이면 재화 병목, 1 이상인데 안 뽑으면 동기 문제"
+        },
+        {
+          "name": "entry_source",
+          "type": "string",
+          "note": "main_banner | push | shop | quest_reward"
+        }
       ],
-      "priority": "should"
+      "priority": "should",
+      "role": "유저가 가챠 배너 화면에 진입하여 상품을 탐색하는 획득 루프 진입을 기록한다.",
+      "used_for": [
+        "배너 매출 집중도"
+      ]
     },
     {
       "name": "gacha_pull",
-      "why": "투입(재화)과 결과(희귀도, 픽업 여부, 천장)를 한 행에 남기지 않으면 어떤 결과를 받은 유저가 이탈하는지 결과-이탈 연결이 불가능하다. 이 장르에서 가장 중요한 단일 이벤트다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "banner_id", "type": "string", "note": "배너 고유 ID"},
-        {"name": "banner_type", "type": "string", "note": "limited_pickup | standard | beginner | rerun"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 오픈 후 경과일"},
-        {"name": "pull_count", "type": "int", "note": "1 또는 10. 1행=1회 뽑기 행위"},
-        {"name": "currency_type", "type": "string", "note": "소비 재화 코드. 유료 재화와 무료 재화를 별도 코드로 분리할 것"},
-        {"name": "currency_amount", "type": "int", "note": "소비량"},
-        {"name": "paid_currency_ratio", "type": "float", "note": "0~1. 이번 뽑기에서 유료 재화가 차지한 비중. 매출 귀속의 근거"},
-        {"name": "pity_counter_before", "type": "int", "note": "뽑기 직전 천장 카운터"},
-        {"name": "pity_triggered", "type": "bool", "note": "천장 발동 여부"},
-        {"name": "max_rarity", "type": "int", "note": "이번 뽑기에서 나온 최고 희귀도"},
-        {"name": "pickup_count", "type": "int", "note": "픽업 캐릭터 획득 수. 0이면 목표 미달"},
-        {"name": "new_char_count", "type": "int", "note": "신규 캐릭터 수"},
-        {"name": "dupe_count", "type": "int", "note": "중복 수. 중복 비율이 높으면 체감 만족도가 무너진다"},
-        {"name": "cumulative_pulls_on_banner", "type": "int", "note": "이 배너에서의 누적 뽑기 수"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "banner_id",
+          "type": "string",
+          "note": "배너 고유 ID"
+        },
+        {
+          "name": "banner_type",
+          "type": "string",
+          "note": "limited_pickup | standard | beginner | rerun"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 오픈 후 경과일"
+        },
+        {
+          "name": "pull_count",
+          "type": "int",
+          "note": "1 또는 10. 1행=1회 뽑기 행위"
+        },
+        {
+          "name": "currency_type",
+          "type": "string",
+          "note": "소비 재화 코드. 유료 재화와 무료 재화를 별도 코드로 분리할 것"
+        },
+        {
+          "name": "currency_amount",
+          "type": "int",
+          "note": "소비량"
+        },
+        {
+          "name": "paid_currency_ratio",
+          "type": "float",
+          "note": "0~1. 이번 뽑기에서 유료 재화가 차지한 비중. 매출 귀속의 근거"
+        },
+        {
+          "name": "pity_counter_before",
+          "type": "int",
+          "note": "뽑기 직전 천장 카운터"
+        },
+        {
+          "name": "pity_triggered",
+          "type": "bool",
+          "note": "천장 발동 여부"
+        },
+        {
+          "name": "max_rarity",
+          "type": "int",
+          "note": "이번 뽑기에서 나온 최고 희귀도"
+        },
+        {
+          "name": "pickup_count",
+          "type": "int",
+          "note": "픽업 캐릭터 획득 수. 0이면 목표 미달"
+        },
+        {
+          "name": "new_char_count",
+          "type": "int",
+          "note": "신규 캐릭터 수"
+        },
+        {
+          "name": "dupe_count",
+          "type": "int",
+          "note": "중복 수. 중복 비율이 높으면 체감 만족도가 무너진다"
+        },
+        {
+          "name": "cumulative_pulls_on_banner",
+          "type": "int",
+          "note": "이 배너에서의 누적 뽑기 수"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "재화를 투입해 캐릭터 획득을 시도하고 그 결과를 한 번에 기록하는 경제 및 핵심 보상 수급 지점을 찍는다.",
+      "used_for": [
+        "뽑기 후 24시간 미복귀율",
+        "픽업 획득까지 소요 뽑기 수",
+        "재화별 source / sink 수지"
+      ]
     },
     {
       "name": "character_upgrade_attempt",
-      "why": "육성 병목을 재화 잔고가 아니라 막힌 시도 그 자체로 관측해야, 어느 재료가 진행을 멈추게 하는지를 추정이 아니라 관측으로 알 수 있다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "char_id", "type": "string", "note": "캐릭터 ID"},
-        {"name": "char_rarity", "type": "int", "note": "희귀도"},
-        {"name": "upgrade_type", "type": "string", "note": "level | ascension | skill | gear | limit_break"},
-        {"name": "result", "type": "string", "note": "success | blocked_material | blocked_currency | blocked_gate. blocked 계열이 병목 신호"},
-        {"name": "blocking_resource", "type": "string", "note": "막혔을 때 부족한 재료/재화 코드, 성공 시 none"},
-        {"name": "blocking_shortfall", "type": "int", "note": "부족 수량. 얼마나 모자란지가 밸런싱 폭을 결정한다"},
-        {"name": "level_before", "type": "int", "note": "강화 전 단계"},
-        {"name": "level_after", "type": "int", "note": "강화 후 단계, 실패 시 level_before와 동일"},
-        {"name": "is_pulled_recently", "type": "bool", "note": "최근 7일 내 뽑은 캐릭터인지. 뽑기-육성 연결 여부 확인용"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "char_id",
+          "type": "string",
+          "note": "캐릭터 ID"
+        },
+        {
+          "name": "char_rarity",
+          "type": "int",
+          "note": "희귀도"
+        },
+        {
+          "name": "upgrade_type",
+          "type": "string",
+          "note": "level | ascension | skill | gear | limit_break"
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "note": "success | blocked_material | blocked_currency | blocked_gate. blocked 계열이 병목 신호"
+        },
+        {
+          "name": "blocking_resource",
+          "type": "string",
+          "note": "막혔을 때 부족한 재료/재화 코드, 성공 시 none"
+        },
+        {
+          "name": "blocking_shortfall",
+          "type": "int",
+          "note": "부족 수량. 얼마나 모자란지가 밸런싱 폭을 결정한다"
+        },
+        {
+          "name": "level_before",
+          "type": "int",
+          "note": "강화 전 단계"
+        },
+        {
+          "name": "level_after",
+          "type": "int",
+          "note": "강화 후 단계, 실패 시 level_before와 동일"
+        },
+        {
+          "name": "is_pulled_recently",
+          "type": "bool",
+          "note": "최근 7일 내 뽑은 캐릭터인지. 뽑기-육성 연결 여부 확인용"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "보유 캐릭터의 능력치 성장을 시도하고 재료 부족으로 인한 실패나 성공 여부를 기록하여 육성 루프 지점을 찍는다.",
+      "used_for": [
+        "육성 차단율 과 병목 재료 순위",
+        "재화별 source / sink 수지"
+      ]
     },
     {
       "name": "currency_change",
-      "why": "획득과 소비를 하나의 원장에 reason 코드로 남기지 않으면 인게임 경제의 인플레와 병목을 사후에 재구성할 수 없다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "currency_type", "type": "string", "note": "재화 코드. 유료 보석/무료 보석/골드/스태미나/육성 재료를 각각 별도 코드로"},
-        {"name": "delta", "type": "int", "note": "획득은 양수, 소비는 음수. 두 방향을 한 테이블에 둔다"},
-        {"name": "balance_after", "type": "int", "note": "변동 후 잔고. 원장 무결성 검증과 잔고 분포 분석에 쓴다"},
-        {"name": "reason_code", "type": "string", "note": "stage_clear | daily_mission | raid_reward | gacha_pull | upgrade_spend | stage_entry | iap_grant | compensation | expire 등 폐쇄 집합"},
-        {"name": "reason_detail", "type": "string", "note": "stage_id, banner_id, product_id 등 원인 개체 ID"},
-        {"name": "is_paid_currency", "type": "bool", "note": "유료 구매로 획득된 재화인지. 매출 귀속과 환불 대응의 근거"},
-        {"name": "ref_event_id", "type": "string", "note": "원인 이벤트(attempt_id, transaction_id 등)와 잇는 키"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "currency_type",
+          "type": "string",
+          "note": "재화 코드. 유료 보석/무료 보석/골드/스태미나/육성 재료를 각각 별도 코드로"
+        },
+        {
+          "name": "delta",
+          "type": "int",
+          "note": "획득은 양수, 소비는 음수. 두 방향을 한 테이블에 둔다"
+        },
+        {
+          "name": "balance_after",
+          "type": "int",
+          "note": "변동 후 잔고. 원장 무결성 검증과 잔고 분포 분석에 쓴다"
+        },
+        {
+          "name": "reason_code",
+          "type": "string",
+          "note": "stage_clear | daily_mission | raid_reward | gacha_pull | upgrade_spend | stage_entry | iap_grant | compensation | expire 등 폐쇄 집합"
+        },
+        {
+          "name": "reason_detail",
+          "type": "string",
+          "note": "stage_id, banner_id, product_id 등 원인 개체 ID"
+        },
+        {
+          "name": "is_paid_currency",
+          "type": "bool",
+          "note": "유료 구매로 획득된 재화인지. 매출 귀속과 환불 대응의 근거"
+        },
+        {
+          "name": "ref_event_id",
+          "type": "string",
+          "note": "원인 이벤트(attempt_id, transaction_id 등)와 잇는 키"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "인게임 재화의 변동량과 잔액을 원장 형태로 기록하여 게임 내 경제 흐름의 유입과 유출 지점을 찍는다.",
+      "used_for": [
+        "재화별 source / sink 수지"
+      ]
     },
     {
       "name": "daily_mission_claim",
-      "why": "반복 동기가 살아 있는지 여부는 일일 임무 완주율에서 가장 먼저 꺾이며, 이 신호는 리텐션 하락보다 며칠 앞선다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "mission_id", "type": "string", "note": "임무 ID"},
-        {"name": "mission_type", "type": "string", "note": "login | stage_clear | gacha | upgrade | raid 등"},
-        {"name": "missions_completed_today", "type": "int", "note": "수령 시점 당일 완료 수"},
-        {"name": "missions_total_today", "type": "int", "note": "당일 총 임무 수. 완주율의 분모"},
-        {"name": "is_full_clear", "type": "bool", "note": "당일 전량 완주 여부"},
-        {"name": "reward_currency_type", "type": "string", "note": "보상 재화 코드"},
-        {"name": "reward_amount", "type": "int", "note": "보상량"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "mission_id",
+          "type": "string",
+          "note": "임무 ID"
+        },
+        {
+          "name": "mission_type",
+          "type": "string",
+          "note": "login | stage_clear | gacha | upgrade | raid 등"
+        },
+        {
+          "name": "missions_completed_today",
+          "type": "int",
+          "note": "수령 시점 당일 완료 수"
+        },
+        {
+          "name": "missions_total_today",
+          "type": "int",
+          "note": "당일 총 임무 수. 완주율의 분모"
+        },
+        {
+          "name": "is_full_clear",
+          "type": "bool",
+          "note": "당일 전량 완주 여부"
+        },
+        {
+          "name": "reward_currency_type",
+          "type": "string",
+          "note": "보상 재화 코드"
+        },
+        {
+          "name": "reward_amount",
+          "type": "int",
+          "note": "보상량"
+        }
       ],
-      "priority": "should"
+      "priority": "should",
+      "role": "일일 반복 과제를 달성하고 보상을 수령하여 정기 순환 루프의 완주 여부를 기록한다.",
+      "used_for": [
+        "일일 임무 완주율 및 주간 레이드 참여율",
+        "재화별 source / sink 수지"
+      ]
     },
     {
       "name": "weekly_raid_attempt",
-      "why": "주간 레이드는 상위 육성 수요와 주간 복귀 리듬을 동시에 만드는 지점이라, 참여 이탈이 장기 리텐션 하락의 선행 신호가 된다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "raid_id", "type": "string", "note": "주차 단위 레이드 인스턴스 ID"},
-        {"name": "boss_id", "type": "string", "note": "보스 ID"},
-        {"name": "raid_tier", "type": "int", "note": "도전 난이도 티어"},
-        {"name": "result", "type": "string", "note": "clear | fail | timeout | retreat"},
-        {"name": "damage_dealt", "type": "int", "note": "누적 딜량. 클리어 실패 구간에서도 진척을 측정한다"},
-        {"name": "attempt_index_this_week", "type": "int", "note": "이번 주 몇 번째 시도인지. 주간 횟수 소진율의 분자"},
-        {"name": "party_power", "type": "int", "note": "편성 전투력"},
-        {"name": "clear_time_sec", "type": "int", "note": "클리어까지 소요 시간, 미클리어 시 0"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "raid_id",
+          "type": "string",
+          "note": "주차 단위 레이드 인스턴스 ID"
+        },
+        {
+          "name": "boss_id",
+          "type": "string",
+          "note": "보스 ID"
+        },
+        {
+          "name": "raid_tier",
+          "type": "int",
+          "note": "도전 난이도 티어"
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "note": "clear | fail | timeout | retreat"
+        },
+        {
+          "name": "damage_dealt",
+          "type": "int",
+          "note": "누적 딜량. 클리어 실패 구간에서도 진척을 측정한다"
+        },
+        {
+          "name": "attempt_index_this_week",
+          "type": "int",
+          "note": "이번 주 몇 번째 시도인지. 주간 횟수 소진율의 분자"
+        },
+        {
+          "name": "party_power",
+          "type": "int",
+          "note": "편성 전투력"
+        },
+        {
+          "name": "clear_time_sec",
+          "type": "int",
+          "note": "클리어까지 소요 시간, 미클리어 시 0"
+        }
       ],
-      "priority": "should"
+      "priority": "should",
+      "role": "주간 단위 엔드 콘텐츠에 도전하여 진행 루프의 상위 전투 참여 및 결과를 기록한다.",
+      "used_for": [
+        "일일 임무 완주율 및 주간 레이드 참여율"
+      ]
     },
     {
       "name": "store_offer_impression",
-      "why": "구매만 찍으면 퍼널이 보이지 않는다. 노출을 분리해야 매출 변동이 오퍼를 덜 보여준 탓인지 덜 팔린 탓인지 나뉜다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "offer_id", "type": "string", "note": "오퍼 고유 ID"},
-        {"name": "offer_type", "type": "string", "note": "banner_bundle | daily_pack | first_purchase | battle_pass | currency_shop"},
-        {"name": "placement", "type": "string", "note": "노출 위치. shop_main | gacha_insufficient | stage_fail | popup_on_login"},
-        {"name": "price_tier", "type": "string", "note": "가격대 구간 라벨. 국가별 실가격과 분리해 둔다"},
-        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 오퍼면 배너 ID, 아니면 none. 배너 매출 귀속의 핵심"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
-        {"name": "is_first_view_today", "type": "bool", "note": "당일 첫 노출 여부. 중복 노출로 분모가 부풀지 않게 한다"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "offer_id",
+          "type": "string",
+          "note": "오퍼 고유 ID"
+        },
+        {
+          "name": "offer_type",
+          "type": "string",
+          "note": "banner_bundle | daily_pack | first_purchase | battle_pass | currency_shop"
+        },
+        {
+          "name": "placement",
+          "type": "string",
+          "note": "노출 위치. shop_main | gacha_insufficient | stage_fail | popup_on_login"
+        },
+        {
+          "name": "price_tier",
+          "type": "string",
+          "note": "가격대 구간 라벨. 국가별 실가격과 분리해 둔다"
+        },
+        {
+          "name": "linked_banner_id",
+          "type": "string",
+          "note": "배너 연동 오퍼면 배너 ID, 아니면 none. 배너 매출 귀속의 핵심"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 경과일, 배너 무관이면 -1"
+        },
+        {
+          "name": "is_first_view_today",
+          "type": "bool",
+          "note": "당일 첫 노출 여부. 중복 노출로 분모가 부풀지 않게 한다"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "상점 및 팝업 오퍼가 유저 화면에 노출되는 수익화 퍼널의 진입 지점을 기록한다.",
+      "used_for": [
+        "결제 오퍼 퍼널 전환율"
+      ]
     },
     {
       "name": "store_offer_click",
-      "why": "노출과 구매 사이의 이탈 지점을 분리해야, 오퍼가 안 보이는 문제인지 가격이 안 맞는 문제인지 판별된다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "offer_id", "type": "string", "note": "오퍼 고유 ID"},
-        {"name": "offer_type", "type": "string", "note": "impression과 동일 집합"},
-        {"name": "placement", "type": "string", "note": "impression과 동일 집합"},
-        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 오퍼면 배너 ID"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
-        {"name": "time_since_impression_sec", "type": "int", "note": "같은 세션 내 해당 오퍼 최근 노출로부터 경과 초"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "offer_id",
+          "type": "string",
+          "note": "오퍼 고유 ID"
+        },
+        {
+          "name": "offer_type",
+          "type": "string",
+          "note": "impression과 동일 집합"
+        },
+        {
+          "name": "placement",
+          "type": "string",
+          "note": "impression과 동일 집합"
+        },
+        {
+          "name": "linked_banner_id",
+          "type": "string",
+          "note": "배너 연동 오퍼면 배너 ID"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 경과일, 배너 무관이면 -1"
+        },
+        {
+          "name": "time_since_impression_sec",
+          "type": "int",
+          "note": "같은 세션 내 해당 오퍼 최근 노출로부터 경과 초"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "노출된 과금 상품에 관심을 보이고 상세 단계로 이동하는 수익화 퍼널의 상호작용 지점을 기록한다.",
+      "used_for": [
+        "결제 오퍼 퍼널 전환율"
+      ]
     },
     {
       "name": "iap_purchase",
-      "why": "배너 ID와 배너 경과일을 결제에 직접 붙이지 않으면 매출이 어느 배너의 며칠차에 몰렸는지 사후 추정에 의존하게 된다.",
       "properties": [
-        {"name": "user_id", "type": "string", "note": "공통 필드"},
-        {"name": "event_ts", "type": "timestamp", "note": "공통 필드"},
-        {"name": "session_id", "type": "string", "note": "공통 필드"},
-        {"name": "day_n", "type": "int", "note": "공통 필드"},
-        {"name": "transaction_id", "type": "string", "note": "스토어 거래 ID. 중복 집계와 환불 처리의 키"},
-        {"name": "product_id", "type": "string", "note": "스토어 상품 ID"},
-        {"name": "offer_id", "type": "string", "note": "구매를 유발한 오퍼 ID. 퍼널 연결 키"},
-        {"name": "offer_type", "type": "string", "note": "impression과 동일 집합"},
-        {"name": "linked_banner_id", "type": "string", "note": "배너 연동 구매면 배너 ID, 아니면 none"},
-        {"name": "banner_day_index", "type": "int", "note": "배너 경과일, 배너 무관이면 -1"},
-        {"name": "price_local", "type": "float", "note": "현지 통화 결제 금액"},
-        {"name": "currency_code", "type": "string", "note": "ISO 4217 통화 코드"},
-        {"name": "price_usd", "type": "float", "note": "결제 시점 환율로 환산한 USD. 국가 혼합 집계의 기준"},
-        {"name": "store", "type": "string", "note": "google_play | app_store"},
-        {"name": "is_first_purchase", "type": "bool", "note": "생애 첫 결제 여부"},
-        {"name": "lifetime_purchase_count", "type": "int", "note": "결제 후 누적 결제 횟수"},
-        {"name": "is_verified", "type": "bool", "note": "영수증 검증 통과 여부. false 건은 매출 집계에서 제외"}
+        {
+          "name": "user_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "event_ts",
+          "type": "timestamp",
+          "note": "공통 필드"
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "note": "공통 필드"
+        },
+        {
+          "name": "day_n",
+          "type": "int",
+          "note": "공통 필드"
+        },
+        {
+          "name": "transaction_id",
+          "type": "string",
+          "note": "스토어 거래 ID. 중복 집계와 환불 처리의 키"
+        },
+        {
+          "name": "product_id",
+          "type": "string",
+          "note": "스토어 상품 ID"
+        },
+        {
+          "name": "offer_id",
+          "type": "string",
+          "note": "구매를 유발한 오퍼 ID. 퍼널 연결 키"
+        },
+        {
+          "name": "offer_type",
+          "type": "string",
+          "note": "impression과 동일 집합"
+        },
+        {
+          "name": "linked_banner_id",
+          "type": "string",
+          "note": "배너 연동 구매면 배너 ID, 아니면 none"
+        },
+        {
+          "name": "banner_day_index",
+          "type": "int",
+          "note": "배너 경과일, 배너 무관이면 -1"
+        },
+        {
+          "name": "price_local",
+          "type": "float",
+          "note": "현지 통화 결제 금액"
+        },
+        {
+          "name": "currency_code",
+          "type": "string",
+          "note": "ISO 4217 통화 코드"
+        },
+        {
+          "name": "price_usd",
+          "type": "float",
+          "note": "결제 시점 환율로 환산한 USD. 국가 혼합 집계의 기준"
+        },
+        {
+          "name": "store",
+          "type": "string",
+          "note": "google_play | app_store"
+        },
+        {
+          "name": "is_first_purchase",
+          "type": "bool",
+          "note": "생애 첫 결제 여부"
+        },
+        {
+          "name": "lifetime_purchase_count",
+          "type": "int",
+          "note": "결제 후 누적 결제 횟수"
+        },
+        {
+          "name": "is_verified",
+          "type": "bool",
+          "note": "영수증 검증 통과 여부. false 건은 매출 집계에서 제외"
+        }
       ],
-      "priority": "must"
+      "priority": "must",
+      "role": "실제 현금 결제가 완료되어 유료 재화나 패키지가 지급되는 수익화 퍼널의 성공 지점을 기록한다.",
+      "used_for": [
+        "결제 오퍼 퍼널 전환율",
+        "결제 전환율",
+        "ARPDAU 와 ARPPU"
+      ]
     }
   ],
   "user_properties": [
-    {"name": "user_id", "type": "string", "note": "모든 이벤트의 조인 키"},
-    {"name": "install_ts", "type": "timestamp", "note": "최초 실행 시각. day_n 계산의 기준점"},
-    {"name": "install_date", "type": "string", "note": "설치 코호트 라벨 YYYY-MM-DD, 리텐션 집계의 그룹 키"},
-    {"name": "platform", "type": "string", "note": "android | ios. 이벤트마다 반복 기록하지 말 것"},
-    {"name": "os_version", "type": "string", "note": "최초 설치 시점 값, 변동 시 갱신"},
-    {"name": "device_model", "type": "string", "note": "저사양 기기 이탈 확인용"},
-    {"name": "country", "type": "string", "note": "ISO 국가 코드, 스토어 국가 기준"},
-    {"name": "acquisition_channel", "type": "string", "note": "organic | 각 광고 매체. 유입 품질 비교의 축"},
-    {"name": "campaign_id", "type": "string", "note": "캠페인 단위 식별자"},
-    {"name": "first_open_version", "type": "string", "note": "최초 접속 앱 버전. 빌드별 코호트 비교용"},
-    {"name": "is_payer", "type": "bool", "note": "일 1회 배치 갱신 스냅샷 속성"},
-    {"name": "first_purchase_ts", "type": "timestamp", "note": "첫 결제 시각, 미결제 시 null"},
-    {"name": "account_level", "type": "int", "note": "일 1회 스냅샷. 진도 구간별 분석의 세그먼트 키"},
-    {"name": "max_team_power", "type": "int", "note": "일 1회 스냅샷. 육성 수준과 스테이지 벽을 잇는 축"},
-    {"name": "owned_top_rarity_count", "type": "int", "note": "일 1회 스냅샷. 최고 희귀도 보유 수, 뽑기 만족도 세그먼트"}
+    {
+      "name": "user_id",
+      "type": "string",
+      "note": "모든 이벤트의 조인 키"
+    },
+    {
+      "name": "install_ts",
+      "type": "timestamp",
+      "note": "최초 실행 시각. day_n 계산의 기준점"
+    },
+    {
+      "name": "install_date",
+      "type": "string",
+      "note": "설치 코호트 라벨 YYYY-MM-DD, 리텐션 집계의 그룹 키"
+    },
+    {
+      "name": "platform",
+      "type": "string",
+      "note": "android | ios. 이벤트마다 반복 기록하지 말 것"
+    },
+    {
+      "name": "os_version",
+      "type": "string",
+      "note": "최초 설치 시점 값, 변동 시 갱신"
+    },
+    {
+      "name": "device_model",
+      "type": "string",
+      "note": "저사양 기기 이탈 확인용"
+    },
+    {
+      "name": "country",
+      "type": "string",
+      "note": "ISO 국가 코드, 스토어 국가 기준"
+    },
+    {
+      "name": "acquisition_channel",
+      "type": "string",
+      "note": "organic | 각 광고 매체. 유입 품질 비교의 축"
+    },
+    {
+      "name": "campaign_id",
+      "type": "string",
+      "note": "캠페인 단위 식별자"
+    },
+    {
+      "name": "first_open_version",
+      "type": "string",
+      "note": "최초 접속 앱 버전. 빌드별 코호트 비교용"
+    },
+    {
+      "name": "is_payer",
+      "type": "bool",
+      "note": "일 1회 배치 갱신 스냅샷 속성"
+    },
+    {
+      "name": "first_purchase_ts",
+      "type": "timestamp",
+      "note": "첫 결제 시각, 미결제 시 null"
+    },
+    {
+      "name": "account_level",
+      "type": "int",
+      "note": "일 1회 스냅샷. 진도 구간별 분석의 세그먼트 키"
+    },
+    {
+      "name": "max_team_power",
+      "type": "int",
+      "note": "일 1회 스냅샷. 육성 수준과 스테이지 벽을 잇는 축"
+    },
+    {
+      "name": "owned_top_rarity_count",
+      "type": "int",
+      "note": "일 1회 스냅샷. 최고 희귀도 보유 수, 뽑기 만족도 세그먼트"
+    }
   ],
   "kpis": [
     {
