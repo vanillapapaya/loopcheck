@@ -9,7 +9,7 @@ export default function Header({ right }: { right?: React.ReactNode }) {
             <path d="M4 17c0-6 3-10 6-10s3 4 0 6-6-1-6-6" />
             <path d="M14 7l3 10 3-6" />
           </svg>
-          <span>루프체크</span>
+          <span style={{ fontFamily: "var(--serif)", fontSize: 18, fontWeight: 600 }}>루프체크</span>
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           {right ?? (

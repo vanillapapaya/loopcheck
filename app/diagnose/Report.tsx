@@ -209,8 +209,10 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         </div>
       </div>
 
+      <div className="two-col" style={{ marginTop: 30 }}>
+      <div>
       {/* 요약 */}
-      <div style={{ marginTop: 30, paddingTop: 22, borderTop: "2px solid var(--ink)" }}>
+      <div style={{ paddingTop: 22, borderTop: "2px solid var(--ink)" }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
           <div className="eyebrow">한 문단 요약</div>
           <InterpretStatus ai={ai} showRules={showRules} onToggle={() => setShowRules((v) => !v)} />
@@ -331,14 +333,6 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               : "연속 실패 수와 결제 비율 사이에 뚜렷한 증가 경향은 보이지 않습니다."}
           </p>
         </div>}
-        <div style={{ display: "flex", gap: 12, marginTop: 20, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2 }}>
-          <WarnIcon />
-          <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
-            <strong style={{ fontWeight: 600, color: "var(--ink)" }}>결제 퍼널(노출 → 클릭 → 구매)은 계산에서 제외했습니다.</strong>{" "}
-            오퍼 노출·클릭 로그 미포함이 사유이며, 없는 단계를 추정해 채우지 않았습니다.
-            {" "}<Link href="/design">지표 설계기</Link>의 오퍼 노출·구매 단계 이벤트를 쌓으면 다음 진단부터 어느 단계에서 끊기는지 확인할 수 있습니다.
-          </div>
-        </div>
       </div>
 
       {/* 표 보기 */}
@@ -372,6 +366,33 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
           </div>}
         </div>
       </details>
+
+      </div>
+
+      <aside className="aside">
+        <div className="eyebrow" style={{ marginBottom: 12 }}>계산 기준</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>리텐션 : classic N-day. 분모는 N일째가 관측 기간 안에 들어온 유저만 포함</div>
+          {m.levels.length > 0 && <div>레벨 이탈 : 레벨 N 도달자 중 N+1 미진입</div>}
+          {m.meta.purchases > 0 && <div>결제 전환율 : 분모는 설치 유저 수. ARPPU : 분모는 결제자 수</div>}
+          {m.meta.adViews > 0 && <div>광고 : 경과 {fixed.dayFrom}-{fixed.dayTo}일 고정, 당일 시청 수 대비 익일 접속</div>}
+          <div>비율에는 95% 신뢰구간을 붙였고, 표본 {num(100)} 미만 구간은 표본 부족으로 표시</div>
+        </div>
+
+        <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>계산하지 않은 것</div>
+          <div>
+            결제 퍼널(노출 → 클릭 → 구매) : 오퍼 노출·클릭 로그 미포함으로 계산 제외.{" "}
+            <Link href="/design">지표 설계기</Link>의 오퍼 노출·구매 단계 이벤트를 쌓으면 다음 진단부터 확인 가능
+          </div>
+        </div>
+
+        <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>검증 방식</div>
+          <div>유저를 나누는 A/B 대신, 전원에게 같은 변경을 적용하고 영향군과 비교군의 변화량 차이로 확인. 난이도·가격·보상을 유저마다 다르게 주지 않는다</div>
+        </div>
+      </aside>
+      </div>
 
       <p style={{ margin: "28px 0 0", fontSize: 13, lineHeight: 1.7, color: "var(--muted)" }}>
         모든 숫자는 이 브라우저에서 코드로 계산했습니다. {sourceNote}

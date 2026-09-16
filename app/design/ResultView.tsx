@@ -117,7 +117,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
 
       <div style={{ paddingTop: 22 }}>
         {tab === "events" && (
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(280px, 1fr)", gap: 20, alignItems: "start" }} className="two-col">
+          <div className="two-col">
             <div className="tile" style={{ overflow: "hidden" }}>
               {data.events.map((e, i) => (
                 <div key={`${i}-${e.name}`} style={{ padding: "16px 22px", borderBottom: i === data.events.length - 1 ? "none" : "1px solid var(--line-2)" }}>
@@ -145,8 +145,8 @@ export default function ResultView({ data, label, source }: { data: DesignResult
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className="card" style={{ padding: "20px 22px" }}>
+            <div className="aside" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+              <div>
                 <div className="eyebrow" style={{ marginBottom: 12 }}>유저 고정 속성</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {data.user_properties.map((p) => (
@@ -161,7 +161,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                 </div>
               </div>
 
-              <div className="card" style={{ padding: "20px 22px" }}>
+              <div style={{ paddingTop: 18, borderTop: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 17h.01" />
@@ -245,11 +245,6 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         )}
       </div>
 
-      <style>{`
-        @media (max-width: 900px) {
-          .two-col { grid-template-columns: minmax(0, 1fr) !important; }
-        }
-      `}</style>
     </div>
   );
 }

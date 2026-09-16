@@ -184,8 +184,8 @@ export default function DiagnosePage() {
             />
           </>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 28, alignItems: "start" }}>
-            <div style={{ gridColumn: "span 2", minWidth: 0 }} className="diag-main">
+          <div className="two-col">
+            <div style={{ minWidth: 0 }}>
               <h1 style={{ fontSize: 34, fontWeight: 600, marginBottom: 14 }}>진단 리포트</h1>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--ink-2)", margin: "0 0 26px" }}>
                 쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리해 드립니다.
@@ -304,8 +304,8 @@ export default function DiagnosePage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className="card" style={{ padding: "20px 22px" }}>
+            <aside className="aside" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+              <div>
                 <div className="eyebrow" style={{ marginBottom: 12 }}>데이터를 어떻게 다루나요</div>
                 {[
                   "파일은 이 브라우저 안에서만 읽고 계산. 원본 행은 서버로 전송하지 않음",
@@ -314,26 +314,25 @@ export default function DiagnosePage() {
                 ].map((t) => (
                   <div key={t} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }} aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
-                    <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)" }}>{t}</div>
+                    <div style={{ lineHeight: 1.65 }}>{t}</div>
                   </div>
                 ))}
               </div>
-              <div className="card" style={{ padding: "20px 22px" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>파일 형식</div>
-                <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 10 }}>
+              <div style={{ paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>파일 형식</div>
+                <div style={{ lineHeight: 1.7, marginBottom: 10 }}>
                   유저와 세션은 필수, 나머지는 있는 만큼만 올리면 됩니다. 날짜는 YYYY-MM-DD로 시작해야 합니다. 샘플 파일을 열어 보면 형식을 바로 확인할 수 있습니다.
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 12px" }}>
                   {SAMPLE.map(([, f]) => <a key={f} href={`/sample/${f}`} className="mono" style={{ fontSize: 12 }}>{f}</a>)}
                 </div>
               </div>
-              <div style={{ background: "var(--surface-3)", border: "1px solid var(--line)", borderRadius: 2, padding: "20px 22px" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>아직 로그가 없다면</div>
-                <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 10 }}>지표 설계기로 먼저 스키마를 받아 두세요. 그대로 쌓으면 이 화면에서 매핑 없이 바로 진단할 수 있습니다.</div>
+              <div style={{ paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>아직 로그가 없다면</div>
+                <div style={{ lineHeight: 1.7, marginBottom: 10 }}>지표 설계기로 먼저 스키마를 받아 두세요. 그대로 쌓으면 이 화면에서 매핑 없이 바로 진단할 수 있습니다.</div>
                 <Link href="/design" style={{ fontSize: 13, fontWeight: 500 }}>지표 설계기로 가기 →</Link>
               </div>
-            </div>
-            <style>{`@media (max-width: 720px) { .diag-main { grid-column: auto !important; } }`}</style>
+            </aside>
           </div>
         )}
       </main>
