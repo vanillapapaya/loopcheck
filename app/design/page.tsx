@@ -110,10 +110,7 @@ export default function DesignPage() {
               </div>
             )}
 
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 10, marginBottom: 14 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600 }}>지표 설계 예시</h2>
-              <span style={{ fontSize: 13, color: "var(--muted)" }}>네 장르의 설계서를 그대로 열어 볼 수 있습니다</span>
-            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14 }}>지표 설계 예시</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16, marginBottom: 40 }}>
               {PRESETS.map((p) => (
                 <button
