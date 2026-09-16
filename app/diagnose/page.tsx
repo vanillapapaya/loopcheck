@@ -177,10 +177,10 @@ export default function DiagnosePage() {
             )}
             <Report
               m={state.metrics}
-              title={state.source === "sample" ? "샘플 퍼즐 게임 · 30일 진단" : `내 게임 · ${state.metrics.meta.obsStart} – ${state.metrics.meta.obsEnd} 진단`}
+              title={state.source === "sample" ? "샘플 퍼즐 게임 · 30일 진단" : `내 게임 · ${state.metrics.meta.obsStart} - ${state.metrics.meta.obsEnd} 진단`}
               sourceNote={state.source === "sample"
-                ? `샘플 CSV를 내려받아 ${(state.ms / 1000).toFixed(1)}초 만에 계산했습니다. AI 해석에는 집계 수치만 보냈습니다.`
-                : `올린 파일은 이 브라우저에서만 읽어 ${(state.ms / 1000).toFixed(1)}초 만에 계산했습니다. 원본 행은 서버로 가지 않았고, AI 해석에는 집계 수치만 보냈습니다.`}
+                ? "샘플 CSV를 내려받아 이 브라우저에서 계산. 서버로 보낸 것은 집계 수치뿐"
+                : "올린 CSV를 이 브라우저에서만 읽어 계산. 원본 행은 서버로 전송하지 않음, 보낸 것은 집계 수치뿐"}
             />
           </>
         ) : (

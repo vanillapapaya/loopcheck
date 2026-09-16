@@ -63,11 +63,21 @@ export const pp = (a: number, b: number, digits = 1) => {
 /** 받침이 있으면 "으로", 없으면 "로". 숫자는 읽는 소리 기준(1, 3, 6, 7, 8, 0은 받침 있음) */
 function ro(word: string): string {
   const c = word.trim().slice(-1);
-  if (/[0-9]/.test(c)) return "1360 78".includes(c) ? "으로" : "로";
+  // 숫자는 읽는 소리의 받침을 본다. 0(영) 3(삼) 6(육)만 "으로", 1·7·8은 ㄹ 받침이라 "로"
+  if (/[0-9]/.test(c)) return "036".includes(c) ? "으로" : "로";
   const code = c.charCodeAt(0) - 0xac00;
   if (code < 0 || code > 11172) return "로";
   const batchim = code % 28;
   return batchim === 0 || batchim === 8 ? "로" : "으로";
+}
+
+/** 받침에 따른 은/는. "레벨 12은"을 막는다 */
+function eun(word: string): string {
+  const c = word.trim().slice(-1);
+  if (/[0-9]/.test(c)) return "013678".includes(c) ? "은" : "는";
+  const code = c.charCodeAt(0) - 0xac00;
+  if (code < 0 || code > 11172) return "는";
+  return code % 28 === 0 ? "는" : "은";
 }
 
 /** "고사양 9.5분, 중사양 8.0분, 저사양 4.5분으로 고사양 > 중사양 > 저사양 순" */
@@ -119,11 +129,11 @@ function wallFinding(m: DiagnosisMetrics, w: WallReading, streakRises: boolean):
 
   return {
     id: "level_wall",
-    title: w.conflict ? `레벨 ${L}의 난이도를 낮추되, 직전에 저가 오퍼를 놓으세요` : `레벨 ${L}의 난이도를 낮추세요`,
+    title: w.conflict ? `레벨 ${L}${eun(String(L))} 난이도를 낮추되 직전에 저가 오퍼를 두는 편이 좋아 보입니다` : `레벨 ${L}의 난이도 조정이 필요해 보입니다`,
     tag: w.conflict ? "매출 영향 있음" : undefined,
     body: w.conflict
-      ? `시도 대비 클리어율을 ${w.targetClearPct}% 안팎으로 올리는 정도면 충분합니다. 벽을 완전히 없애지 않는 이유는 이 레벨의 좌절이 첫 결제를 가장 많이 만들고 있기 때문입니다. 대신 벽 직전에 ${offer} 오퍼를 배치해, 이탈로 갈 유저의 일부를 결제로 돌리는 편이 낫습니다.`
-      : `시도 대비 클리어율을 ${w.targetClearPct}% 안팎으로 올리세요. 직전 레벨보다 급격히 어려워진 지점이라 도달자의 상당수가 다음 레벨로 넘어가지 못하고 있습니다.`,
+      ? `시도 대비 클리어율을 ${w.targetClearPct}% 안팎으로 올리는 정도면 충분합니다. 벽을 완전히 없애지 않는 이유는 이 레벨의 좌절이 첫 결제를 가장 많이 만들고 있기 때문입니다. 대신 벽 직전에 ${offer} 오퍼를 두어 이탈로 갈 유저의 일부를 결제로 돌리는 편이 나아 보입니다.`
+      : `시도 대비 클리어율을 ${w.targetClearPct}% 안팎으로 올리는 정도가 적절해 보입니다. 직전 레벨보다 급격히 어려워진 지점이라 도달자의 상당수가 다음 레벨로 넘어가지 못하고 있습니다.`,
     evidence: [
       { label: "근거", text: `레벨 ${L} 시도 대비 클리어율 ${pct(w.level.attemptClear.rate)} 기록, 직전 레벨인 L${w.prev.level}(${pct(w.prev.attemptClear.rate)}) 대비 ${pp(w.level.attemptClear.rate, w.prev.attemptClear.rate)} 감소로 전 구간 최대 낙폭` },
       { label: "이탈", text: `레벨 ${L} 도달 ${num(w.level.reached)}명 중 ${num(w.level.stuck.num)}명(${pct(w.level.stuck.rate)})이 다음 레벨 미진입` },
@@ -138,7 +148,7 @@ function wallFinding(m: DiagnosisMetrics, w: WallReading, streakRises: boolean):
       { label: `1안 - 목표 이동 수를 늘려 클리어율을 ${w.targetClearPct}% 안팎으로 조정`, detail: `레벨 ${L} 단독 조정 후 L${w.prev.level}, L${L + 1}과의 낙폭 재확인` },
       { label: `2안 - 연속 2회 실패 시 부스터 1회 지급`, detail: `난이도 자체는 유지하면서 통과율만 올리는 방식` },
     ],
-    preference: `선호하는 추천은 1안이나 밸런싱 리스크가 있다면 2안으로 대안 마련`,
+    preference: `1안을 먼저 권하나, 밸런싱 리스크가 크다면 2안이 대안으로 적절하다고 생각됩니다`,
     impactUsers: w.level.stuck.num,
   };
 }
@@ -160,8 +170,8 @@ function deviceFinding(m: DiagnosisMetrics): Finding | null {
 
   return {
     id: "device_perf",
-    title: "저사양 기기의 성능을 점검하세요",
-    body: `같은 콘텐츠인데 저사양 기기의 체류 시간이 고사양의 절반에 못 미칩니다. 재미보다 성능 요인을 먼저 의심해야 하는 격차입니다. 저사양이 전체 설치에서 차지하는 비중이 작지 않아, 그대로 두면 전체 리텐션을 계속 끌어내립니다.`,
+    title: "저사양 기기의 성능 점검이 필요해 보입니다",
+    body: `같은 콘텐츠인데 저사양 기기의 체류 시간이 고사양의 절반에 못 미칩니다. 재미보다 성능 요인을 먼저 의심해 볼 만한 격차입니다. 저사양이 전체 설치에서 차지하는 비중이 작지 않아, 그대로 두면 전체 리텐션을 계속 끌어내릴 것으로 보입니다.`,
     evidence: [
       { label: "근거", text: `평균 세션 길이는 ${ranked(withSession, name, (t) => t.avgSessionMin!, (t) => `${t.avgSessionMin!.toFixed(1)}분`)}` },
       { label: "같은 방향", text: `D1 잔존율도 ${ranked(withSession, name, (t) => t.d1.rate, (t) => pct(t.d1.rate))}. 저사양은 고사양 대비 ${pp(high.d1.rate, low.d1.rate)} 감소` },
@@ -184,7 +194,7 @@ function channelFinding(m: DiagnosisMetrics): Finding | null {
 
   return {
     id: "channel_quality",
-    title: `${worst.key} 채널을 D7 기준으로 다시 계산하세요`,
+    title: `${worst.key} 채널을 D7 기준으로 다시 계산해 볼 필요가 있습니다`,
     body: `설치 단가가 낮아도 D7까지 남는 유저를 기준으로 환산하면 실제 획득 비용은 더 비쌀 수 있습니다. 채널을 끊는 판단보다, 같은 예산으로 남는 유저를 몇 명 얻고 있는지를 먼저 계산해 보시길 권합니다.`,
     evidence: [
       { label: "근거", text: `D7 잔존율은 ${ranked(chans, (c) => c.key, (c) => c.d7.rate, (c) => pct(c.d7.rate))}` },
@@ -256,15 +266,14 @@ export function buildReport(m: DiagnosisMetrics): Report {
     const L = wall.level.level;
     summary =
       `이 게임의 이탈은 리텐션 곡선 전반이 아니라 레벨 ${L} 한 지점에 몰려 있습니다. ` +
-      `시도 대비 클리어율 ${pct(wall.level.attemptClear.rate)} 기록, 직전 레벨인 L${wall.prev.level}(${pct(wall.prev.attemptClear.rate)}) 대비 ${pp(wall.level.attemptClear.rate, wall.prev.attemptClear.rate)} 감소로 전 구간 최대 낙폭입니다. ` +
-      `이 레벨에 도달한 ${num(wall.level.reached)}명 가운데 ${num(wall.level.stuck.num)}명(${pct(wall.level.stuck.rate)})이 다음 레벨로 넘어가지 못했습니다. ` +
+      `시도 대비 클리어율은 ${pct(wall.level.attemptClear.rate)}로 직전 레벨 L${wall.prev.level}(${pct(wall.prev.attemptClear.rate)}) 대비 ${pp(wall.level.attemptClear.rate, wall.prev.attemptClear.rate)} 낮고, 도달한 ${num(wall.level.reached)}명 가운데 ${num(wall.level.stuck.num)}명(${pct(wall.level.stuck.rate)})이 다음 레벨로 넘어가지 못했습니다. ` +
       (wall.conflict
-        ? `다만 같은 레벨이 첫 결제가 가장 많이 발생한 단일 레벨이기도 해, 난이도만 낮추면 매출이 함께 빠질 수 있습니다. 이 충돌을 어떻게 다룰지가 이번 진단의 핵심입니다.`
+        ? `다만 같은 레벨이 첫 결제가 가장 많이 발생한 단일 레벨이어서, 난이도만 낮추면 매출이 함께 빠질 수 있습니다.`
         : `여기를 먼저 고치는 것이 가장 많은 유저를 붙잡는 방법입니다.`);
   } else if (findings.length) {
-    summary = `뚜렷한 난이도 벽은 보이지 않습니다. 영향 유저 수 기준으로 가장 큰 문제는 "${findings[0].title}"입니다. 아래 근거를 먼저 확인해 주세요.`;
+    summary = `뚜렷한 난이도 벽은 보이지 않습니다. 영향 유저 수 기준으로 가장 큰 문제는 "${findings[0].title}"입니다. 아래 분석 내용을 함께 확인해 보시면 좋겠습니다.`;
   } else {
-    summary = `규칙으로 잡히는 뚜렷한 이상 신호가 없습니다. 아래 계산 결과를 직접 확인해 주세요.`;
+    summary = `규칙으로 잡히는 뚜렷한 이상 신호는 없습니다. 아래 계산 결과를 직접 확인해 보시면 좋겠습니다.`;
   }
 
   return { summary, findings, wall, ads, streakRises };

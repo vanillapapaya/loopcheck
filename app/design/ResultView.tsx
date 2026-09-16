@@ -18,18 +18,7 @@ function Badge({ priority }: { priority: string }) {
   const must = priority === "must";
   const label = PRIORITY_LABEL[priority] ?? priority;
   return (
-    <span
-      style={{
-        fontSize: 11,
-        fontWeight: 600,
-        padding: "2px 7px",
-        borderRadius: 2,
-        whiteSpace: "nowrap",
-        background: must ? "var(--ink)" : "transparent",
-        color: must ? "var(--surface)" : "var(--ink-2)",
-        border: must ? "1px solid var(--ink)" : "1px solid var(--line-3)",
-      }}
-    >
+    <span style={{ fontSize: 12, whiteSpace: "nowrap", color: must ? "var(--ink)" : "var(--muted)", fontWeight: must ? 600 : 400 }}>
       {label}
     </span>
   );
@@ -82,19 +71,19 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         <div style={{ maxWidth: 760 }}>
           <div className="eyebrow" style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
             지표 설계 결과
-            {source && <span className="mono" style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>{source}</span>}
+            {source && <span className="mono" style={{ fontSize: 12, fontWeight: 500, letterSpacing: 0, color: "var(--muted)" }}>{source}</span>}
           </div>
-          <h2 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>{label}</h2>
+          <h2 style={{ fontSize: "clamp(24px, 3.2vw, 28px)", fontWeight: 600, marginBottom: 12 }}>{label}</h2>
           <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0, lineHeight: 1.7 }}>{data.game_summary}</p>
         </div>
         <div style={{ display: "flex", gap: 28 }}>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 3 }}>이벤트</div>
-            <div className="mono" style={{ fontSize: 22, fontWeight: 600 }}>{data.events.length}</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 600 }}>{data.events.length}</div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 3 }}>KPI</div>
-            <div className="mono" style={{ fontSize: 22, fontWeight: 600 }}>{data.kpis.length}</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 600 }}>{data.kpis.length}</div>
           </div>
         </div>
       </div>
@@ -146,11 +135,9 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                     <Badge priority={e.priority} />
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)", marginBottom: 8 }}>{e.role}</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
-                    <span style={{ fontSize: 12, color: "var(--muted)" }}>쓰이는 지표</span>
-                    {e.used_for.map((u, i) => (
-                      <span key={`${i}-${u}`} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>{u}</span>
-                    ))}
+                  <div style={{ display: "flex", gap: 10, marginBottom: 10, fontSize: 12, lineHeight: 1.6 }}>
+                    <span style={{ flexShrink: 0, color: "var(--muted)" }}>쓰이는 지표</span>
+                    <span style={{ color: "var(--ink-2)" }}>{e.used_for.join(", ")}</span>
                   </div>
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
@@ -187,12 +174,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
               </div>
 
               <div style={{ paddingTop: 18, borderTop: "1px solid var(--line)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 17h.01" />
-                  </svg>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>주의사항</span>
-                </div>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>주의사항</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {data.do_not_track.map((d, i) => (
                     <div key={i} style={{ fontSize: 12, lineHeight: 1.65, color: "var(--ink-2)" }}>{d}</div>
@@ -207,16 +189,14 @@ export default function ResultView({ data, label, source }: { data: DesignResult
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
             {data.kpis.map((k) => (
               <div key={k.name} className="card" style={{ padding: "22px 24px" }}>
-                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{k.name}</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{k.name}</h3>
                 <div className="mono" style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, padding: "10px 12px", marginBottom: 14, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                   {k.formula}
                 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 12 }}>{k.why_this_game}</div>
-                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", paddingTop: 12, borderTop: "1px solid var(--line-2)" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }}>
-                    <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 17h.01" />
-                  </svg>
-                  <div style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)" }}>{k.watch_out}</div>
+                <div style={{ display: "flex", gap: 10, paddingTop: 12, borderTop: "1px solid var(--line-2)" }}>
+                  <span style={{ flexShrink: 0, fontSize: 12, color: "var(--muted)" }}>주의</span>
+                  <span style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)" }}>{k.watch_out}</span>
                 </div>
               </div>
             ))}
@@ -227,7 +207,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, alignItems: "start" }}>
             <div style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "26px 28px" }}>
               <div className="eyebrow" style={{ color: "var(--on-ink)", marginBottom: 12 }}>가설</div>
-              <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, marginBottom: 20 }}>{data.ab_test.hypothesis}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>{data.ab_test.hypothesis}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
                   <span style={{ color: "var(--on-ink)" }}>1차 지표</span>

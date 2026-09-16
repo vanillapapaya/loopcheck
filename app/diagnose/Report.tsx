@@ -12,32 +12,51 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ textAlign: "right" }}>
       <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>{label}</div>
-      <div className="mono" style={{ fontSize: 24, fontWeight: 600 }}>{value}</div>
+      <div className="mono" style={{ fontSize: 20, fontWeight: 600 }}>{value}</div>
     </div>
   );
 }
 
-function WarnIcon() {
+/** 해석 방식 전환. 리포트 본문이 아니라 그 위에 두는 조작부다 */
+function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (rules: boolean) => void }) {
+  const seg = (on: boolean): React.CSSProperties => ({
+    padding: "6px 14px", fontFamily: "var(--sans)", fontSize: 13, lineHeight: 1.4, cursor: "pointer",
+    border: "none", background: on ? "var(--ink)" : "transparent", color: on ? "var(--bg)" : "var(--ink-2)", fontWeight: on ? 600 : 400,
+  });
+  const note =
+    ai.status === "loading" ? "AI 해석을 받는 중입니다. 지금 보이는 것은 규칙 기반 해석입니다"
+    : ai.status === "failed" ? `${ai.message}. 규칙 기반 해석을 보여 드립니다`
+    : useAi ? "AI가 계산 결과를 보고 쓴 해석입니다"
+    : "계산 결과에 규칙을 적용해 만든 해석입니다";
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }} aria-hidden>
-      <path d="M12 8v5" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" />
-    </svg>
+    <div className="no-print" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px 16px", marginBottom: 20, padding: "10px 14px", border: "1px solid var(--line-3)", background: "var(--surface-2)" }}>
+      <span className="eyebrow">해석 방식</span>
+      <div role="group" aria-label="해석 방식" style={{ display: "flex", border: "1px solid var(--line-3)", background: "var(--bg)" }}>
+        <button type="button" aria-pressed={useAi} disabled={ai.status !== "done"} onClick={() => onPick(false)}
+          style={{ ...seg(useAi), opacity: ai.status === "done" ? 1 : 0.45, cursor: ai.status === "done" ? "pointer" : "default" }}>
+          AI 해석{ai.status === "done" ? <span className="mono" style={{ fontSize: 12, fontWeight: 400 }}> {ai.model}</span> : null}
+        </button>
+        <button type="button" aria-pressed={!useAi} onClick={() => onPick(true)} style={seg(!useAi)}>규칙 기반</button>
+      </div>
+      <span role="status" style={{ fontSize: 12, color: "var(--muted)", flexGrow: 1, minWidth: 180 }}>{note}</span>
+      <button className="btn-ghost" onClick={() => window.print()} style={{ height: 34, fontSize: 13 }}>PDF로 저장</button>
+    </div>
   );
 }
 
-function InterpretStatus({ ai, showRules, onToggle }: { ai: Ai; showRules: boolean; onToggle: () => void }) {
-  const chip: React.CSSProperties = { fontSize: 12, color: "var(--ink-2)", display: "inline-flex", alignItems: "center", gap: 8 };
-  if (ai.status === "loading") return <span role="status" style={chip}>AI 해석을 받는 중 · 지금은 규칙 기반 해석입니다</span>;
-  if (ai.status === "failed") return <span style={chip}>{ai.message}. 규칙 기반 해석을 보여 드립니다</span>;
+/** 요약을 문장 단위로 끊어 세 줄 안에 담는다 */
+function summaryLines(text: string): string[] {
+  const parts = text.split(/(?<=[다요]\.)\s+/).map((t) => t.trim()).filter(Boolean);
+  return parts.length <= 3 ? parts : [parts[0], parts[1], parts.slice(2).join(" ")];
+}
+
+/** 절 제목. 요약·결정 사항·분석 내용이 같은 양식을 쓴다 */
+function SectionHead({ title, note }: { title: string; note?: string }) {
   return (
-    <span style={chip}>
-      <span className="mono" style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2 }}>
-        {showRules ? "규칙 기반 해석" : `AI 해석 · ${ai.model}`}
-      </span>
-      <button onClick={onToggle} className="no-print" style={{ background: "none", border: "none", padding: 0, fontFamily: "var(--sans)", fontSize: 12, color: "var(--link)", cursor: "pointer" }}>
-        {showRules ? "AI 해석 보기" : "규칙 기반과 비교"}
-      </button>
-    </span>
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 10, paddingTop: 18, borderTop: "2px solid var(--ink)", marginBottom: 14 }}>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: 17, fontWeight: 600 }}>{title}</h2>
+      {note && <span style={{ fontSize: 12, color: "var(--muted)" }}>{note}</span>}
+    </div>
   );
 }
 
@@ -54,18 +73,15 @@ function DesignBlock({ d }: { d: Design }) {
   const row = (label: string, value: React.ReactNode) => (
     <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
       <span style={{ width: 66, flexShrink: 0, fontSize: 12, color: "var(--muted)" }}>{label}</span>
-      <span style={{ fontSize: 13, lineHeight: 1.6 }}>{value}</span>
+      <span style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{value}</span>
     </div>
   );
   return (
-    <div style={{ marginTop: 14, padding: "16px 18px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <span style={{ fontSize: 13, fontWeight: 600 }}>검증 설계</span>
-        <span style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>유저를 나누지 않음</span>
-        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 2, background: d.feasible ? "var(--ok-bg)" : "var(--warn-bg)", color: d.feasible ? "var(--ok)" : "var(--warn-ink)" }}>
-          {d.feasible ? `이 규모에서 확인 가능 · 최소 ${d.mdePp.toFixed(1)}%p` : `이 규모에서는 확인 어려움 · 최소 ${d.mdePp.toFixed(1)}%p`}
-        </span>
-      </div>
+    <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--line-2)" }}>
+      <div className="eyebrow" style={{ marginBottom: 10 }}>검증 설계 (유저를 나누지 않는 비교)</div>
+      {row("판정", <>
+        이 규모에서 {d.feasible ? "확인 가능" : "확인 어려움"}. 검출 가능한 최소 효과 <span className="mono">{d.mdePp.toFixed(1)}%p</span>
+      </>)}
       {row("개입", d.intervention)}
       {row("비교", <>
         {d.treated.label} <span className="mono">{num(d.treated.users)}</span>
@@ -84,21 +100,21 @@ function DesignBlock({ d }: { d: Design }) {
 function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   return (
     <div className="card" style={{ padding: "26px 0 4px" }}>
-      <div style={{ display: "flex", gap: 20 }}>
-        <div aria-label={`${rank}순위`} style={{ width: 44, flexShrink: 0 }}>
-          <div style={{ fontFamily: "var(--serif)", fontSize: 34, lineHeight: 1, fontWeight: 600, color: rank === 1 ? "var(--danger)" : "var(--ink)" }}>{rank}</div>
+      <div style={{ display: "flex", gap: 16 }}>
+        <div aria-label={`${rank}순위`} className="mono" style={{ width: 28, flexShrink: 0, fontSize: 13, fontWeight: 600, lineHeight: 1.7, color: rank === 1 ? "var(--danger)" : "var(--ink-2)" }}>
+          {String(rank).padStart(2, "0")}
         </div>
         <div style={{ flexGrow: 1, minWidth: 0 }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 10px", marginBottom: 8 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.45 }}>{f.title}</h3>
-            {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "var(--danger-bg)", color: "var(--danger-ink)", borderRadius: 2 }}>{f.tag}</span>}
+            <h3 style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.6 }}>{f.title}</h3>
+            {f.tag && <span style={{ fontSize: 12, color: "var(--danger-ink)" }}>({f.tag})</span>}
           </div>
           <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
           {!!f.options?.length && (
             <div style={{ marginBottom: 16, paddingLeft: 2 }}>
               {f.options.map((o, i) => (
                 <div key={`${i}-${o.label}`} style={{ marginBottom: 8 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.6 }}>{o.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.7 }}>{o.label}</div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- {o.detail}</div>
                 </div>
               ))}
@@ -184,24 +200,20 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
 
   return (
     <div>
+      <InterpretBar ai={ai} useAi={useAi} onPick={(rules) => setShowRules(rules)} />
+
       {/* 리포트 머리 */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-end", justifyContent: "space-between", paddingBottom: 26, borderBottom: "1px solid var(--line)" }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 10 }}>진단 리포트</div>
-          <h1 style={{ fontSize: "clamp(28px, 4.4vw, 38px)", fontWeight: 600, marginBottom: 10 }}>{title}</h1>
+          <h1 style={{ fontSize: "clamp(24px, 3.2vw, 28px)", fontWeight: 600, marginBottom: 10 }}>{title}</h1>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px", fontSize: 13, color: "var(--ink-2)" }}>
-            <span className="mono">{m.meta.obsStart} – {m.meta.obsEnd}</span>
+            <span className="mono">{m.meta.obsStart} - {m.meta.obsEnd}</span>
             <span>설치 <span className="mono">{num(m.meta.users)}</span>명</span>
             <span>레벨 시도 <span className="mono">{num(m.meta.attempts)}</span>건</span>
           </div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 32, alignItems: "flex-end" }}>
-          <button className="btn-ghost no-print" onClick={() => window.print()} style={{ height: 38, fontSize: 14, alignSelf: "center" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M12 3v12" /><path d="M7 12l5 5 5-5" /><path d="M4 20h16" />
-            </svg>
-            PDF로 저장
-          </button>
           {d1 && <Stat label="D1" value={pct(d1.rate)} />}
           {d7 && <Stat label="D7" value={pct(d7.rate)} />}
           {m.meta.purchases > 0 && <Stat label="결제 전환" value={pct(m.monetization.payers.rate)} />}
@@ -212,23 +224,29 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       <div className="two-col" style={{ marginTop: 30 }}>
       <div>
       {/* 요약 */}
-      <div style={{ paddingTop: 22, borderTop: "2px solid var(--ink)" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
-          <div className="eyebrow">한 문단 요약</div>
-          <InterpretStatus ai={ai} showRules={showRules} onToggle={() => setShowRules((v) => !v)} />
-        </div>
-        <p className="prose" style={{ margin: 0, fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.9 }}>{summary}</p>
-      </div>
+      <SectionHead title="요약" />
+      <ul className="prose" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+        {summaryLines(summary).map((line, i) => (
+          <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.8 }}>
+            <span aria-hidden style={{ color: "var(--muted)", flexShrink: 0 }}>-</span>
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
 
-      {/* 개선안 */}
-      <h2 style={{ fontSize: 26, fontWeight: 600, margin: "48px 0 18px" }}>먼저 고칠 것</h2>
+      {/* 결정 사항 */}
+      <div style={{ marginTop: 40 }}><SectionHead title="결정 사항" note="영향 유저 수가 많은 순" /></div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} />)}
         {!findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
       </div>
 
-      {/* 근거 차트 */}
-      <h2 style={{ fontSize: 26, fontWeight: 600, margin: "52px 0 18px" }}>근거가 된 숫자</h2>
+      {/* 분석 내용 */}
+      <div style={{ marginTop: 44 }}><SectionHead title="분석 내용" note="계산 기준은 각 그림의 각주" /></div>
+      <p style={{ margin: "0 0 20px", fontSize: 14, lineHeight: 1.8, color: "var(--ink-2)", maxWidth: 940 }}>
+        위 결정의 근거가 된 계산 결과입니다. 그림마다 분모와 집계 기준을 각주로 달았고, 규칙 해석과 AI 해석 모두 여기 있는 숫자만 참조합니다.
+        표본이 {num(100)} 미만인 구간은 결론 대신 단서로만 다뤘습니다.
+      </p>
 
       <div style={grid2}>
         <Figure n={1} title="코호트 리텐션" note="classic N-day" sub="※ 리텐션 : classic N-day 기준. 설치 후 N일째 접속 여부로 집계하며, 분모는 N일째가 관측 기간 안에 들어온 유저만 포함">
@@ -255,67 +273,62 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       {/* 광고 트랩 */}
       {rep.ads && (
         <div className="card" style={{ padding: "24px 26px", marginBottom: 16 }}>
-          <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
-            <WarnIcon />
-            <h3 style={{ fontSize: 15, fontWeight: 600 }}>[ 광고 빈도 — 집계 방식이 결론을 뒤집는 구간 ]</h3>
-          </div>
+          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>[ 광고 빈도 ]</h3>
+          <p style={{ margin: "0 0 10px", fontSize: 13, color: "var(--ink-2)" }}>집계 방식이 결론을 뒤집는 구간입니다.</p>
           <p style={{ margin: "0 0 20px", fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", maxWidth: 1000 }}>
             누적 시청량으로 보면 광고를 많이 볼수록 잔존이 높아 보입니다. 오래 남은 유저일수록 시청 누적량이 커지는 구조라, 누적량은 잔존의 원인이 아니라 결과입니다.
             경과일을 고정하고 당일 시청 수 대비 익일 접속으로 다시 집계하면 방향이 달라집니다.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 20 }}>
             <div style={{ padding: 18, border: "1px solid var(--line-2)", borderRadius: 2, background: "var(--surface-2)" }}>
-              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--line)", color: "var(--ink-2)", borderRadius: 2 }}>이렇게 보면 틀립니다</span>
+              <span className="eyebrow" style={{ color: "var(--ink-2)" }}>이렇게 보면 틀립니다</span>
               <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>누적 광고 시청 수 대비 D7 리텐션</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--line-3)"
                 items={m.ads.naiveCumulativeD7.map((b) => ({ label: b.label.replace("회 이상", "+").replace("회", ""), r: b.d7 }))}
                 caption="생존 편향이 그대로 들어간 집계입니다." /></div>
             </div>
             <div style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 2 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--ink)", color: "var(--surface)", borderRadius: 2 }}>이렇게 봅니다</span>
-              <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>경과 {fixed.dayFrom}–{fixed.dayTo}일 고정 · 당일 시청 수 대비 익일 접속</div>
+              <span className="eyebrow" style={{ color: "var(--ink)" }}>이렇게 봅니다</span>
+              <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>경과 {fixed.dayFrom}-{fixed.dayTo}일 고정 · 당일 시청 수 대비 익일 접속</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" items={adItems(fixed.buckets)} emphasize={rep.ads.peakLabel}
                 caption={`${rep.ads.peakLabel}가 정점${rep.ads.declinesAfterPeak ? `이고 ${rep.ads.last.label}에서 다시 내려갑니다` : "입니다"}.`} /></div>
             </div>
           </div>
           {rep.ads.last.lowSample && (
-            <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "var(--warn-bg)", borderRadius: 2 }}>
-              <WarnIcon />
-              <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
-                <strong style={{ fontWeight: 600, color: "var(--ink)" }}>단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다.</strong>{" "}
-                상한 조정 전 표본 축적을 권합니다. 흐린 막대가 n {num(100)} 미만 구간입니다.
-              </div>
-            </div>
+            <p style={{ margin: "16px 0 0", paddingTop: 12, borderTop: "1px solid var(--line-2)", fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
+              ※ 단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다. 상한을 조정하기 전에 표본을 더 쌓아 보시면 좋겠습니다.
+              흐린 막대가 n {num(100)} 미만 구간입니다.
+            </p>
           )}
         </div>
       )}
 
       {/* 수익화 */}
       <div className="card" style={{ padding: "24px 26px", marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>[ 수익화 ]</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>[ 수익화 ]</h3>
         <p style={{ margin: "0 0 20px", fontSize: 12, color: "var(--muted)" }}>
           {m.meta.purchases ? "※ 결제 전환율 : 분모는 설치 유저 수. ARPPU : 분모는 결제자 수" : "※ 결제 데이터 미포함으로 수익화 수치 계산 제외"}
         </p>
         {m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>결제자</div>
-            <div className="mono" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{num(m.monetization.payers.num)}명</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{num(m.monetization.payers.num)}명</div>
             <div style={{ fontSize: 12, color: "var(--ink-2)" }}>설치 대비 <span className="mono">{pct(m.monetization.payers.rate, 2)}</span></div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>총 매출</div>
-            <div className="mono" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{won(m.monetization.revenueKrw)}</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{won(m.monetization.revenueKrw)}</div>
             <div style={{ fontSize: 12, color: "var(--ink-2)" }}>관측 기간 누적</div>
           </div>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>ARPPU</div>
-            <div className="mono" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{m.monetization.arppuKrw != null ? won(m.monetization.arppuKrw) : "–"}</div>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{m.monetization.arppuKrw != null ? won(m.monetization.arppuKrw) : "-"}</div>
             <div style={{ fontSize: 12, color: "var(--ink-2)" }}>결제자 1인당</div>
           </div>
           {fp && (
             <div>
               <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>첫 결제가 가장 많은 레벨</div>
-              <div className="mono" style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>레벨 {fp.level}</div>
+              <div className="mono" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>레벨 {fp.level}</div>
               <div style={{ fontSize: 12, color: "var(--ink-2)" }}><span className="mono">{num(fp.count)}</span>건 · 레벨 중 1위{rep.wall?.conflict ? " · 최대 정체 레벨과 같음" : ""}</div>
             </div>
           )}
@@ -337,7 +350,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
 
       {/* 표 보기 */}
       <details className="card" style={{ padding: "18px 24px" }}>
-        <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 600 }}>계산 근거 표로 보기</summary>
+        <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 600 }}>계산 근거 표로 보기 (부록)</summary>
         <div className="no-print" style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>PDF로 저장하면 이 표도 함께 들어갑니다.</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 16 }}>
           <div style={{ overflowX: "auto" }}>
@@ -346,7 +359,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               <thead><tr><th style={{ ...th, textAlign: "left" }}>일</th><th style={th}>잔존</th><th style={th}>분모</th><th style={th}>비율</th><th style={th}>95% 구간</th></tr></thead>
               <tbody>
                 {m.retention.map(({ day, r }) => (
-                  <tr key={day}><td style={{ ...td, textAlign: "left" }}>D{day}</td><td style={td}>{num(r.num)}</td><td style={td}>{num(r.den)}</td><td style={td}>{pct(r.rate)}</td><td style={td}>{pct(r.lo)}–{pct(r.hi)}</td></tr>
+                  <tr key={day}><td style={{ ...td, textAlign: "left" }}>D{day}</td><td style={td}>{num(r.num)}</td><td style={td}>{num(r.den)}</td><td style={td}>{pct(r.rate)}</td><td style={td}>{pct(r.lo)}-{pct(r.hi)}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -394,13 +407,15 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       </aside>
       </div>
 
-      <p style={{ margin: "28px 0 0", fontSize: 13, lineHeight: 1.7, color: "var(--muted)" }}>
-        모든 숫자는 이 브라우저에서 코드로 계산했습니다. {sourceNote}
-        {" "}
-        {useAi
-          ? "요약과 개선안 문장은 AI가 계산 결과만 보고 썼고, 계산 결과에 없는 숫자가 들어간 답은 코드가 걸러 냈습니다."
-          : "요약과 개선안 문장은 계산 결과에 규칙을 적용해 만든 해석입니다."}
-      </p>
+      {/* 판권. 무엇을 어떻게 만들었는지 명사형으로 짧게 */}
+      <div style={{ marginTop: 36, paddingTop: 14, borderTop: "1px solid var(--line)", display: "flex", flexDirection: "column", gap: 6, fontSize: 12, lineHeight: 1.7, color: "var(--muted)" }}>
+        <div style={{ display: "flex", gap: 12 }}><span style={{ width: 34, flexShrink: 0 }}>계산</span><span>{sourceNote}</span></div>
+        <div style={{ display: "flex", gap: 12 }}><span style={{ width: 34, flexShrink: 0 }}>해석</span><span>
+          {useAi
+            ? "AI가 집계 수치를 보고 작성. 계산 결과에 없는 숫자가 섞인 답은 코드가 반려"
+            : "계산 결과에 규칙을 적용한 해석. AI 해석으로 바꿔 비교 가능"}
+        </span></div>
+      </div>
     </div>
   );
 }
