@@ -35,7 +35,7 @@ export default function DesignPage() {
       if (!res.ok) throw new Error("불러오지 못했습니다");
       const data: DesignResult = await res.json();
       setResult(data);
-      setLabel(`${p.genre} · ${p.stage}`);
+      setLabel(`${p.genre} · ${p.platform}`);
       setSource(undefined);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -140,7 +140,7 @@ export default function DesignPage() {
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{p.coreLoop}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-                    {[p.monetization, p.platform, p.stage].map((t) => (
+                    {[p.monetization, p.platform].map((t) => (
                       <span key={t} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--muted)" }}>
                         {t}
                       </span>
