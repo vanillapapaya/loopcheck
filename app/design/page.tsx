@@ -8,10 +8,9 @@ import { PRESETS, type DesignResult, type Preset } from "@/lib/types";
 
 const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
 const PLATFORM = ["iOS", "Android", "PC", "복수"];
-const STAGE = ["출시 전", "소프트론칭", "출시 후"];
 
-type Form = { genre: string; core_loop: string; monetization: string; platform: string; stage: string };
-const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform: "복수", stage: "출시 전" };
+type Form = { genre: string; core_loop: string; monetization: string; platform: string };
+const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform: "복수" };
 
 const field: React.CSSProperties = {
   width: "100%", fontFamily: "var(--sans)", fontSize: 14, color: "var(--ink)",
@@ -66,7 +65,7 @@ export default function DesignPage() {
         return;
       }
       setResult(data.result);
-      setLabel(`${form.genre} · ${form.stage}`);
+      setLabel(`${form.genre} · ${form.platform}`);
       setSource(`AI 생성 · ${data.model}`);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -179,10 +178,6 @@ export default function DesignPage() {
                   <div>
                     <label htmlFor="platform" style={labelStyle}>플랫폼</label>
                     <select id="platform" value={form.platform} onChange={set("platform")} style={field}>{PLATFORM.map((v) => <option key={v}>{v}</option>)}</select>
-                  </div>
-                  <div>
-                    <label htmlFor="stage" style={labelStyle}>출시 단계</label>
-                    <select id="stage" value={form.stage} onChange={set("stage")} style={field}>{STAGE.map((v) => <option key={v}>{v}</option>)}</select>
                   </div>
                 </div>
 

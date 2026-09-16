@@ -12,8 +12,11 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "ddl", label: "SQL DDL" },
 ];
 
+const PRIORITY_LABEL: Record<string, string> = { must: "필수", should: "추천" };
+
 function Badge({ priority }: { priority: string }) {
   const must = priority === "must";
+  const label = PRIORITY_LABEL[priority] ?? priority;
   return (
     <span
       style={{
@@ -27,7 +30,7 @@ function Badge({ priority }: { priority: string }) {
         border: must ? "1px solid var(--ink)" : "1px solid var(--line-3)",
       }}
     >
-      {priority}
+      {label}
     </span>
   );
 }

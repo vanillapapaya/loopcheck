@@ -34,6 +34,9 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
     집단과 덜 노출되는 집단의 변화량 차이로 효과를 읽는 설계를 쓴다(이중차분). 두 집단은 이 게임의 핵심 루프 안에서
     실제로 구분되는 것으로 고른다(예: 조정한 구간의 도달자 대 인접 구간의 도달자). 유입이 충분한 팀이라면 무작위 배정도
     가능하다는 단서만 덧붙인다.
+12. 플랫폼을 설계에 반영하라. PC/Steam이면 수익화에 광고가 명시되지 않는 한 광고 이벤트를 넣지 마라.
+    기기 구분은 등급(low/mid/high)이 아니라 사양과 해상도로 잡고, 환불과 누적 플레이타임처럼 스토어가 주는
+    신호를 고려한다. 모바일이면 기기 등급, OS 버전, 스토어 결제 흐름을 기준으로 잡는다.
 
 ## 금지 사항
 
@@ -91,19 +94,16 @@ export type DesignInput = {
   core_loop: string;
   monetization: string;
   platform: string;
-  stage: string;
 };
 
 export const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
 export const PLATFORM = ["iOS", "Android", "PC", "복수"];
-export const STAGE = ["출시 전", "소프트론칭", "출시 후"];
 
 export function designUserPrompt(i: DesignInput) {
   return `장르: ${i.genre}
 핵심 루프: ${i.core_loop}
 수익화: ${i.monetization}
 플랫폼: ${i.platform}
-출시 단계: ${i.stage}
 
 위 게임의 지표 체계를 설계하라.`;
 }
@@ -116,14 +116,12 @@ export function parseDesignInput(v: unknown): { ok: true; input: DesignInput } |
     core_loop: s("core_loop"),
     monetization: s("monetization"),
     platform: s("platform"),
-    stage: s("stage"),
   };
   if (input.genre.length < 2 || input.genre.length > 60) return { ok: false, message: "장르를 2-60자로 적어 주세요" };
   if (input.core_loop.length < 30) return { ok: false, message: "핵심 루프를 두세 문장(30자 이상)으로 적어 주세요. 유저가 무엇을 반복하고, 어디서 성공·실패하는지가 들어가면 좋습니다" };
   if (input.core_loop.length > 1000) return { ok: false, message: "핵심 루프는 1,000자 이내로 적어 주세요" };
   if (!MONETIZATION.includes(input.monetization)) return { ok: false, message: "수익화 모델을 골라 주세요" };
   if (!PLATFORM.includes(input.platform)) return { ok: false, message: "플랫폼을 골라 주세요" };
-  if (!STAGE.includes(input.stage)) return { ok: false, message: "출시 단계를 골라 주세요" };
   return { ok: true, input };
 }
 
