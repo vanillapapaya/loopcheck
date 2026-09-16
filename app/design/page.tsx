@@ -88,7 +88,7 @@ export default function DesignPage() {
               다른 장르 보기
             </button>
           ) : (
-            <span style={{ fontSize: 13, color: "var(--muted)" }}>저장되지 않습니다 · 회원가입 불필요</span>
+            <span style={{ fontSize: 13, color: "var(--muted)" }}></span>
           )
         }
       />
@@ -99,7 +99,7 @@ export default function DesignPage() {
         ) : (
           <>
             <div style={{ maxWidth: 640, marginBottom: 32 }}>
-              <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>어떤 게임인가요</h1>
+              <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>장르 선택</h1>
               <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.75, margin: 0 }}>
                 장르를 고르면 그 장르의 핵심 루프에 맞춘 이벤트 스키마, KPI 정의서, 첫 A/B 설계안이
                 바로 나옵니다. 목록에 없으면 아래에 핵심 루프를 적어 AI에게 설계를 받으세요.
@@ -154,11 +154,10 @@ export default function DesignPage() {
 
             <div className="card" style={{ padding: "28px 30px" }}>
               <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600 }}>내 게임은 여기 없는데요</h2>
-                <span style={{ fontSize: 12, color: "var(--muted)" }}>AI가 30초-1분 정도 걸려 설계합니다</span>
+                <h2 style={{ fontSize: 20, fontWeight: 600 }}>목록에 없는 새로운 게임을 만드신다면</h2>
               </div>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--ink-2)", margin: "0 0 22px", maxWidth: 720 }}>
-                핵심 루프를 두세 문장으로 적어 주세요. 유저가 무엇을 반복하는지, 어디서 성공하고 실패하는지, 무엇으로 돈을 쓰는지가 들어가면 설계가 정확해집니다.
+                핵심 루프를 두세 문장으로 적어 주세요. 유저가  무엇을 반복하는지, 어디서 성공하고 실패하는지, 무엇으로 돈을 쓰는지가 들어가면 설계가 정확해집니다.
               </p>
 
               <form onSubmit={submitCustom}>
