@@ -8,12 +8,6 @@ import { buildFacts, type AiReport } from "@/lib/diagnose/interpret";
 import type { Design } from "@/lib/diagnose/experiment";
 import { ChannelChart, DeviceChart, Legend, LevelChart, MiniColumns, RetentionChart, adItems } from "./charts";
 
-const RANK_STYLE = [
-  { background: "var(--danger)", color: "#FFFFFF" },
-  { background: "var(--warn)", color: "var(--ink)" },
-  { background: "var(--line-3)", color: "var(--ink)" },
-];
-
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ textAlign: "right" }}>
@@ -37,7 +31,7 @@ function InterpretStatus({ ai, showRules, onToggle }: { ai: Ai; showRules: boole
   if (ai.status === "failed") return <span style={chip}>{ai.message}. 규칙 기반 해석을 보여 드립니다</span>;
   return (
     <span style={chip}>
-      <span className="mono" style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3 }}>
+      <span className="mono" style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2 }}>
         {showRules ? "규칙 기반 해석" : `AI 해석 · ${ai.model}`}
       </span>
       <button onClick={onToggle} className="no-print" style={{ background: "none", border: "none", padding: 0, fontFamily: "var(--sans)", fontSize: 12, color: "var(--link)", cursor: "pointer" }}>
@@ -64,11 +58,11 @@ function DesignBlock({ d }: { d: Design }) {
     </div>
   );
   return (
-    <div style={{ marginTop: 14, padding: "16px 18px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4 }}>
+    <div style={{ marginTop: 14, padding: "16px 18px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 600 }}>검증 설계</span>
-        <span style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3, color: "var(--ink-2)" }}>유저를 나누지 않음</span>
-        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 3, background: d.feasible ? "var(--ok-bg)" : "var(--warn-bg)", color: d.feasible ? "var(--ok)" : "var(--warn-ink)" }}>
+        <span style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>유저를 나누지 않음</span>
+        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 2, background: d.feasible ? "var(--ok-bg)" : "var(--warn-bg)", color: d.feasible ? "var(--ok)" : "var(--warn-ink)" }}>
           {d.feasible ? `이 규모에서 확인 가능 · 최소 ${d.mdePp.toFixed(1)}%p` : `이 규모에서는 확인 어려움 · 최소 ${d.mdePp.toFixed(1)}%p`}
         </span>
       </div>
@@ -89,16 +83,15 @@ function DesignBlock({ d }: { d: Design }) {
 
 function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   return (
-    <div className="card" style={{ padding: "24px 26px" }}>
+    <div className="card" style={{ padding: "26px 0 4px" }}>
       <div style={{ display: "flex", gap: 20 }}>
-        <div className="mono" aria-label={`${rank}순위`}
-          style={{ ...RANK_STYLE[Math.min(rank - 1, 2)], width: 32, height: 32, flexShrink: 0, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 600 }}>
-          {rank}
+        <div aria-label={`${rank}순위`} style={{ width: 44, flexShrink: 0 }}>
+          <div style={{ fontFamily: "var(--serif)", fontSize: 34, lineHeight: 1, fontWeight: 600, color: rank === 1 ? "var(--danger)" : "var(--ink)" }}>{rank}</div>
         </div>
         <div style={{ flexGrow: 1, minWidth: 0 }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 10px", marginBottom: 8 }}>
             <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.45 }}>{f.title}</h3>
-            {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "var(--danger-bg)", color: "var(--danger-ink)", borderRadius: 3 }}>{f.tag}</span>}
+            {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "var(--danger-bg)", color: "var(--danger-ink)", borderRadius: 2 }}>{f.tag}</span>}
           </div>
           <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
           {!!f.options?.length && (
@@ -127,16 +120,20 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   );
 }
 
-function ChartCard({ title, note, sub, children }: { title: string; note?: string; sub?: string; children: React.ReactNode }) {
+/** 그림 하나. 번호와 제목을 위에 두고 정의 각주를 아래에 단다 */
+function Figure({ n, title, note, sub, children }: { n: number; title: string; note?: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="card" style={{ padding: "22px 24px", minWidth: 0 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600 }}>[ {title} ]</h3>
+    <figure style={{ margin: 0, minWidth: 0, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 12 }}>
+        <div>
+          <span className="figure-num">[ 그림 {n} ]</span>
+          <span className="figure-title">{title}</span>
+        </div>
         {note && <span style={{ fontSize: 12, color: "var(--muted)" }}>{note}</span>}
       </div>
-      {sub && <p style={{ margin: "0 0 14px", fontSize: 12, lineHeight: 1.6, color: "var(--muted)" }}>{sub}</p>}
       <div style={{ overflowX: "auto" }}>{children}</div>
-    </div>
+      {sub && <figcaption style={{ marginTop: 10, fontSize: 12, lineHeight: 1.6, color: "var(--muted)" }}>{sub}</figcaption>}
+    </figure>
   );
 }
 
@@ -191,7 +188,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-end", justifyContent: "space-between", paddingBottom: 26, borderBottom: "1px solid var(--line)" }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 10 }}>진단 리포트</div>
-          <h1 style={{ fontSize: "clamp(26px, 4vw, 32px)", fontWeight: 600, marginBottom: 10 }}>{title}</h1>
+          <h1 style={{ fontSize: "clamp(28px, 4.4vw, 38px)", fontWeight: 600, marginBottom: 10 }}>{title}</h1>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 16px", fontSize: 13, color: "var(--ink-2)" }}>
             <span className="mono">{m.meta.obsStart} – {m.meta.obsEnd}</span>
             <span>설치 <span className="mono">{num(m.meta.users)}</span>명</span>
@@ -213,44 +210,44 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       </div>
 
       {/* 요약 */}
-      <div className="card" style={{ marginTop: 28, padding: "26px 30px", borderLeft: "3px solid var(--ink)" }}>
+      <div style={{ marginTop: 30, paddingTop: 22, borderTop: "2px solid var(--ink)" }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
           <div className="eyebrow">한 문단 요약</div>
           <InterpretStatus ai={ai} showRules={showRules} onToggle={() => setShowRules((v) => !v)} />
         </div>
-        <p style={{ margin: 0, fontSize: 16, lineHeight: 1.85, maxWidth: 1080 }}>{summary}</p>
+        <p className="prose" style={{ margin: 0, fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.9 }}>{summary}</p>
       </div>
 
       {/* 개선안 */}
-      <h2 style={{ fontSize: 22, fontWeight: 600, margin: "40px 0 16px" }}>먼저 고칠 것</h2>
+      <h2 style={{ fontSize: 26, fontWeight: 600, margin: "48px 0 18px" }}>먼저 고칠 것</h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} />)}
         {!findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
       </div>
 
       {/* 근거 차트 */}
-      <h2 style={{ fontSize: 22, fontWeight: 600, margin: "44px 0 16px" }}>근거가 된 숫자</h2>
+      <h2 style={{ fontSize: 26, fontWeight: 600, margin: "52px 0 18px" }}>근거가 된 숫자</h2>
 
       <div style={grid2}>
-        <ChartCard title="코호트 리텐션" note="classic N-day" sub="※ 리텐션 : classic N-day 기준. 설치 후 N일째 접속 여부로 집계하며, 분모는 N일째가 관측 기간 안에 들어온 유저만 포함">
+        <Figure n={1} title="코호트 리텐션" note="classic N-day" sub="※ 리텐션 : classic N-day 기준. 설치 후 N일째 접속 여부로 집계하며, 분모는 N일째가 관측 기간 안에 들어온 유저만 포함">
           <RetentionChart m={m} />
-        </ChartCard>
-        {m.levels.length > 0 && <ChartCard title="레벨별 클리어율" note="레벨 1–20" sub="※ 시도 대비 : 분모는 해당 레벨의 시도 수, 도달자 대비 : 분모는 해당 레벨 도달 유저 수. 두 값이 벌어지는 레벨이 재도전 구간">
+        </Figure>
+        {m.levels.length > 0 && <Figure n={2} title="레벨별 클리어율" note="레벨 1-20" sub="※ 시도 대비 : 분모는 해당 레벨의 시도 수, 도달자 대비 : 분모는 해당 레벨 도달 유저 수. 두 값이 벌어지는 레벨이 재도전 구간">
           <Legend items={[
             { label: "시도 대비 (분모: 시도 수)", swatch: "bar", color: "var(--series)" },
             { label: "도달자 대비 (분모: 도달 유저)", swatch: "line", color: "var(--ink-2)" },
           ]} />
           <LevelChart levels={m.levels} wallLevel={rep.wall?.level.level ?? null} />
-        </ChartCard>}
+        </Figure>}
       </div>
 
       <div style={grid2}>
-        {m.segments.channel.length > 1 && <ChartCard title="획득 채널별 D7 리텐션" sub="※ 분모는 채널별 설치 유저. 오른쪽 회색 글자는 D1과 전체 설치 대비 비중">
+        {m.segments.channel.length > 1 && <Figure n={3} title="획득 채널별 D7 리텐션" sub="※ 분모는 채널별 설치 유저. 오른쪽 회색 글자는 D1과 전체 설치 대비 비중">
           <ChannelChart channels={m.segments.channel} worstKey={worstChannel} />
-        </ChartCard>}
-        {m.segments.deviceTier.length > 1 && <ChartCard title="기기 등급별 평균 세션 길이" sub={`※ 세션 길이는 세션당 평균. 저사양 구간이 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)} 차지`}>
+        </Figure>}
+        {m.segments.deviceTier.length > 1 && <Figure n={4} title="기기 등급별 평균 세션 길이" sub={`※ 세션 길이는 세션당 평균. 저사양 구간이 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)} 차지`}>
           <DeviceChart tiers={m.segments.deviceTier} />
-        </ChartCard>}
+        </Figure>}
       </div>
 
       {/* 광고 트랩 */}
@@ -265,22 +262,22 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             경과일을 고정하고 당일 시청 수 대비 익일 접속으로 다시 집계하면 방향이 달라집니다.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 20 }}>
-            <div style={{ padding: 18, border: "1px solid var(--line-2)", borderRadius: 4, background: "var(--surface-2)" }}>
-              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--line)", color: "var(--ink-2)", borderRadius: 3 }}>이렇게 보면 틀립니다</span>
+            <div style={{ padding: 18, border: "1px solid var(--line-2)", borderRadius: 2, background: "var(--surface-2)" }}>
+              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--line)", color: "var(--ink-2)", borderRadius: 2 }}>이렇게 보면 틀립니다</span>
               <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>누적 광고 시청 수 대비 D7 리텐션</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--line-3)"
                 items={m.ads.naiveCumulativeD7.map((b) => ({ label: b.label.replace("회 이상", "+").replace("회", ""), r: b.d7 }))}
                 caption="생존 편향이 그대로 들어간 집계입니다." /></div>
             </div>
-            <div style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--ink)", color: "var(--surface)", borderRadius: 3 }}>이렇게 봅니다</span>
+            <div style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 2 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 7px", background: "var(--ink)", color: "var(--surface)", borderRadius: 2 }}>이렇게 봅니다</span>
               <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>경과 {fixed.dayFrom}–{fixed.dayTo}일 고정 · 당일 시청 수 대비 익일 접속</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" items={adItems(fixed.buckets)} emphasize={rep.ads.peakLabel}
                 caption={`${rep.ads.peakLabel}가 정점${rep.ads.declinesAfterPeak ? `이고 ${rep.ads.last.label}에서 다시 내려갑니다` : "입니다"}.`} /></div>
             </div>
           </div>
           {rep.ads.last.lowSample && (
-            <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "var(--warn-bg)", borderRadius: 4 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "var(--warn-bg)", borderRadius: 2 }}>
               <WarnIcon />
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
                 <strong style={{ fontWeight: 600, color: "var(--ink)" }}>단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다.</strong>{" "}
@@ -334,7 +331,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               : "연속 실패 수와 결제 비율 사이에 뚜렷한 증가 경향은 보이지 않습니다."}
           </p>
         </div>}
-        <div style={{ display: "flex", gap: 12, marginTop: 20, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4 }}>
+        <div style={{ display: "flex", gap: 12, marginTop: 20, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2 }}>
           <WarnIcon />
           <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
             <strong style={{ fontWeight: 600, color: "var(--ink)" }}>결제 퍼널(노출 → 클릭 → 구매)은 계산에서 제외했습니다.</strong>{" "}

@@ -116,7 +116,7 @@ export default function DiagnosePage() {
     }));
   const typeSelect = (f: Uploaded, strong: boolean) => (
     <select aria-label={`${f.name}의 데이터 종류`} value={f.table ?? ""} onChange={(e) => retype(f.id, e.target.value as TableKey | "")}
-      style={{ fontSize: 12, padding: "5px 8px", border: `1px solid ${strong ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 3, background: "var(--surface)" }}>
+      style={{ fontSize: 12, padding: "5px 8px", border: `1px solid ${strong ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface)" }}>
       <option value="">종류 고르기</option>
       {TABLES.map((t) => <option key={t.key} value={t.key}>{t.label} ({t.file})</option>)}
     </select>
@@ -171,7 +171,7 @@ export default function DiagnosePage() {
         {state.kind === "done" ? (
           <>
             {state.notes.length > 0 && (
-              <div style={{ marginBottom: 20, padding: "12px 16px", background: "var(--warn-bg)", borderRadius: 4, fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
+              <div style={{ marginBottom: 20, padding: "12px 16px", background: "var(--warn-bg)", borderRadius: 2, fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
                 {state.notes.map((n) => <div key={n}>{n}</div>)}
               </div>
             )}
@@ -186,7 +186,7 @@ export default function DiagnosePage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 28, alignItems: "start" }}>
             <div style={{ gridColumn: "span 2", minWidth: 0 }} className="diag-main">
-              <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h1>
+              <h1 style={{ fontSize: 34, fontWeight: 600, marginBottom: 14 }}>진단 리포트</h1>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--ink-2)", margin: "0 0 26px" }}>
                 쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리해 드립니다.
                 컬럼 이름이 달라도 됩니다. 무엇인지만 알려 주시면 맞춰 읽습니다.
@@ -200,7 +200,7 @@ export default function DiagnosePage() {
                 onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
                 onDragLeave={() => setDrag(false)}
                 onDrop={(e) => { e.preventDefault(); setDrag(false); if (!busy) addFiles(e.dataTransfer.files); }}
-                style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 6, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
+                style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
               >
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M12 16V4" /><path d="M7 9l5-5 5 5" /><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
@@ -211,13 +211,13 @@ export default function DiagnosePage() {
               </div>
 
               {state.kind === "error" && (
-                <div role="alert" style={{ marginBottom: 14, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+                <div role="alert" style={{ marginBottom: 14, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 2, fontSize: 14, color: "var(--danger-ink)" }}>
                   {state.message}
                 </div>
               )}
 
               {/* 업로드 현황 */}
-              <div className="card" style={{ overflow: "hidden", marginBottom: 20 }}>
+              <div className="tile" style={{ overflow: "hidden", marginBottom: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 20px", borderBottom: "1px solid var(--line)", background: "var(--surface-2)" }}>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>업로드 현황</span>
                   <span className="mono" style={{ fontSize: 12, color: "var(--ink-2)" }}>{TABLES.filter((t) => byTable(t.key)).length} / {TABLES.length}</span>
@@ -251,7 +251,7 @@ export default function DiagnosePage() {
                                   value={f.mapping[col.name] ?? ""}
                                   onChange={(e) => update(f.id, { mapping: { ...f.mapping, [col.name]: e.target.value } })}
                                   className="mono"
-                                  style={{ minWidth: 180, fontSize: 12, padding: "6px 8px", background: "var(--surface)", border: `1px solid ${col.required && !f.mapping[col.name] ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 3 }}
+                                  style={{ minWidth: 180, fontSize: 12, padding: "6px 8px", background: "var(--surface)", border: `1px solid ${col.required && !f.mapping[col.name] ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2 }}
                                 >
                                   <option value="">{col.required ? "선택해 주세요" : "(없음)"}</option>
                                   {f.headers.map((h) => <option key={h} value={h}>{h}</option>)}
@@ -293,7 +293,7 @@ export default function DiagnosePage() {
                 <div style={{ height: 1, flexGrow: 1, background: "var(--line)" }} />
               </div>
 
-              <div className="card" style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "space-between", padding: "20px 24px" }}>
+              <div className="tile" style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "space-between", padding: "20px 24px" }}>
                 <div style={{ maxWidth: 520 }}>
                   <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 5 }}>샘플 게임으로 리포트 보기</div>
                   <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)" }}>
@@ -327,7 +327,7 @@ export default function DiagnosePage() {
                   {SAMPLE.map(([, f]) => <a key={f} href={`/sample/${f}`} className="mono" style={{ fontSize: 12 }}>{f}</a>)}
                 </div>
               </div>
-              <div style={{ background: "var(--surface-3)", border: "1px solid var(--line)", borderRadius: 6, padding: "20px 22px" }}>
+              <div style={{ background: "var(--surface-3)", border: "1px solid var(--line)", borderRadius: 2, padding: "20px 22px" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>아직 로그가 없다면</div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 10 }}>지표 설계기로 먼저 스키마를 받아 두세요. 그대로 쌓으면 이 화면에서 매핑 없이 바로 진단할 수 있습니다.</div>
                 <Link href="/design" style={{ fontSize: 13, fontWeight: 500 }}>지표 설계기로 가기 →</Link>

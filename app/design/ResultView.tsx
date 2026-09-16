@@ -23,7 +23,7 @@ function Badge({ priority }: { priority: string }) {
         fontSize: 11,
         fontWeight: 600,
         padding: "2px 7px",
-        borderRadius: 3,
+        borderRadius: 2,
         whiteSpace: "nowrap",
         background: must ? "var(--ink)" : "transparent",
         color: must ? "var(--surface)" : "var(--ink-2)",
@@ -65,9 +65,9 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         <div style={{ maxWidth: 760 }}>
           <div className="eyebrow" style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
             지표 설계 결과
-            {source && <span className="mono" style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3, color: "var(--ink-2)" }}>{source}</span>}
+            {source && <span className="mono" style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>{source}</span>}
           </div>
-          <h2 style={{ fontSize: 27, fontWeight: 600, marginBottom: 10 }}>{label}</h2>
+          <h2 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>{label}</h2>
           <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0, lineHeight: 1.7 }}>{data.game_summary}</p>
         </div>
         <div style={{ display: "flex", gap: 28 }}>
@@ -118,7 +118,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
       <div style={{ paddingTop: 22 }}>
         {tab === "events" && (
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(280px, 1fr)", gap: 20, alignItems: "start" }} className="two-col">
-            <div className="card" style={{ overflow: "hidden" }}>
+            <div className="tile" style={{ overflow: "hidden" }}>
               {data.events.map((e, i) => (
                 <div key={`${i}-${e.name}`} style={{ padding: "16px 22px", borderBottom: i === data.events.length - 1 ? "none" : "1px solid var(--line-2)" }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
@@ -129,13 +129,13 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                   <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
                     <span style={{ fontSize: 12, color: "var(--muted)" }}>쓰이는 지표</span>
                     {e.used_for.map((u, i) => (
-                      <span key={`${i}-${u}`} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--ink-2)" }}>{u}</span>
+                      <span key={`${i}-${u}`} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>{u}</span>
                     ))}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {e.properties.map((p) => (
                       <span key={p.name} className="mono" title={p.note}
-                        style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 3, color: "var(--ink-2)" }}>
+                        style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, color: "var(--ink-2)" }}>
                         {p.name}
                         <span style={{ color: "var(--muted)" }}>:{p.type}</span>
                       </span>
@@ -151,7 +151,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {data.user_properties.map((p) => (
                     <span key={p.name} className="mono" title={p.note}
-                      style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 3, color: "var(--ink-2)" }}>
+                      style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, color: "var(--ink-2)" }}>
                       {p.name}
                     </span>
                   ))}
@@ -183,7 +183,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
             {data.kpis.map((k) => (
               <div key={k.name} className="card" style={{ padding: "22px 24px" }}>
                 <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{k.name}</h3>
-                <div className="mono" style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4, padding: "10px 12px", marginBottom: 14, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                <div className="mono" style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, padding: "10px 12px", marginBottom: 14, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                   {k.formula}
                 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 12 }}>{k.why_this_game}</div>
@@ -200,7 +200,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
 
         {tab === "ab" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, alignItems: "start" }}>
-            <div style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 6, padding: "26px 28px" }}>
+            <div style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "26px 28px" }}>
               <div className="eyebrow" style={{ color: "var(--on-ink)", marginBottom: 12 }}>가설</div>
               <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, marginBottom: 20 }}>{data.ab_test.hypothesis}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
@@ -239,7 +239,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         )}
 
         {tab === "ddl" && (
-          <pre className="mono" style={{ margin: 0, padding: 24, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 6, fontSize: 12, lineHeight: 1.75, overflowX: "auto", color: "var(--ink)" }}>
+          <pre className="mono" style={{ margin: 0, padding: 24, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 2, fontSize: 12, lineHeight: 1.75, overflowX: "auto", color: "var(--ink)" }}>
             {data.sql_ddl}
           </pre>
         )}

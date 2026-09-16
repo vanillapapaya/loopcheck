@@ -15,16 +15,16 @@ export default function Home() {
       <Header />
       <main className="wrap">
         <section style={{ padding: "72px 0 64px", maxWidth: 720 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 28, padding: "0 11px", border: "1px solid var(--line-3)", borderRadius: 999, fontSize: 12, color: "var(--ink-2)", marginBottom: 26 }}>
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--ok)" }} />
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 28, padding: "0 11px", border: "1px solid var(--line-3)", borderRadius: 2, fontSize: 12, color: "var(--ink-2)", marginBottom: 26 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 2, background: "var(--ok)" }} />
             소규모 게임 팀을 위한 지표 설계와 진단 도구
           </div>
-          <h1 style={{ fontSize: "clamp(34px, 5.4vw, 52px)", lineHeight: 1.2, fontWeight: 600, marginBottom: 22, textWrap: "balance" }}>
+          <h1 style={{ fontSize: "clamp(34px, 5.6vw, 56px)", lineHeight: 1.2, fontWeight: 600, marginBottom: 22, textWrap: "balance" }}>
             쌓을 것을 정하고,
             <br />
             쌓인 것을 읽습니다.
           </h1>
-          <p style={{ fontSize: 17, lineHeight: 1.8, color: "var(--ink-2)", marginBottom: 32 }}>
+          <p className="prose" style={{ fontSize: 17, lineHeight: 1.85, color: "var(--ink-2)", marginBottom: 32 }}>
             게임 장르와 핵심 루프를 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다.
             그 스키마로 쌓은 데이터를 올리면, 어디서 유저가 빠지는지와 무엇을 먼저 고쳐야 하는지를 읽어 드립니다.
           </p>
@@ -70,8 +70,8 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="how" style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 6, padding: "48px 40px", marginBottom: 72 }}>
-          <h2 style={{ fontSize: "clamp(24px, 3.4vw, 32px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 720 }}>
+        <section id="how" style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "48px 40px", marginBottom: 72 }}>
+          <h2 style={{ fontSize: "clamp(26px, 3.6vw, 34px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 720 }}>
             기존 분석 도구는 이미 데이터가 있는 팀을 전제합니다.
           </h2>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: "var(--on-ink)", maxWidth: 720, marginBottom: 34 }}>
@@ -85,7 +85,7 @@ export default function Home() {
               ["표본이 모자라면 모자라다고 씁니다", "구간 표본이 수십 개뿐이면 결론 대신 단서를 답니다. 확신을 파는 대신 확신의 근거를 같이 보여 드립니다."],
               ["상충하는 지표를 같이 놓습니다", "난이도 벽은 최대 이탈 지점이면서 최대 결제 지점이기도 합니다. 한쪽만 보고 내린 개선안은 다른 쪽을 무너뜨립니다."],
             ].map(([t, d]) => (
-              <div key={t} style={{ border: "1px solid #35353A", borderRadius: 4, padding: "18px 20px" }}>
+              <div key={t} style={{ border: "1px solid #35353A", borderRadius: 2, padding: "18px 20px" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--on-ink)" }}>{d}</div>
               </div>

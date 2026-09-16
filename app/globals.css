@@ -48,15 +48,42 @@ a:hover { color: #123761; }
 
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
 
+/* 상자 대신 괘선. 회색 박스를 두르는 대신 위쪽 선과 여백으로 구분한다 */
 .card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+}
+
+/* 누를 수 있는 면과 파일을 떨어뜨리는 면처럼 실제로 "면"이 필요한 곳 */
+.tile {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 2px;
 }
+
+/* 그림·표 캡션. [ 그림 1 ] 처럼 번호를 달아 본문에서 가리킬 수 있게 한다 */
+.figure-title {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.figure-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: 8px;
+}
+
+/* 읽는 글의 폭. 표와 차트만 이 폭을 넘는다 */
+.prose { max-width: 68ch; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  height: 48px; padding: 0 26px; border-radius: 3px;
+  height: 48px; padding: 0 26px; border-radius: 2px;
   background: var(--ink); color: var(--surface);
   font-family: var(--sans); font-size: 15px; font-weight: 500;
   border: 1px solid var(--ink); cursor: pointer; text-align: center;
@@ -66,7 +93,7 @@ a:hover { color: #123761; }
 
 .btn-ghost {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  height: 48px; padding: 0 22px; border-radius: 3px;
+  height: 48px; padding: 0 22px; border-radius: 2px;
   background: transparent; color: var(--ink);
   border: 1px solid var(--line-3);
   font-family: var(--sans); font-size: 15px; font-weight: 500; cursor: pointer;
@@ -74,7 +101,7 @@ a:hover { color: #123761; }
 .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
 
 .eyebrow {
-  font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: var(--muted);
 }
 
 .site-header {

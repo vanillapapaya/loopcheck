@@ -14,7 +14,7 @@ const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform
 
 const field: React.CSSProperties = {
   width: "100%", fontFamily: "var(--sans)", fontSize: 14, color: "var(--ink)",
-  background: "var(--surface)", border: "1px solid var(--line-3)", borderRadius: 3, padding: "10px 12px",
+  background: "var(--surface)", border: "1px solid var(--line-3)", borderRadius: 2, padding: "10px 12px",
 };
 const labelStyle: React.CSSProperties = { display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 };
 
@@ -96,7 +96,7 @@ export default function DesignPage() {
         ) : (
           <>
             <div style={{ maxWidth: 640, marginBottom: 32 }}>
-              <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>장르 선택</h1>
+              <h1 style={{ fontSize: 34, fontWeight: 600, marginBottom: 14 }}>장르 선택</h1>
               <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.75, margin: 0 }}>
                 장르를 고르면 그 장르의 핵심 루프에 맞춘 이벤트 스키마, KPI 정의서, 첫 검증 설계가
                 바로 나옵니다. 목록에 없으면 아래에 핵심 루프를 적어 AI에게 설계를 받으세요.
@@ -104,7 +104,7 @@ export default function DesignPage() {
             </div>
 
             {error && (
-              <div role="alert" style={{ marginBottom: 20, padding: "14px 18px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+              <div role="alert" style={{ marginBottom: 20, padding: "14px 18px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 2, fontSize: 14, color: "var(--danger-ink)" }}>
                 {error}
               </div>
             )}
@@ -116,7 +116,7 @@ export default function DesignPage() {
                   key={p.id}
                   onClick={() => loadPreset(p)}
                   disabled={loading !== null}
-                  className="card"
+                  className="tile"
                   style={{
                     padding: "24px 26px",
                     textAlign: "left",
@@ -141,7 +141,7 @@ export default function DesignPage() {
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{p.coreLoop}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
                     {[p.monetization, p.platform].map((t, i) => (
-                      <span key={`${i}-${t}`} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--muted)" }}>
+                      <span key={`${i}-${t}`} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--muted)" }}>
                         {t}
                       </span>
                     ))}
@@ -182,7 +182,7 @@ export default function DesignPage() {
                 </div>
 
                 {aiError && (
-                  <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+                  <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 2, fontSize: 14, color: "var(--danger-ink)" }}>
                     {aiError}
                   </div>
                 )}
