@@ -142,6 +142,10 @@ export function validateDesign(v: unknown): { ok: true; result: DesignResult } |
     if (!ev || !props(ev.properties)) e.push(`events[${i}].properties는 {name,type} 배열`);
     if (!ev || !["must", "should"].includes(String(ev.priority).trim())) e.push(`events[${i}].priority는 must 또는 should`);
   });
+  if (Array.isArray(o.events)) {
+    const names = o.events.map((ev) => ev?.name).filter(Boolean);
+    if (new Set(names).size !== names.length) e.push("events의 name이 서로 달라야 함");
+  }
   if (!props(o.user_properties) || !(o.user_properties as unknown[]).length) e.push("user_properties는 {name,type} 배열");
   if (!Array.isArray(o.kpis) || o.kpis.length < 3 || !o.kpis.every((k) => k && str(k.name, 120) && str(k.formula, 1500) && str(k.why_this_game, 1000) && str(k.watch_out, 1000))) {
     e.push("kpis는 name/formula/why_this_game/watch_out을 가진 3개 이상");

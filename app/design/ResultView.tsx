@@ -120,7 +120,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(280px, 1fr)", gap: 20, alignItems: "start" }} className="two-col">
             <div className="card" style={{ overflow: "hidden" }}>
               {data.events.map((e, i) => (
-                <div key={e.name} style={{ padding: "16px 22px", borderBottom: i === data.events.length - 1 ? "none" : "1px solid var(--line-2)" }}>
+                <div key={`${i}-${e.name}`} style={{ padding: "16px 22px", borderBottom: i === data.events.length - 1 ? "none" : "1px solid var(--line-2)" }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
                     <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>{e.name}</span>
                     <Badge priority={e.priority} />
@@ -128,8 +128,8 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                   <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)", marginBottom: 8 }}>{e.role}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 6, marginBottom: 10 }}>
                     <span style={{ fontSize: 12, color: "var(--muted)" }}>쓰이는 지표</span>
-                    {e.used_for.map((u) => (
-                      <span key={u} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--ink-2)" }}>{u}</span>
+                    {e.used_for.map((u, i) => (
+                      <span key={`${i}-${u}`} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--ink-2)" }}>{u}</span>
                     ))}
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>

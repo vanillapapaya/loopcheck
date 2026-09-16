@@ -140,8 +140,8 @@ export default function DesignPage() {
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{p.coreLoop}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-                    {[p.monetization, p.platform].map((t) => (
-                      <span key={t} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--muted)" }}>
+                    {[p.monetization, p.platform].map((t, i) => (
+                      <span key={`${i}-${t}`} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 999, color: "var(--muted)" }}>
                         {t}
                       </span>
                     ))}

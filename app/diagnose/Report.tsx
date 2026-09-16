@@ -103,8 +103,8 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
           <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
           {!!f.options?.length && (
             <div style={{ marginBottom: 16, paddingLeft: 2 }}>
-              {f.options.map((o) => (
-                <div key={o.label} style={{ marginBottom: 8 }}>
+              {f.options.map((o, i) => (
+                <div key={`${i}-${o.label}`} style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.6 }}>{o.label}</div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- {o.detail}</div>
                 </div>
@@ -114,8 +114,8 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
           )}
           {f.design && <DesignBlock d={f.design} />}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, paddingTop: 14, marginTop: 14, borderTop: "1px solid var(--line-2)" }}>
-            {f.evidence.map((e) => (
-              <div key={e.label}>
+            {f.evidence.map((e, i) => (
+              <div key={`${i}-${e.label}`}>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>{e.label}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.6 }}>{e.text}</div>
               </div>
