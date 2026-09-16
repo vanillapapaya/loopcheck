@@ -34,7 +34,7 @@ function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (
       <div role="group" aria-label="해석 방식" style={{ display: "flex", border: "1px solid var(--line-3)", background: "var(--bg)" }}>
         <button type="button" aria-pressed={useAi} disabled={ai.status !== "done"} onClick={() => onPick(false)}
           style={{ ...seg(useAi), opacity: ai.status === "done" ? 1 : 0.45, cursor: ai.status === "done" ? "pointer" : "default" }}>
-          AI 해석{ai.status === "done" ? <span className="mono" style={{ fontSize: 12, fontWeight: 400 }}> {ai.model}</span> : null}
+          AI 해석
         </button>
         <button type="button" aria-pressed={!useAi} onClick={() => onPick(true)} style={seg(!useAi)}>규칙 기반</button>
       </div>
@@ -44,13 +44,32 @@ function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (
   );
 }
 
+/**
+ * 수치의 방향을 색으로 한 번 더 보여준다. 감소·하락은 빨강, 증가·상승은 초록.
+ * 색만으로 의미를 전하지 않도록 방향을 가리키는 단어까지 함께 감싼다.
+ */
+const TONE = /(\d[\d,.]*\s*(?:%p|%|명|건|원|분|일|회|배)?[^\d.,·\n]{0,6}?(?:감소|하락|낮아|낮고|낮음|낮습니다|증가|상승|개선|올리|올라|늘리|늘어|회복))/g;
+function Tone({ text }: { text: string }) {
+  const parts = text.split(TONE);
+  if (parts.length === 1) return <>{text}</>;
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 0 ? p : (
+          <span key={i} style={{ color: /감소|하락|낮/.test(p) ? "var(--danger-ink)" : "var(--good-ink)", fontWeight: 500 }}>{p}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 /** 요약을 문장 단위로 끊어 세 줄 안에 담는다 */
 function summaryLines(text: string): string[] {
   const parts = text.split(/(?<=[다요]\.)\s+/).map((t) => t.trim()).filter(Boolean);
   return parts.length <= 3 ? parts : [parts[0], parts[1], parts.slice(2).join(" ")];
 }
 
-/** 절 제목. 요약·결정 사항·분석 내용이 같은 양식을 쓴다 */
+/** 절 제목. 요약·제안 사항·분석 내용이 같은 양식을 쓴다 */
 function SectionHead({ title, note }: { title: string; note?: string }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 10, paddingTop: 18, borderTop: "2px solid var(--ink)", marginBottom: 14 }}>
@@ -109,13 +128,13 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
             <h3 style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.6 }}>{f.title}</h3>
             {f.tag && <span style={{ fontSize: 12, color: "var(--danger-ink)" }}>({f.tag})</span>}
           </div>
-          <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
+          <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}><Tone text={f.body} /></p>
           {!!f.options?.length && (
             <div style={{ marginBottom: 16, paddingLeft: 2 }}>
               {f.options.map((o, i) => (
                 <div key={`${i}-${o.label}`} style={{ marginBottom: 8 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.7 }}>{o.label}</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- {o.detail}</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- <Tone text={o.detail} /></div>
                 </div>
               ))}
               {f.preference && <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink)", marginTop: 10 }}>{f.preference}</div>}
@@ -126,7 +145,7 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
             {f.evidence.map((e, i) => (
               <div key={`${i}-${e.label}`}>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>{e.label}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.6 }}>{e.text}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.6 }}><Tone text={e.text} /></div>
               </div>
             ))}
           </div>
@@ -229,13 +248,13 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         {summaryLines(summary).map((line, i) => (
           <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.8 }}>
             <span aria-hidden style={{ color: "var(--muted)", flexShrink: 0 }}>-</span>
-            <span>{line}</span>
+            <span><Tone text={line} /></span>
           </li>
         ))}
       </ul>
 
-      {/* 결정 사항 */}
-      <div style={{ marginTop: 40 }}><SectionHead title="결정 사항" note="영향 유저 수가 많은 순" /></div>
+      {/* 제안 사항 */}
+      <div style={{ marginTop: 40 }}><SectionHead title="제안 사항" note="영향 유저 수가 많은 순" /></div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} />)}
         {!findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
@@ -244,7 +263,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       {/* 분석 내용 */}
       <div style={{ marginTop: 44 }}><SectionHead title="분석 내용" note="계산 기준은 각 그림의 각주" /></div>
       <p style={{ margin: "0 0 20px", fontSize: 14, lineHeight: 1.8, color: "var(--ink-2)", maxWidth: 940 }}>
-        위 결정의 근거가 된 계산 결과입니다. 그림마다 분모와 집계 기준을 각주로 달았고, 규칙 해석과 AI 해석 모두 여기 있는 숫자만 참조합니다.
+        위 제안의 근거가 된 계산 결과입니다. 그림마다 분모와 집계 기준을 각주로 달았고, 규칙 해석과 AI 해석 모두 여기 있는 숫자만 참조합니다.
         표본이 {num(100)} 미만인 구간은 결론 대신 단서로만 다뤘습니다.
       </p>
 
@@ -412,8 +431,8 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <div style={{ display: "flex", gap: 12 }}><span style={{ width: 34, flexShrink: 0 }}>계산</span><span>{sourceNote}</span></div>
         <div style={{ display: "flex", gap: 12 }}><span style={{ width: 34, flexShrink: 0 }}>해석</span><span>
           {useAi
-            ? "AI가 집계 수치를 보고 작성. 계산 결과에 없는 숫자가 섞인 답은 코드가 반려"
-            : "계산 결과에 규칙을 적용한 해석. AI 해석으로 바꿔 비교 가능"}
+            ? <>AI가 집계 수치를 보고 작성(<span className="mono">{ai.status === "done" ? ai.model : ""}</span>). 계산 결과에 없는 숫자가 섞인 답은 코드가 반려</>
+            : "계산 결과에 규칙을 적용한 해석. AI가 쓴 문장 없음"}
         </span></div>
       </div>
     </div>
