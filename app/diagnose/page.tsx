@@ -188,7 +188,7 @@ export default function DiagnosePage() {
             <div style={{ gridColumn: "span 2", minWidth: 0 }} className="diag-main">
               <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h1>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--ink-2)", margin: "0 0 26px" }}>
-                쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리합니다.
+                쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리해 드립니다.
                 컬럼 이름이 달라도 됩니다. 무엇인지만 알려 주시면 맞춰 읽습니다.
               </p>
 
@@ -308,9 +308,9 @@ export default function DiagnosePage() {
               <div className="card" style={{ padding: "20px 22px" }}>
                 <div className="eyebrow" style={{ marginBottom: 12 }}>데이터를 어떻게 다루나요</div>
                 {[
-                  "파일은 이 브라우저 안에서만 읽고 계산합니다. 원본 행은 서버로 가지 않습니다.",
-                  "AI 해석 단계에 넘기는 것은 집계된 지표 문장뿐이고, 유저 ID 같은 개별 값은 들어가지 않습니다.",
-                  "탭을 닫으면 읽은 데이터도 함께 사라집니다. 저장하지 않습니다.",
+                  "파일은 이 브라우저 안에서만 읽고 계산. 원본 행은 서버로 전송하지 않음",
+                  "AI 해석에 넘기는 것은 집계 지표 문장뿐이며, 유저 ID 등 개별 값은 미포함",
+                  "탭 종료 시 읽은 데이터도 함께 소멸. 별도 저장 없음",
                 ].map((t) => (
                   <div key={t} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }} aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
@@ -321,7 +321,7 @@ export default function DiagnosePage() {
               <div className="card" style={{ padding: "20px 22px" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>파일 형식</div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 10 }}>
-                  유저와 세션은 필수, 나머지는 있는 만큼만 올리면 됩니다. 날짜는 YYYY-MM-DD로 시작해야 합니다. 샘플 파일을 열어 보면 형식을 바로 알 수 있습니다.
+                  유저와 세션은 필수, 나머지는 있는 만큼만 올리면 됩니다. 날짜는 YYYY-MM-DD로 시작해야 합니다. 샘플 파일을 열어 보면 형식을 바로 확인할 수 있습니다.
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 12px" }}>
                   {SAMPLE.map(([, f]) => <a key={f} href={`/sample/${f}`} className="mono" style={{ fontSize: 12 }}>{f}</a>)}

@@ -8,6 +8,7 @@ import { buildReport } from "../lib/diagnose/findings.ts";
 import { buildFacts, validateAiReport } from "../lib/diagnose/interpret.ts";
 import { autoMap, identifyTable, missingRequired, normalizeTable } from "../lib/diagnose/schema.ts";
 import { validateDesign } from "../lib/llm/designer.ts";
+import { fails, lintBullet, lintProse } from "../lib/voice/lint.ts";
 
 const dir = process.argv[2] ?? join(import.meta.dirname, "../../data");
 const read = (f) => parseCsv(readFileSync(join(dir, f), "utf8"));
@@ -91,7 +92,24 @@ check("시그널1×5 충돌: 최대 정체 레벨 = 첫 결제 최다 레벨", t
 
 // 리포트 해석 규칙이 정답지의 결론에 도달하는가
 const rep = buildReport(m);
-check("리포트 1순위 = 레벨 벽, 2순위 = 저사양, 3순위 = 채널", rep.findings.map((f) => f.id).join(",") === "level_wall,device_perf,channel_quality", rep.findings.map((f) => f.id).join(","));
+const findingIds = rep.findings.map((f) => f.id).join(",");
+check("리포트 1순위 = 레벨 벽, 광고 빈도 개선안 포함", rep.findings[0].id === "level_wall" && findingIds.includes("ad_frequency"), findingIds);
+check("리포트 1순위에 1안·2안과 선호 대안", rep.findings[0].options?.length === 2 && !!rep.findings[0].preference, rep.findings[0].preference ?? "없음");
+
+// 문체 규칙 (prompts/voice.md 4-1)
+const voiceIssues = [
+  ...lintProse(rep.summary, "summary"),
+  ...rep.findings.flatMap((f) => [
+    ...lintProse(f.title, `${f.id}.title`), ...lintProse(f.body, `${f.id}.body`),
+    ...f.evidence.flatMap((e, i) => lintBullet(e.text, `${f.id}.evidence[${i}]`)),
+    ...(f.options ?? []).flatMap((o, i) => lintBullet(o.detail, `${f.id}.options[${i}]`)),
+  ]),
+];
+check("규칙 해석이 문체 린터를 통과 (금지어·이모지·물결표·종결 혼용·날조 벤치마크)", fails(voiceIssues).length === 0, fails(voiceIssues).map((i) => i.detail).join(" / ") || "fail 0건");
+const bulletEndings = rep.findings.flatMap((f) => f.evidence.map((e) => e.text.trim()));
+check("근거 항목은 서술형으로 끝나지 않음, 요약은 서술형", !bulletEndings.some((t) => /(습니다|입니다|합니다|됩니다)\.?$/.test(t)) && /(습니다|입니다)\.$/.test(rep.summary.trim()),
+  `근거 ${bulletEndings.length}개 중 서술형 종결 ${bulletEndings.filter((t) => /(습니다|입니다)\.?$/.test(t)).length}개`);
+check("비율 차이는 %p로 표기", rep.summary.includes("%p"), rep.summary.match(/[\d.]+%p/)?.[0] ?? "없음");
 check("리포트 벽 = L12, 매출 충돌 인지", rep.wall?.level.level === 12 && rep.wall.conflict, `L${rep.wall?.level.level} conflict=${rep.wall?.conflict}`);
 check("리포트 목표 클리어율이 정답지 권고(45-50%) 안", rep.wall.targetClearPct >= 45 && rep.wall.targetClearPct <= 50, `${rep.wall.targetClearPct}%`);
 check("리포트 1순위 개선안에 1,200원 오퍼", rep.findings[0].body.includes("1,200원"), rep.findings[0].title);

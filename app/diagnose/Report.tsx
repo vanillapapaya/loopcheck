@@ -46,7 +46,12 @@ function InterpretStatus({ ai, showRules, onToggle }: { ai: Ai; showRules: boole
   );
 }
 
-type CardFinding = { title: string; body: string; tag?: string | null; evidence: { label: string; text: string }[] };
+type CardFinding = {
+  title: string; body: string; tag?: string | null;
+  evidence: { label: string; text: string }[];
+  options?: { label: string; detail: string }[];
+  preference?: string | null;
+};
 
 function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   return (
@@ -62,6 +67,17 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
             {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "#FBE9E7", color: "var(--danger-ink)", borderRadius: 3 }}>{f.tag}</span>}
           </div>
           <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
+          {!!f.options?.length && (
+            <div style={{ marginBottom: 16, paddingLeft: 2 }}>
+              {f.options.map((o) => (
+                <div key={o.label} style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.6 }}>{o.label}</div>
+                  <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- {o.detail}</div>
+                </div>
+              ))}
+              {f.preference && <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink)", marginTop: 10 }}>{f.preference}</div>}
+            </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, paddingTop: 14, borderTop: "1px solid var(--line-2)" }}>
             {f.evidence.map((e) => (
               <div key={e.label}>
@@ -80,7 +96,7 @@ function ChartCard({ title, note, sub, children }: { title: string; note?: strin
   return (
     <div className="card" style={{ padding: "22px 24px", minWidth: 0 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600 }}>{title}</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 600 }}>[ {title} ]</h3>
         {note && <span style={{ fontSize: 12, color: "var(--muted)" }}>{note}</span>}
       </div>
       {sub && <p style={{ margin: "0 0 14px", fontSize: 12, lineHeight: 1.6, color: "var(--muted)" }}>{sub}</p>}
@@ -171,10 +187,10 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       <h2 style={{ fontSize: 22, fontWeight: 600, margin: "44px 0 16px" }}>근거가 된 숫자</h2>
 
       <div style={grid2}>
-        <ChartCard title="코호트 리텐션" note="classic N-day" sub="설치 후 N일째에 접속한 비율입니다. 분모는 N일째가 관측 기간 안에 들어온 유저만 셉니다.">
+        <ChartCard title="코호트 리텐션" note="classic N-day" sub="※ 리텐션 : classic N-day 기준. 설치 후 N일째 접속 여부로 집계하며, 분모는 N일째가 관측 기간 안에 들어온 유저만 포함">
           <RetentionChart m={m} />
         </ChartCard>
-        {m.levels.length > 0 && <ChartCard title="레벨별 클리어율" note="레벨 1–20" sub="두 선이 크게 벌어지는 레벨은 재도전이 몰리는 구간입니다.">
+        {m.levels.length > 0 && <ChartCard title="레벨별 클리어율" note="레벨 1–20" sub="※ 시도 대비 : 분모는 해당 레벨의 시도 수, 도달자 대비 : 분모는 해당 레벨 도달 유저 수. 두 값이 벌어지는 레벨이 재도전 구간">
           <Legend items={[
             { label: "시도 대비 (분모: 시도 수)", swatch: "bar", color: "var(--series)" },
             { label: "도달자 대비 (분모: 도달 유저)", swatch: "line", color: "var(--ink-2)" },
@@ -184,10 +200,10 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       </div>
 
       <div style={grid2}>
-        {m.segments.channel.length > 1 && <ChartCard title="획득 채널별 D7 리텐션" sub="오른쪽 회색 글자는 D1과 설치 비중입니다.">
+        {m.segments.channel.length > 1 && <ChartCard title="획득 채널별 D7 리텐션" sub="※ 분모는 채널별 설치 유저. 오른쪽 회색 글자는 D1과 전체 설치 대비 비중">
           <ChannelChart channels={m.segments.channel} worstKey={worstChannel} />
         </ChartCard>}
-        {m.segments.deviceTier.length > 1 && <ChartCard title="기기 등급별 평균 세션 길이" sub={`저사양 기기가 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)}입니다.`}>
+        {m.segments.deviceTier.length > 1 && <ChartCard title="기기 등급별 평균 세션 길이" sub={`※ 세션 길이는 세션당 평균. 저사양 구간이 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)} 차지`}>
           <DeviceChart tiers={m.segments.deviceTier} />
         </ChartCard>}
       </div>
@@ -197,11 +213,11 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <div className="card" style={{ padding: "24px 26px", marginBottom: 16 }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
             <WarnIcon />
-            <h3 style={{ fontSize: 15, fontWeight: 600 }}>광고 빈도 — 집계 방식이 결론을 뒤집는 구간</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 600 }}>[ 광고 빈도 — 집계 방식이 결론을 뒤집는 구간 ]</h3>
           </div>
           <p style={{ margin: "0 0 20px", fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", maxWidth: 1000 }}>
-            누적 시청량으로 보면 광고를 많이 볼수록 잔존이 높아 보입니다. 오래 남은 유저가 광고를 많이 본 것이지 그 반대가 아닙니다.
-            경과일을 고정하고 당일 시청량 대비 익일 접속으로 다시 보면 방향이 달라집니다.
+            누적 시청량으로 보면 광고를 많이 볼수록 잔존이 높아 보입니다. 오래 남은 유저일수록 시청 누적량이 커지는 구조라, 누적량은 잔존의 원인이 아니라 결과입니다.
+            경과일을 고정하고 당일 시청 수 대비 익일 접속으로 다시 집계하면 방향이 달라집니다.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 20 }}>
             <div style={{ padding: 18, border: "1px solid var(--line-2)", borderRadius: 4, background: "var(--surface-2)" }}>
@@ -222,9 +238,8 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "#FDF8EE", borderRadius: 4 }}>
               <WarnIcon />
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
-                <strong style={{ fontWeight: 600, color: "var(--ink)" }}>다만 {rep.ads.last.label} 구간은 표본이 {num(rep.ads.last.n)}개뿐입니다.</strong>{" "}
-                역전이 시작됐다고 단정하기엔 부족합니다. 광고 상한을 당장 내리기보다 이 구간의 표본이 쌓일 때까지 지켜보거나 A/B로 직접 확인하세요.
-                흐린 막대가 표본 {num(100)}개 미만인 구간입니다.
+                <strong style={{ fontWeight: 600, color: "var(--ink)" }}>단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다.</strong>{" "}
+                광고 상한 조정 전 표본 축적 또는 A/B 확인을 권합니다. 흐린 막대가 n {num(100)} 미만 구간입니다.
               </div>
             </div>
           )}
@@ -233,9 +248,9 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
 
       {/* 수익화 */}
       <div className="card" style={{ padding: "24px 26px", marginBottom: 16 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>수익화</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>[ 수익화 ]</h3>
         <p style={{ margin: "0 0 20px", fontSize: 12, color: "var(--muted)" }}>
-          {m.meta.purchases ? "결제 전환율의 분모는 설치 유저 수입니다." : "결제 데이터를 올리지 않아 수익화 수치는 비어 있습니다."}
+          {m.meta.purchases ? "※ 결제 전환율 : 분모는 설치 유저 수. ARPPU : 분모는 결제자 수" : "※ 결제 데이터 미포함으로 수익화 수치 계산 제외"}
         </p>
         {m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
           <div>
@@ -277,9 +292,9 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <div style={{ display: "flex", gap: 12, marginTop: 20, padding: "14px 16px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4 }}>
           <WarnIcon />
           <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
-            <strong style={{ fontWeight: 600, color: "var(--ink)" }}>결제 퍼널(노출 → 클릭 → 구매)은 계산하지 않았습니다.</strong>{" "}
-            이 데이터에는 오퍼 노출과 클릭 로그가 없어서, 없는 단계를 추정해 채우지 않았습니다.
-            {" "}<Link href="/design">지표 설계기</Link>의 오퍼 노출·구매 단계 이벤트를 쌓으면 다음 진단부터 어느 단계에서 끊기는지 보입니다.
+            <strong style={{ fontWeight: 600, color: "var(--ink)" }}>결제 퍼널(노출 → 클릭 → 구매)은 계산에서 제외했습니다.</strong>{" "}
+            오퍼 노출·클릭 로그 미포함이 사유이며, 없는 단계를 추정해 채우지 않았습니다.
+            {" "}<Link href="/design">지표 설계기</Link>의 오퍼 노출·구매 단계 이벤트를 쌓으면 다음 진단부터 어느 단계에서 끊기는지 확인할 수 있습니다.
           </div>
         </div>
       </div>
@@ -290,7 +305,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 16 }}>
           <div style={{ overflowX: "auto" }}>
             <table className="mono" style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
-              <caption style={{ textAlign: "left", fontFamily: "var(--sans)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>리텐션</caption>
+              <caption style={{ textAlign: "left", fontFamily: "var(--sans)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>[ 리텐션 ]</caption>
               <thead><tr><th style={{ ...th, textAlign: "left" }}>일</th><th style={th}>잔존</th><th style={th}>분모</th><th style={th}>비율</th><th style={th}>95% 구간</th></tr></thead>
               <tbody>
                 {m.retention.map(({ day, r }) => (
@@ -301,7 +316,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
           </div>
           {m.levels.length > 0 && <div style={{ overflowX: "auto" }}>
             <table className="mono" style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
-              <caption style={{ textAlign: "left", fontFamily: "var(--sans)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>레벨 (1–20)</caption>
+              <caption style={{ textAlign: "left", fontFamily: "var(--sans)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>[ 레벨 1-20 ]</caption>
               <thead><tr><th style={{ ...th, textAlign: "left" }}>레벨</th><th style={th}>도달</th><th style={th}>시도 대비</th><th style={th}>도달자 대비</th><th style={th}>미도달</th></tr></thead>
               <tbody>
                 {m.levels.slice(0, 20).map((l) => (

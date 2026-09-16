@@ -25,8 +25,8 @@ export default function Home() {
             쌓인 것을 읽는다
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.8, color: "var(--ink-2)", marginBottom: 32 }}>
-            장르와 핵심 루프만 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다. 그 스키마로 쌓은
-            데이터를 올리면, 어디서 유저가 빠지고 왜 빠지는지를 읽어 드립니다.
+            장르와 핵심 루프를 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다. 그 스키마로 쌓은
+            데이터를 올리면, 어디서 유저가 빠지는지와 무엇을 먼저 고쳐야 하는지를 한국어로 읽어 드립니다.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             <Link href="/design" className="btn">무료로 지표 설계하기</Link>
@@ -45,7 +45,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              아직 로그를 안 쌓고 있어도 괜찮습니다. 무엇을 이벤트로 찍어야 하는지부터 정해 드립니다.
+              아직 로그를 안 쌓고 있어도 됩니다. 이 게임의 루프에서 무엇을 이벤트로 남겨야 하는지부터 정해 드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />로그 이벤트 스키마와 SQL DDL</div>
@@ -61,7 +61,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              쌓인 CSV를 올리면 리텐션, 퍼널, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
+              쌓인 CSV를 올리면 리텐션, 레벨 이탈, 결제, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />코호트 리텐션과 이탈 구간 특정</div>
@@ -83,7 +83,8 @@ export default function Home() {
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
             {[
-              ["상관관계를 인과로 읽지 않습니다", "누적 광고 시청량으로 집계하면 “많이 볼수록 잔존이 높다”가 나옵니다. 오래 남은 유저가 광고를 많이 본 것이지 그 반대가 아닙니다. 경과일을 고정하고 다시 봅니다."],
+              ["무엇을 쌓을지 정하는 앞단계부터 합니다", "분석 도구는 이벤트가 이미 찍히고 있다고 전제합니다. 이 게임의 루프에서 무엇을 이벤트로 남길지 정하는 단계는 비어 있습니다. 거기서부터 시작합니다."],
+              ["상관관계를 인과로 읽지 않습니다", "누적 광고 시청량으로 집계하면 “많이 볼수록 잔존이 높다”가 나옵니다. 오래 남은 유저일수록 시청 누적량이 커지는 구조라, 누적량은 잔존의 원인이 아니라 결과입니다. 경과일을 고정해 다시 집계합니다."],
               ["표본이 모자라면 모자라다고 씁니다", "구간 표본이 수십 개뿐이면 결론 대신 단서를 답니다. 확신을 파는 대신 확신의 근거를 같이 보여 드립니다."],
               ["상충하는 지표를 같이 놓습니다", "난이도 벽은 최대 이탈 지점이면서 최대 결제 지점이기도 합니다. 한쪽만 보고 내린 개선안은 다른 쪽을 무너뜨립니다."],
             ].map(([t, d]) => (
