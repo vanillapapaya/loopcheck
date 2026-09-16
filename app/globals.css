@@ -78,3 +78,23 @@ h1, h2, h3 { letter-spacing: -0.025em; margin: 0; }
 @media (max-width: 760px) {
   .wrap { padding: 0 16px; }
 }
+
+/* 인쇄 = PDF 저장. 지원사업 보고서에 넣을 산출물이 되게 한다. */
+@media print {
+  @page { size: A4; margin: 14mm; }
+
+  html, body { background: #fff; }
+  .wrap { max-width: none; padding: 0; }
+  .site-header, .no-print { display: none !important; }
+
+  /* 배경색과 상태색이 인쇄에서도 남아야 위험 구간이 구분된다 */
+  *, *::before, *::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .card { break-inside: avoid; border-color: #D6CFC2; }
+  svg, table { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+
+  /* 접어 둔 근거 표도 함께 인쇄한다 */
+  details > *:not(summary) { display: block !important; }
+  details > summary { list-style: none; }
+}

@@ -28,6 +28,7 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
    used_for에는 이 설계서의 kpis에 실제로 있는 지표 이름을 쓴다.
 9. 출력은 한국어로 쓴다. 이벤트명, 속성명, 테이블·컬럼명 같은 코드 식별자만 영문 snake_case로 쓰고
    지표 이름과 설명 문장은 한국어로 쓴다.
+10. do_not_track은 팀에게 직접 말하는 자리다. 존댓말 서술형으로 쓴다. 나머지 필드는 설명문이므로 평서형으로 쓴다.
 
 ## 금지 사항
 
@@ -68,7 +69,7 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
     "min_duration_days": 7,
     "sample_size_note": "표본 크기 계산에 필요한 입력값과 계산 방법"
   },
-  "do_not_track": ["지금 단계에서 심지 말 것과 그 이유"],
+  "do_not_track": ["지금 단계에서 찍지 말 것과 그 이유. 존댓말 서술형 한두 문장 (~하세요, ~습니다)"],
   "sql_ddl": "위 스키마의 CREATE TABLE 문 (표준 SQL)"
 }
 

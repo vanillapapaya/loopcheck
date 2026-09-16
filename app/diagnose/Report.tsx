@@ -39,7 +39,7 @@ function InterpretStatus({ ai, showRules, onToggle }: { ai: Ai; showRules: boole
       <span className="mono" style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3 }}>
         {showRules ? "규칙 기반 해석" : `AI 해석 · ${ai.model}`}
       </span>
-      <button onClick={onToggle} style={{ background: "none", border: "none", padding: 0, fontFamily: "var(--sans)", fontSize: 12, color: "var(--link)", cursor: "pointer" }}>
+      <button onClick={onToggle} className="no-print" style={{ background: "none", border: "none", padding: 0, fontFamily: "var(--sans)", fontSize: 12, color: "var(--link)", cursor: "pointer" }}>
         {showRules ? "AI 해석 보기" : "규칙 기반과 비교"}
       </button>
     </span>
@@ -159,7 +159,13 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             <span>레벨 시도 <span className="mono">{num(m.meta.attempts)}</span>건</span>
           </div>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 32 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 32, alignItems: "flex-end" }}>
+          <button className="btn-ghost no-print" onClick={() => window.print()} style={{ height: 38, fontSize: 14, alignSelf: "center" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 3v12" /><path d="M7 12l5 5 5-5" /><path d="M4 20h16" />
+            </svg>
+            PDF로 저장
+          </button>
           {d1 && <Stat label="D1" value={pct(d1.rate)} />}
           {d7 && <Stat label="D7" value={pct(d7.rate)} />}
           {m.meta.purchases > 0 && <Stat label="결제 전환" value={pct(m.monetization.payers.rate)} />}
@@ -302,6 +308,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       {/* 표 보기 */}
       <details className="card" style={{ padding: "18px 24px" }}>
         <summary style={{ cursor: "pointer", fontSize: 14, fontWeight: 600 }}>계산 근거 표로 보기</summary>
+        <div className="no-print" style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>PDF로 저장하면 이 표도 함께 들어갑니다.</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 24, marginTop: 16 }}>
           <div style={{ overflowX: "auto" }}>
             <table className="mono" style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
