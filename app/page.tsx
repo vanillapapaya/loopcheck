@@ -40,7 +40,6 @@ export default function Home() {
           <div className="card" style={{ padding: 30 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>01</span>
-              <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 8px", background: "#ECE7DC", borderRadius: 3, color: "var(--ink-2)" }}>무료</span>
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
@@ -56,7 +55,6 @@ export default function Home() {
           <div className="card" style={{ padding: 30 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>02</span>
-              <span style={{ fontSize: 12, fontWeight: 600, padding: "3px 8px", background: "var(--ink)", color: "var(--surface)", borderRadius: 3 }}>프리미엄</span>
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>

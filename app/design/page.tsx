@@ -87,9 +87,7 @@ export default function DesignPage() {
             <button className="btn-ghost" style={{ height: 38, fontSize: 14 }} onClick={() => setResult(null)}>
               다른 장르 보기
             </button>
-          ) : (
-            <span style={{ fontSize: 13, color: "var(--muted)" }}></span>
-          )
+          ) : undefined
         }
       />
 
@@ -101,7 +99,7 @@ export default function DesignPage() {
             <div style={{ maxWidth: 640, marginBottom: 32 }}>
               <h1 style={{ fontSize: 30, fontWeight: 600, marginBottom: 12 }}>장르 선택</h1>
               <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.75, margin: 0 }}>
-                장르를 고르면 그 장르의 핵심 루프에 맞춘 이벤트 스키마, KPI 정의서, 첫 A/B 설계안이
+                장르를 고르면 그 장르의 핵심 루프에 맞춘 이벤트 스키마, KPI 정의서, 첫 검증 설계가
                 바로 나옵니다. 목록에 없으면 아래에 핵심 루프를 적어 AI에게 설계를 받으세요.
               </p>
             </div>
@@ -112,6 +110,10 @@ export default function DesignPage() {
               </div>
             )}
 
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: 10, marginBottom: 14 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600 }}>지표 설계 예시</h2>
+              <span style={{ fontSize: 13, color: "var(--muted)" }}>네 장르의 설계서를 그대로 열어 볼 수 있습니다</span>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16, marginBottom: 40 }}>
               {PRESETS.map((p) => (
                 <button
