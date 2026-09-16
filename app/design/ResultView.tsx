@@ -39,6 +39,23 @@ export default function ResultView({ data, label, source }: { data: DesignResult
   const [tab, setTab] = useState<Tab>("events");
   const [copied, setCopied] = useState(false);
 
+  /** 엑셀에서 바로 열리는 컬럼 명세서. 한글이 깨지지 않게 BOM을 붙인다 */
+  function downloadSpec() {
+    const cell = (v: string | undefined) => `"${(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [["구분", "이벤트", "우선순위", "컬럼", "타입", "설명"]];
+    for (const e of data.events) {
+      for (const p of e.properties) rows.push(["이벤트", e.name, e.priority === "must" ? "필수" : "추천", p.name, p.type, p.note ?? ""]);
+    }
+    for (const p of data.user_properties) rows.push(["유저 속성", "users", "필수", p.name, p.type, p.note ?? ""]);
+    const csv = "\uFEFF" + rows.map((r) => r.map(cell).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `loopcheck-스키마-명세서-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function download() {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -86,6 +103,9 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         <button className="btn" style={{ height: 42, fontSize: 14 }} onClick={download}>
           JSON 내려받기
         </button>
+        <button className="btn-ghost" style={{ height: 42, fontSize: 14 }} onClick={downloadSpec}>
+          명세서 CSV
+        </button>
         <button className="btn-ghost" style={{ height: 42, fontSize: 14 }} onClick={copyDdl}>
           {copied ? "복사했습니다" : "DDL 복사"}
         </button>
@@ -132,14 +152,18 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                       <span key={`${i}-${u}`} style={{ fontSize: 12, padding: "2px 8px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--ink-2)" }}>{u}</span>
                     ))}
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {e.properties.map((p) => (
-                      <span key={p.name} className="mono" title={p.note}
-                        style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, color: "var(--ink-2)" }}>
-                        {p.name}
-                        <span style={{ color: "var(--muted)" }}>:{p.type}</span>
-                      </span>
-                    ))}
+                  <div style={{ overflowX: "auto" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                      <tbody>
+                        {e.properties.map((p, j) => (
+                          <tr key={`${j}-${p.name}`} style={{ borderTop: "1px solid var(--line-2)" }}>
+                            <td className="mono" style={{ padding: "6px 10px 6px 0", verticalAlign: "top", whiteSpace: "nowrap" }}>{p.name}</td>
+                            <td className="mono" style={{ padding: "6px 12px 6px 0", verticalAlign: "top", whiteSpace: "nowrap", color: "var(--muted)" }}>{p.type}</td>
+                            <td style={{ padding: "6px 0", verticalAlign: "top", lineHeight: 1.6, color: "var(--ink-2)" }}>{p.note ?? ""}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               ))}
@@ -148,12 +172,13 @@ export default function ResultView({ data, label, source }: { data: DesignResult
             <div className="aside" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
               <div>
                 <div className="eyebrow" style={{ marginBottom: 12 }}>유저 고정 속성</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {data.user_properties.map((p) => (
-                    <span key={p.name} className="mono" title={p.note}
-                      style={{ fontSize: 11, padding: "3px 7px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 2, color: "var(--ink-2)" }}>
-                      {p.name}
-                    </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {data.user_properties.map((p, j) => (
+                    <div key={`${j}-${p.name}`}>
+                      <span className="mono" style={{ fontSize: 12, color: "var(--ink)" }}>{p.name}</span>
+                      <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}> {p.type}</span>
+                      {p.note && <div style={{ lineHeight: 1.6 }}>{p.note}</div>}
+                    </div>
                   ))}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 12, lineHeight: 1.6 }}>

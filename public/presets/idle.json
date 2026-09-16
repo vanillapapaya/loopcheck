@@ -177,7 +177,7 @@
         {
           "name": "building_id",
           "type": "string",
-          "note": ""
+          "note": "업그레이드를 완료한 생산 시설의 고유 식별자이다."
         },
         {
           "name": "new_level",
@@ -187,7 +187,7 @@
         {
           "name": "cost",
           "type": "float",
-          "note": ""
+          "note": "시설 업그레이드에 소모된 재화의 양이다."
         },
         {
           "name": "seconds_since_prev_upgrade",
@@ -202,7 +202,7 @@
         {
           "name": "prestige_level",
           "type": "int",
-          "note": ""
+          "note": "업그레이드 시점 유저의 누적 프레스티지(리셋) 횟수이다."
         }
       ],
       "priority": "must",
@@ -219,12 +219,12 @@
         {
           "name": "building_id",
           "type": "string",
-          "note": ""
+          "note": "비용 부족 등으로 업그레이드가 막힌 생산 시설의 고유 식별자이다."
         },
         {
           "name": "target_level",
           "type": "int",
-          "note": ""
+          "note": "업그레이드를 시도했으나 도달하지 못한 목표 시설 레벨이다."
         },
         {
           "name": "shortfall_ratio",
@@ -244,7 +244,7 @@
         {
           "name": "prestige_level",
           "type": "int",
-          "note": ""
+          "note": "업그레이드 정체 발생 시점의 누적 프레스티지 횟수로, 정체 구간 파악에 사용된다."
         }
       ],
       "priority": "must",
@@ -270,7 +270,7 @@
         {
           "name": "current_prestige_level",
           "type": "int",
-          "note": ""
+          "note": "리셋 가능 알림 노출 시점에 유저가 보유한 현재 프레스티지 횟수이다."
         },
         {
           "name": "seconds_since_run_start",
@@ -352,7 +352,7 @@
         {
           "name": "prestige_level",
           "type": "int",
-          "note": ""
+          "note": "과금 상품이 노출된 시점 유저의 누적 프레스티지 횟수이다."
         },
         {
           "name": "blocked_recently",
@@ -373,17 +373,17 @@
         {
           "name": "offer_id",
           "type": "string",
-          "note": ""
+          "note": "유저가 클릭한 과금 상품 또는 인앱 오퍼의 고유 식별자이다."
         },
         {
           "name": "offer_type",
           "type": "string",
-          "note": ""
+          "note": "보상형 광고, 패키지 구매 등 클릭한 과금 상품의 유형이다."
         },
         {
           "name": "placement",
           "type": "string",
-          "note": ""
+          "note": "정체 구간 팝업, 상점 UI 등 오퍼가 노출되어 클릭된 게임 내 위치이다."
         },
         {
           "name": "impression_id",
@@ -413,7 +413,7 @@
         {
           "name": "offer_type",
           "type": "string",
-          "note": ""
+          "note": "구매 또는 보상 지급이 최종 완료된 과금 상품의 유형이다."
         },
         {
           "name": "status",
@@ -475,7 +475,7 @@
         {
           "name": "prestige_level",
           "type": "int",
-          "note": ""
+          "note": "재화 변동 발생 시점의 누적 프레스티지 횟수로, 회차별 자원 흐름 분석에 필요하다."
         }
       ],
       "priority": "must",

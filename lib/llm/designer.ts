@@ -37,6 +37,8 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
 12. 플랫폼을 설계에 반영하라. PC/Steam이면 수익화에 광고가 명시되지 않는 한 광고 이벤트를 넣지 마라.
     기기 구분은 등급(low/mid/high)이 아니라 사양과 해상도로 잡고, 환불과 누적 플레이타임처럼 스토어가 주는
     신호를 고려한다. 모바일이면 기기 등급, OS 버전, 스토어 결제 흐름을 기준으로 잡는다.
+13. 모든 컬럼에 note를 단다. 이 컬럼이 무엇을 담는지 한국어 한 문장으로 쓰고, 단위나 형식이 중요하면 밝힌다
+    (초 단위, 0-1 비율, 콤마 구분 목록 등). 이 설명은 팀이 엑셀 명세서로 뽑아 그대로 구현에 쓴다. 120자 이내.
 
 ## 금지 사항
 
@@ -56,11 +58,11 @@ export const DESIGNER_SYSTEM = `당신은 라이브 서비스 게임의 데이�
       "name": "snake_case 이벤트명",
       "role": "이 이벤트가 핵심 루프에서 맡는 역할 한 문장 (진입/성공/실패/중단/경제/수익화 중 어디인지가 드러나게)",
       "used_for": ["이 이벤트로 계산하는 지표 이름", "..."],
-      "properties": [{"name": "", "type": "string|int|float|bool|timestamp", "note": ""}],
+      "properties": [{"name": "", "type": "string|int|float|bool|timestamp", "note": "이 컬럼이 무엇을 담는지 한국어 한 문장"}],
       "priority": "must | should"
     }
   ],
-  "user_properties": [{"name": "", "type": "", "note": ""}],
+  "user_properties": [{"name": "", "type": "", "note": "이 컬럼이 무엇을 담는지 한국어 한 문장"}],
   "kpis": [
     {
       "name": "지표명",
@@ -126,7 +128,8 @@ export function parseDesignInput(v: unknown): { ok: true; input: DesignInput } |
 }
 
 const str = (v: unknown, max = 4000) => typeof v === "string" && v.trim().length > 0 && v.length <= max;
-const props = (v: unknown) => Array.isArray(v) && v.every((p) => p && str(p.name, 80) && typeof p.type === "string");
+/** 컬럼은 이름·타입·설명을 모두 갖춰야 한다. 설명은 엑셀 명세서로 그대로 나간다 */
+const props = (v: unknown) => Array.isArray(v) && v.every((p) => p && str(p.name, 80) && typeof p.type === "string" && str(p.note, 300));
 
 /** 프리셋과 같은 모양인지, 프롬프트 원칙(이벤트 12개 이하 등)을 지켰는지 본다. */
 export function validateDesign(v: unknown): { ok: true; result: DesignResult } | { ok: false; errors: string[] } {
