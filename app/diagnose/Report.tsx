@@ -17,8 +17,18 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+/**
+ * 산문만 사람이 고칠 수 있게 여는 장치. 숫자·표·차트는 잠근다.
+ * 고친 값은 blur 때 평문으로 받아 두고, 다시 그릴 때 방향 색을 입혀 보여준다.
+ */
+type EditApi = {
+  on: boolean;
+  get: (id: string, original: string) => string;
+  props: (id: string, original: string) => React.HTMLAttributes<HTMLElement>;
+};
+
 /** 해석 방식 전환. 리포트 본문이 아니라 그 위에 두는 조작부다 */
-function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (rules: boolean) => void }) {
+function InterpretBar({ ai, useAi, onPick, edit, onEdit, edited }: { ai: Ai; useAi: boolean; onPick: (rules: boolean) => void; edit: boolean; onEdit: (v: boolean) => void; edited: boolean }) {
   const seg = (on: boolean): React.CSSProperties => ({
     padding: "6px 14px", fontFamily: "var(--sans)", fontSize: 13, lineHeight: 1.4, cursor: "pointer",
     border: "none", background: on ? "var(--ink)" : "transparent", color: on ? "var(--bg)" : "var(--ink-2)", fontWeight: on ? 600 : 400,
@@ -38,8 +48,14 @@ function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (
         </button>
         <button type="button" aria-pressed={!useAi} onClick={() => onPick(true)} style={seg(!useAi)}>규칙 기반</button>
       </div>
-      <span role="status" style={{ fontSize: 12, color: "var(--muted)", flexGrow: 1, minWidth: 180 }}>{note}</span>
-      <button className="btn-ghost" onClick={() => window.print()} style={{ height: 34, fontSize: 13 }}>PDF로 저장</button>
+      <span role="status" style={{ fontSize: 12, color: "var(--muted)", flexGrow: 1, minWidth: 180 }}>
+        {edit ? "요약과 제안 문장을 눌러 고칠 수 있습니다. 숫자와 표는 잠겨 있습니다" : note}
+      </span>
+      <button className="btn-ghost" aria-pressed={edit} onClick={() => onEdit(!edit)}
+        style={{ height: 34, fontSize: 13, ...(edit ? { borderColor: "var(--ink)", background: "var(--ink)", color: "var(--bg)" } : null) }}>
+        {edit ? "고치기 끝내기" : "문장 고치기"}
+      </button>
+      <button className="btn-ghost" onClick={() => window.print()} style={{ height: 34, fontSize: 13 }}>PDF로 저장{edited ? " (수정본)" : ""}</button>
     </div>
   );
 }
@@ -120,7 +136,8 @@ function DesignBlock({ d }: { d: Design }) {
   );
 }
 
-function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
+function FindingCard({ f, rank, ed }: { f: CardFinding; rank: number; ed: EditApi }) {
+  const id = (part: string) => `f${rank}.${part}`;
   return (
     <div className="card" style={{ padding: "26px 0 4px" }}>
       <div style={{ display: "flex", gap: 16 }}>
@@ -129,10 +146,10 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
         </div>
         <div style={{ flexGrow: 1, minWidth: 0 }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 10px", marginBottom: 8 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.6 }}>{f.title}</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.6 }} {...ed.props(id("title"), f.title)}>{ed.get(id("title"), f.title)}</h3>
             {f.tag && <span style={{ fontSize: 12, color: "var(--danger-ink)" }}>({f.tag})</span>}
           </div>
-          <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}><Tone text={f.body} /></p>
+          <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }} {...ed.props(id("body"), f.body)}><Tone text={ed.get(id("body"), f.body)} /></p>
           {!!f.options?.length && (
             <div style={{ marginBottom: 16, paddingLeft: 2 }}>
               {f.options.map((o, i) => (
@@ -141,7 +158,7 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", paddingLeft: 12 }}>- <Tone text={o.detail} /></div>
                 </div>
               ))}
-              {f.preference && <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink)", marginTop: 10 }}>{f.preference}</div>}
+              {f.preference && <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink)", marginTop: 10 }} {...ed.props(id("pref"), f.preference)}>{ed.get(id("pref"), f.preference)}</div>}
             </div>
           )}
           {f.design && <DesignBlock d={f.design} />}
@@ -189,6 +206,31 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
   const rep = useMemo(() => buildReport(m), [m]);
   const [ai, setAi] = useState<Ai>({ status: "loading" });
   const [showRules, setShowRules] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const edited = Object.keys(edits).length > 0;
+  const ed: EditApi = {
+    on: edit,
+    get: (id, original) => edits[id] ?? original,
+    props: (id, original) => {
+      if (!edit) return {};
+      return {
+        contentEditable: true,
+        suppressContentEditableWarning: true,
+        spellCheck: false,
+        className: "editable",
+        onBlur: (e: React.FocusEvent<HTMLElement>) => {
+          const v = e.currentTarget.innerText.replace(/\s+/g, " ").trim();
+          setEdits((prev) => {
+            const next = { ...prev };
+            if (!v || v === original.replace(/\s+/g, " ").trim()) delete next[id];
+            else next[id] = v;
+            return next;
+          });
+        },
+      };
+    },
+  };
 
   // 규칙 해석을 먼저 보여주고, AI 해석이 오면 바꿔 끼운다. 서버로 가는 것은 집계 수치 문장(사실표)뿐이다.
   useEffect(() => {
@@ -223,7 +265,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
 
   return (
     <div>
-      <InterpretBar ai={ai} useAi={useAi} onPick={(rules) => setShowRules(rules)} />
+      <InterpretBar ai={ai} useAi={useAi} onPick={(rules) => setShowRules(rules)} edit={edit} onEdit={setEdit} edited={edited} />
 
       {/* 리포트 머리 */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-end", justifyContent: "space-between", paddingBottom: 26, borderBottom: "1px solid var(--line)" }}>
@@ -252,7 +294,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         {summaryLines(summary).map((line, i) => (
           <li key={i} style={{ display: "flex", gap: 10, fontSize: 15, lineHeight: 1.8 }}>
             <span aria-hidden style={{ color: "var(--muted)", flexShrink: 0 }}>-</span>
-            <span><Tone text={line} /></span>
+            <span {...ed.props(`summary.${i}`, line)}><Tone text={ed.get(`summary.${i}`, line)} /></span>
           </li>
         ))}
       </ul>
@@ -260,7 +302,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       {/* 제안 사항 */}
       <div style={{ marginTop: 40 }}><SectionHead title="제안 사항" note="영향 유저 수가 많은 순" /></div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} />)}
+        {findings.map((f, i) => <FindingCard key={`${useAi ? "ai" : "rule"}-${i}`} f={f} rank={i + 1} ed={ed} />)}
         {!findings.length && <div className="card" style={{ padding: 24, fontSize: 14, color: "var(--ink-2)" }}>규칙으로 잡히는 뚜렷한 이상 신호가 없습니다.</div>}
       </div>
 
@@ -438,6 +480,9 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             ? <>AI가 집계 수치를 보고 작성(<span className="mono">{ai.status === "done" ? ai.model : ""}</span>). 계산 결과에 없는 숫자가 섞인 답은 코드가 반려</>
             : "계산 결과에 규칙을 적용한 해석. AI가 쓴 문장 없음"}
         </span></div>
+        {edited && <div style={{ display: "flex", gap: 12 }}><span style={{ width: 34, flexShrink: 0 }}>수정</span><span>
+          요약과 제안 문장 <span className="mono">{Object.keys(edits).length}</span>곳을 사람이 직접 고침. 숫자·표·차트는 계산값 그대로
+        </span></div>}
       </div>
     </div>
   );
