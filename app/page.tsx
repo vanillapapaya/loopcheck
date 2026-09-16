@@ -67,6 +67,7 @@ export default function Home() {
               <div style={{ display: "flex", gap: 9 }}><Check />코호트 리텐션과 이탈 구간 특정</div>
               <div style={{ display: "flex", gap: 9 }}><Check />결제 퍼널과 전환 붕괴 지점</div>
               <div style={{ display: "flex", gap: 9 }}><Check />우선순위가 매겨진 개선 가설</div>
+              <div style={{ display: "flex", gap: 9 }}><Check />유저를 나누지 않고 효과를 확인하는 검증 설계</div>
             </div>
             <Link href="/diagnose?sample" style={{ display: "inline-block", marginTop: 20, fontSize: 14, fontWeight: 500 }}>샘플 게임 리포트 보기 →</Link>
           </div>

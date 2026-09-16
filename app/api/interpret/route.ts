@@ -6,7 +6,7 @@ import { INTERPRET_SYSTEM, validateAiReport, type AiReport } from "@/lib/diagnos
 import { allowRequest, clientIp, generate, LlmUnavailable, parseJsonObject, unavailableResponse, type Turn } from "@/lib/llm/gemini.ts";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const MAX_FACTS = 12_000;
 const cache = new Map<string, { report: AiReport; model: string }>();
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   try {
     const turns: Turn[] = [{ role: "user", text: `사실표:\n${facts}\n\n이 게임의 진단 해석을 작성하라.` }];
     for (let attempt = 0; attempt < 2; attempt++) {
-      const { text, model } = await generate({ system: INTERPRET_SYSTEM, turns, temperature: 0.3, maxOutputTokens: 4096 });
+      const { text, model } = await generate({ system: INTERPRET_SYSTEM, turns, temperature: 0.3, maxOutputTokens: 4096, timeoutMs: attempt ? 45_000 : 70_000 });
       let errors: string[];
       try {
         const v = validateAiReport(parseJsonObject(text), facts);

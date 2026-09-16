@@ -96,6 +96,16 @@ const findingIds = rep.findings.map((f) => f.id).join(",");
 check("리포트 1순위 = 레벨 벽, 광고 빈도 개선안 포함", rep.findings[0].id === "level_wall" && findingIds.includes("ad_frequency"), findingIds);
 check("리포트 1순위에 1안·2안과 선호 대안", rep.findings[0].options?.length === 2 && !!rep.findings[0].preference, rep.findings[0].preference ?? "없음");
 
+// 검증 설계: 유저를 나누지 않는 이중차분 설계가 개선안마다 붙는가
+const designs = rep.findings.map((f) => [f.id, f.design]);
+check("개선안마다 검증 설계 생성", designs.every(([, d]) => d && d.treated.users > 0 && d.control.users > 0 && d.daysPerPeriod >= 3),
+  designs.map(([id, d]) => `${id} ${d?.daysPerPeriod}일/${d?.mdePp.toFixed(1)}%p`).join(", "));
+check("영향군과 비교군이 서로 다른 집단", designs.every(([, d]) => d.treated.label !== d.control.label), "OK");
+const adDesign = rep.findings.find((f) => f.id === "ad_frequency")?.design;
+check("표본이 부족한 광고 상한은 확인 어려움으로 판정하고 대안 제시", adDesign && !adDesign.feasible && !!adDesign.fallback,
+  adDesign ? `${adDesign.feasible ? "가능" : "어려움"} · ${adDesign.mdePp.toFixed(1)}%p` : "없음");
+check("규칙 해석이 A/B를 권하지 않음", !JSON.stringify(rep.findings.map((f) => ({ e: f.evidence, o: f.options }))).includes("A/B"), "OK");
+
 // 문체 규칙 (prompts/voice.md 4-1)
 const voiceIssues = [
   ...lintProse(rep.summary, "summary"),

@@ -4,6 +4,7 @@
 // LLM 해석이 붙기 전의 기본 해석이자, LLM이 실패해도 리포트가 서게 하는 바닥이다.
 
 import type { DiagnosisMetrics, LevelStat, SegmentStat } from "./engine.ts";
+import { buildDesigns, type Design } from "./experiment.ts";
 
 export type Evidence = { label: string; text: string };
 export type Option = { label: string; detail: string };
@@ -16,6 +17,8 @@ export type Finding = {
   evidence: Evidence[];
   options?: Option[];
   preference?: string;
+  /** 유저를 나누지 않고 효과를 확인하는 방법 */
+  design?: Design;
   /** 정렬용 영향 유저 추정치 */
   impactUsers: number;
 };
@@ -129,7 +132,7 @@ function wallFinding(m: DiagnosisMetrics, w: WallReading, streakRises: boolean):
         : m.meta.purchases === 0
           ? { label: "한계", text: `결제 데이터 미포함으로 난이도 조정의 매출 영향 확인 불가. 조정 전 결제 로그 확보 필요` }
           : { label: "결제", text: w.firstBuyCount ? `첫 결제 ${num(w.firstBuyCount)}건으로 레벨 중 ${w.firstBuyRank}위 기록` : `이 레벨의 첫 결제 발생 없음` },
-      { label: "검증 방법", text: `이동 수 조정 A/B, 1차 지표 D3 리텐션, 가드레일 설치당 매출. 배정 단위 user_id` },
+      { label: "가드레일", text: `난이도를 낮추면 결제가 함께 줄 수 있으므로 설치당 매출과 첫 결제 발생 레벨 분포를 같이 확인 필요` },
     ],
     options: [
       { label: `1안 - 목표 이동 수를 늘려 클리어율을 ${w.targetClearPct}% 안팎으로 조정`, detail: `레벨 ${L} 단독 조정 후 L${w.prev.level}, L${L + 1}과의 낙폭 재확인` },
@@ -223,8 +226,8 @@ function adFinding(m: DiagnosisMetrics, a: AdReading): Finding | null {
       { label: "교란 요인", text: `하지만 오래 잔존한 유저일수록 시청 누적량이 커지는 구조로, 생존 편향이 포함됨. 누적량은 잔존 기간의 결과이므로 경과일 고정 후 재집계가 필요` },
       { label: "분리 결과", text: `경과 ${m.ads.fixedDay.dayFrom}-${m.ads.fixedDay.dayTo}일 고정 시 당일 ${ranked(buckets, (b) => b.label, (b) => b.nextDay.rate, (b) => pct(b.nextDay.rate))}` },
       a.last.lowSample
-        ? { label: "단서", text: `단 ${a.last.label} 구간은 n이 ${num(a.last.n)}로 결론을 내리기에 부족. 광고 상한 조정 전 표본 축적 또는 A/B 확인 권장` }
-        : { label: "검증 방법", text: `일일 광고 상한 A/B, 1차 지표 익일 접속률, 가드레일 광고 매출` },
+        ? { label: "단서", text: `단 ${a.last.label} 구간은 n이 ${num(a.last.n)}로 결론을 내리기에 부족. 상한 조정 전 표본 축적 필요` }
+        : { label: "가드레일", text: `상한을 내리면 광고 매출이 함께 줄 수 있으므로 ARPDAU와 광고 매출을 같이 확인 필요` },
     ],
     // 정점과 마지막 구간의 격차가 걸린 유저-일 수
     impactUsers: buckets.reduce((s, b) => s + b.nextDay.den, 0) * Math.max(0, a.peakRate - a.last.rate) * 0.5,
@@ -237,6 +240,7 @@ export function buildReport(m: DiagnosisMetrics): Report {
   const s = m.monetization.buyAfterFailStreak;
   const streakRises = s.length >= 3 && s[0].r.rate < s[Math.floor(s.length / 2)].r.rate && s[Math.floor(s.length / 2)].r.rate < s[s.length - 1].r.rate;
 
+  const designs = buildDesigns(m, wall?.level.level ?? null);
   const findings = [
     wall && wallFinding(m, wall, streakRises),
     deviceFinding(m),
@@ -244,6 +248,7 @@ export function buildReport(m: DiagnosisMetrics): Report {
     ads && adFinding(m, ads),
   ]
     .filter((f): f is Finding => !!f)
+    .map((f) => ({ ...f, design: designs[f.id] }))
     .sort((a, b) => b.impactUsers - a.impactUsers);
 
   let summary: string;

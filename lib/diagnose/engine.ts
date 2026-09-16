@@ -49,6 +49,8 @@ export type DiagnosisMetrics = {
     adViews: number;
     obsStart: string;
     obsEnd: string;
+    /** 설치가 있었던 날의 하루 평균 설치 수. 검증 설계의 기간 계산에 쓴다 */
+    dailyInstalls: number;
   };
   retention: { day: number; r: Rate }[];
   /** D0부터 일별 classic 리텐션. 분모가 줄어드는 뒤쪽은 화면에서 잘라 쓴다 */
@@ -171,7 +173,12 @@ export function diagnose(t: RawTables): DiagnosisMetrics {
   let obsStart = Infinity;
   for (const s of t.sessions) obsEnd = Math.max(obsEnd, dayNum(s.session_start));
   for (const a of t.attempts) obsEnd = Math.max(obsEnd, dayNum(a.ts));
-  for (const d of install.values()) obsStart = Math.min(obsStart, d);
+  const installsByDay = new Map<number, number>();
+  for (const d of install.values()) {
+    obsStart = Math.min(obsStart, d);
+    installsByDay.set(d, (installsByDay.get(d) ?? 0) + 1);
+  }
+  const dailyInstalls = installsByDay.size ? t.users.length / installsByDay.size : 0;
 
   // 활동일 (설치 후 경과일). day_n 컬럼이 있으면 그것을, 없으면 날짜 차이로
   const active = new Map<string, Set<number>>();
@@ -383,6 +390,7 @@ export function diagnose(t: RawTables): DiagnosisMetrics {
       adViews: t.ads.length,
       obsStart: dayStr(obsStart),
       obsEnd: dayStr(obsEnd),
+      dailyInstalls,
     },
     retention,
     retentionCurve,

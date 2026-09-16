@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { DiagnosisMetrics } from "@/lib/diagnose/engine";
 import { buildReport, num, pct, won } from "@/lib/diagnose/findings";
 import { buildFacts, type AiReport } from "@/lib/diagnose/interpret";
+import type { Design } from "@/lib/diagnose/experiment";
 import { ChannelChart, DeviceChart, Legend, LevelChart, MiniColumns, RetentionChart, adItems } from "./charts";
 
 const RANK_STYLE = [
@@ -51,7 +52,40 @@ type CardFinding = {
   evidence: { label: string; text: string }[];
   options?: { label: string; detail: string }[];
   preference?: string | null;
+  design?: Design;
 };
+
+/** 유저를 나누지 않고 효과를 확인하는 설계. 숫자는 전부 코드가 계산한 값이다. */
+function DesignBlock({ d }: { d: Design }) {
+  const row = (label: string, value: React.ReactNode) => (
+    <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
+      <span style={{ width: 66, flexShrink: 0, fontSize: 12, color: "var(--muted)" }}>{label}</span>
+      <span style={{ fontSize: 13, lineHeight: 1.6 }}>{value}</span>
+    </div>
+  );
+  return (
+    <div style={{ marginTop: 14, padding: "16px 18px", background: "var(--surface-2)", border: "1px solid var(--line-2)", borderRadius: 4 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>검증 설계</span>
+        <span style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3, color: "var(--ink-2)" }}>유저를 나누지 않음</span>
+        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 3, background: d.feasible ? "#ECF3EC" : "#FDF8EE", color: d.feasible ? "#2F6B2F" : "#8A6520" }}>
+          {d.feasible ? `이 규모에서 확인 가능 · 최소 ${d.mdePp.toFixed(1)}%p` : `이 규모에서는 확인 어려움 · 최소 ${d.mdePp.toFixed(1)}%p`}
+        </span>
+      </div>
+      {row("개입", d.intervention)}
+      {row("비교", <>
+        {d.treated.label} <span className="mono">{num(d.treated.users)}</span>
+        <span style={{ color: "var(--muted)" }}> ↔ </span>
+        {d.control.label} <span className="mono">{num(d.control.users)}</span>
+      </>)}
+      {row("지표", d.outcome)}
+      {row("기간", <>변경 전후 각 <span className="mono">{d.daysPerPeriod}</span>일</>)}
+      {row("사전 점검", d.precheck)}
+      {row("교란 요인", d.confounders)}
+      {!d.feasible && d.fallback && row("대안", d.fallback)}
+    </div>
+  );
+}
 
 function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
   return (
@@ -78,7 +112,8 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
               {f.preference && <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink)", marginTop: 10 }}>{f.preference}</div>}
             </div>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, paddingTop: 14, borderTop: "1px solid var(--line-2)" }}>
+          {f.design && <DesignBlock d={f.design} />}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, paddingTop: 14, marginTop: 14, borderTop: "1px solid var(--line-2)" }}>
             {f.evidence.map((e) => (
               <div key={e.label}>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>{e.label}</div>
@@ -139,7 +174,11 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
 
   const useAi = ai.status === "done" && !showRules;
   const summary = useAi ? ai.report.summary : rep.summary;
-  const findings: CardFinding[] = useAi ? ai.report.findings : rep.findings;
+  // 설계의 숫자는 AI 해석일 때도 코드가 계산한 값을 그대로 쓴다
+  const designs = new Map(rep.findings.map((f) => [f.id as string, f.design]));
+  const findings: CardFinding[] = useAi
+    ? ai.report.findings.map((f) => ({ ...f, design: designs.get(f.basis) }))
+    : rep.findings;
   const d1 = m.retention.find((r) => r.day === 1)?.r;
   const d7 = m.retention.find((r) => r.day === 7)?.r;
   const fixed = m.ads.fixedDay;
@@ -245,7 +284,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               <WarnIcon />
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
                 <strong style={{ fontWeight: 600, color: "var(--ink)" }}>단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다.</strong>{" "}
-                광고 상한 조정 전 표본 축적 또는 A/B 확인을 권합니다. 흐린 막대가 n {num(100)} 미만 구간입니다.
+                상한 조정 전 표본 축적을 권합니다. 흐린 막대가 n {num(100)} 미만 구간입니다.
               </div>
             </div>
           )}

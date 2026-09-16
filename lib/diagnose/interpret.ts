@@ -32,6 +32,9 @@ export const INTERPRET_SYSTEM = `당신은 라이브 서비스 게임의 시니�
 6. 사실표에 "광고 - 올바른 집계"가 있으면 광고 빈도 해석을 finding 하나로 반드시 넣는다. 4단 논증 형태로 쓴다.
 7. 오퍼나 상품을 제안할 때는 사실표의 "가장 싼 상품" 이름과 가격을 그대로 인용한다.
 8. 연속 실패 수별 결제 비율이 상승한다고 적혀 있으면, 난이도 조정 제안에 그 사실(좌절이 결제 트리거)을 근거로 쓴다.
+9. 검증 방법을 쓸 때 A/B 테스트를 권하지 마라. 게임에서 유저마다 난이도·가격·보상을 다르게 주는 것은 형평성 문제이고,
+   소규모 팀의 유입으로는 표본도 모자란다. 사실표의 "검증 설계"를 인용해, 전원에게 같은 변경을 적용하고
+   영향군과 비교군의 변화량 차이로 확인하라고 쓴다. "확인 어려움"으로 적혀 있으면 그 사실과 대안을 함께 쓴다.
 
 ## 문체 규칙
 
@@ -218,6 +221,14 @@ export function buildFacts(m: DiagnosisMetrics, rep: Report): string {
     push(`[규칙 후보 - 코드가 먼저 뽑은 개선안. 순서와 문장은 바꿔도 되지만 숫자는 여기 것만]`);
     if (rep.wall) push(`  권장 목표: L${rep.wall.level.level} 시도 대비 클리어율 ${rep.wall.targetClearPct}% 안팎${rep.wall.conflict ? ". 이 레벨이 첫 결제 1위 레벨이기도 함(충돌)" : ""}`);
     rep.findings.forEach((f) => push(`  - ${f.title} | ${f.evidence.map((e) => `${e.label}: ${e.text}`).join(" | ")}`));
+  }
+  const designs = rep.findings.filter((f) => f.design);
+  if (designs.length) {
+    push(`[검증 설계 - 유저를 나누지 않고 전원에게 적용한 뒤 영향군과 비교군의 변화량 차이로 본다(이중차분). 숫자는 코드가 계산함]`);
+    for (const f of designs) {
+      const d = f.design!;
+      push(`  ${f.id}: 개입 ${d.intervention} / 영향군 ${d.treated.label} ${num(d.treated.users)}명 대 비교군 ${d.control.label} ${num(d.control.users)}명 / 지표 ${d.outcome} / 변경 전후 각 ${d.daysPerPeriod}일, 검출 가능한 최소 효과 ${d.mdePp.toFixed(1)}%p / ${d.feasible ? "이 규모에서 확인 가능" : `이 규모에서는 확인 어려움. 대안: ${d.fallback}`} / 사전 점검 ${d.precheck}`);
+    }
   }
   if (rep.ads) {
     const a = rep.ads;
