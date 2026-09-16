@@ -49,6 +49,10 @@ function InterpretBar({ ai, useAi, onPick }: { ai: Ai; useAi: boolean; onPick: (
  * 색만으로 의미를 전하지 않도록 방향을 가리키는 단어까지 함께 감싼다.
  */
 const TONE = /(\d[\d,.]*\s*(?:%p|%|명|건|원|분|일|회|배)?[^\d.,·\n]{0,6}?(?:감소|하락|낮아|낮고|낮음|낮습니다|증가|상승|개선|올리|올라|늘리|늘어|회복))/g;
+const down = (t: string) => /감소|하락|낮/.test(t);
+const mark: React.CSSProperties = { fontWeight: 600, padding: "1px 3px", borderRadius: 2, boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone" };
+const DOWN: React.CSSProperties = { ...mark, color: "var(--danger)", background: "var(--danger-bg)" };
+const UP: React.CSSProperties = { ...mark, color: "var(--good)", background: "var(--good-bg)" };
 function Tone({ text }: { text: string }) {
   const parts = text.split(TONE);
   if (parts.length === 1) return <>{text}</>;
@@ -56,7 +60,7 @@ function Tone({ text }: { text: string }) {
     <>
       {parts.map((p, i) =>
         i % 2 === 0 ? p : (
-          <span key={i} style={{ color: /감소|하락|낮/.test(p) ? "var(--danger-ink)" : "var(--good-ink)", fontWeight: 500 }}>{p}</span>
+          <span key={i} style={down(p) ? DOWN : UP}>{p}</span>
         ),
       )}
     </>
@@ -281,10 +285,10 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
       </div>
 
       <div style={grid2}>
-        {m.segments.channel.length > 1 && <Figure n={3} title="획득 채널별 D7 리텐션" sub="※ 분모는 채널별 설치 유저. 오른쪽 회색 글자는 D1과 전체 설치 대비 비중">
+        {m.segments.channel.length > 1 && <Figure n={3} title="획득 채널별 D7 리텐션" sub="※ D7 잔존·D1 잔존 : 분모는 해당 채널의 설치 유저. 설치 비중 : 분모는 전체 설치 유저. 막대 길이는 D7 잔존 기준">
           <ChannelChart channels={m.segments.channel} worstKey={worstChannel} />
         </Figure>}
-        {m.segments.deviceTier.length > 1 && <Figure n={4} title="기기 등급별 평균 세션 길이" sub={`※ 세션 길이는 세션당 평균. 저사양 구간이 전체 설치의 ${pct(m.segments.deviceTier.find((t) => t.key === "low")?.share ?? 0)} 차지`}>
+        {m.segments.deviceTier.length > 1 && <Figure n={4} title="기기 등급별 평균 세션 길이" sub="※ 세션 길이 : 세션당 평균 분. D1 잔존 : 분모는 해당 등급의 설치 유저. 설치 비중 : 분모는 전체 설치 유저. 세 수치의 분모가 서로 다름">
           <DeviceChart tiers={m.segments.deviceTier} />
         </Figure>}
       </div>
@@ -300,17 +304,17 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 20 }}>
             <div style={{ padding: 18, border: "1px solid var(--line-2)", borderRadius: 2, background: "var(--surface-2)" }}>
-              <span className="eyebrow" style={{ color: "var(--ink-2)" }}>이렇게 보면 틀립니다</span>
+              <span className="eyebrow" style={{ color: "var(--ink-2)" }}>보정 전 · 생존 편향 포함</span>
               <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>누적 광고 시청 수 대비 D7 리텐션</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--line-3)"
                 items={m.ads.naiveCumulativeD7.map((b) => ({ label: b.label.replace("회 이상", "+").replace("회", ""), r: b.d7 }))}
-                caption="생존 편향이 그대로 들어간 집계입니다." /></div>
+                caption="관측 기간이 긴 유저일수록 누적 시청 수가 커져, 잔존의 결과가 원인처럼 읽히는 집계" /></div>
             </div>
             <div style={{ padding: 18, border: "1px solid var(--line)", borderRadius: 2 }}>
-              <span className="eyebrow" style={{ color: "var(--ink)" }}>이렇게 봅니다</span>
+              <span className="eyebrow" style={{ color: "var(--ink)" }}>보정 후 · 경과일 고정</span>
               <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 10px" }}>경과 {fixed.dayFrom}-{fixed.dayTo}일 고정 · 당일 시청 수 대비 익일 접속</div>
               <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" items={adItems(fixed.buckets)} emphasize={rep.ads.peakLabel}
-                caption={`${rep.ads.peakLabel}가 정점${rep.ads.declinesAfterPeak ? `이고 ${rep.ads.last.label}에서 다시 내려갑니다` : "입니다"}.`} /></div>
+                caption={`${rep.ads.peakLabel} 정점${rep.ads.declinesAfterPeak ? `, ${rep.ads.last.label}에서 반전` : ""}. 관측 시점을 맞춰 노출량과 잔존의 관계만 남긴 집계`} /></div>
             </div>
           </div>
           {rep.ads.last.lowSample && (
@@ -357,7 +361,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>연속 실패 수별, 실패 직후 결제 비율</div>
             <div style={{ overflowX: "auto" }}><MiniColumns color="var(--series)" max={Math.max(...m.monetization.buyAfterFailStreak.map((s) => s.r.rate)) * 1.25 || 1} digits={2}
               items={m.monetization.buyAfterFailStreak.map((s) => ({ label: s.streak === 5 ? "5회+" : `${s.streak}회`, r: s.r }))}
-              caption="분모: 해당 연속 실패 수에 이른 실패 시도 (세션 안 기준, %)" /></div>
+              caption="분모는 해당 연속 실패 수에 이른 실패 시도. 세션 안 기준, 단위 %" /></div>
           </div>
           <p style={{ margin: 0, fontSize: 13, lineHeight: 1.75, color: "var(--ink-2)" }}>
             {rep.streakRises

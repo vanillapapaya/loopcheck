@@ -19,8 +19,9 @@
   /* 옅은 배경과 먹색 위 보조색. 하드코딩된 색을 없애려고 토큰으로 뺐다 */
   --danger-bg: #FBEBE9;
   --danger-line: #EFD2CE;
-  --good: #2E6B43;
-  --good-ink: #245737;
+  --good: #10763F;
+  --good-ink: #0E6B39;
+  --good-bg: #E4F1E8;
   --warn-bg: #FAF3E4;
   --warn-ink: #85611F;
   --ok-bg: #EDF3ED;

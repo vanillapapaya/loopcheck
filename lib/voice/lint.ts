@@ -11,6 +11,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
 const TILDE_RANGE = /\d\s*[~∼～]\s*\d/;
 /** 줄표로 부연하는 습관. 문장을 끊거나 괄호와 쉼표를 쓴다 */
 const EM_DASH = /—/;
+/** 지시하는 말투. 읽는 팀이 그 게임을 더 잘 안다 */
+const IMPERATIVE = /(?:하|되|보|넣|빼|올리|낮추|쓰|두|잡|줄이|늘리)(?:세요|십시오|시길 바랍니다)|해야\s*합니다|해라|하라(?![고는])/;
 /** 비율 차이를 말하면서 %p를 안 쓴 경우 */
 const DIFF_WITHOUT_PP = /\d+(?:\.\d+)?\s*%\s*(?:증가|감소|하락|상승|낮|높)/;
 
@@ -23,10 +25,15 @@ export function lintProse(text: string, where: string): VoiceIssue[] {
   if (EMOJI.test(text)) out.push({ level: "fail", rule: "이모지", detail: `${where}: 이모지를 쓰지 않는다` });
   if (TILDE_RANGE.test(text)) out.push({ level: "fail", rule: "물결표 범위", detail: `${where}: 범위는 물결표 대신 하이픈이나 "에서"로 쓴다 (45-50%)` });
   if (EM_DASH.test(text)) out.push({ level: "fail", rule: "줄표 부연", detail: `${where}: 줄표 대신 문장을 끊거나 괄호와 쉼표를 쓴다` });
+  if (IMPERATIVE.test(text)) out.push({ level: "fail", rule: "명령형", detail: `${where}: 지시하지 말고 제안한다 ("~이 필요해 보입니다", "~하는 편이 좋아 보입니다")` });
   if (FAKE_BENCHMARK.test(text)) out.push({ level: "fail", rule: "벤치마크 날조", detail: `${where}: 업계 평균 같은 외부 기준을 만들어 쓰지 않는다. 비교 대상은 이 데이터 안에 있는 것만` });
   for (const s of sentences(text)) {
     if (DIFF_WITHOUT_PP.test(s) && !s.includes("%p") && /대비|보다|차이/.test(s)) {
       out.push({ level: "warn", rule: "%p 누락", detail: `두 비율의 차이는 %p로 쓴다: "${s.trim().slice(0, 60)}"` });
+    }
+    // 비중과 잔존처럼 분모가 다른 비율이 한 문장에 섞이면 기준을 밝혀야 한다
+    if (/차지|비중/.test(s) && /잔존|리텐션|클리어율|전환/.test(s) && !/분모|기준|중/.test(s)) {
+      out.push({ level: "warn", rule: "분모 혼동", detail: `분모가 다른 비율을 한 문장에 나란히 썼다. 각각의 기준을 밝힌다: "${s.trim().slice(0, 60)}"` });
     }
   }
   return out;

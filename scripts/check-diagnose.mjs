@@ -115,7 +115,20 @@ const voiceIssues = [
     ...(f.options ?? []).flatMap((o, i) => lintBullet(o.detail, `${f.id}.options[${i}]`)),
   ]),
 ];
-check("규칙 해석이 문체 린터를 통과 (금지어·이모지·물결표·종결 혼용·날조 벤치마크)", fails(voiceIssues).length === 0, fails(voiceIssues).map((i) => i.detail).join(" / ") || "fail 0건");
+check("규칙 해석이 문체 린터를 통과 (금지어·이모지·물결표·줄표·명령형·종결 혼용·날조 벤치마크)", fails(voiceIssues).length === 0, fails(voiceIssues).map((i) => i.detail).join(" / ") || "fail 0건");
+// 린터가 실제로 잡는지 반대 방향으로 확인한다. 규칙만 있고 검사가 비어 있으면 통과는 의미가 없다
+const trap = [
+  ["명령형", "레벨 12의 난이도를 낮추세요. 클리어율 45%가 적당합니다."],
+  ["명령형", "저사양 기기의 성능을 점검해야 합니다."],
+  ["줄표 부연", "클리어율 28.3% 기록 — 전 구간 최대 낙폭입니다."],
+  ["물결표 범위", "클리어율을 45~50%로 올리는 편이 좋아 보입니다."],
+  ["금지어", "무려 28.3%로 떨어졌습니다."],
+  ["벤치마크 날조", "업계 평균 50% 대비 낮은 수준입니다."],
+];
+const caught = trap.filter(([rule, text]) => fails(lintProse(text, "trap")).some((i) => i.rule === rule));
+check("린터가 명령형·줄표·물결표·금지어·날조 벤치마크를 실제로 잡음", caught.length === trap.length, `${caught.length}/${trap.length}`);
+const mixed = lintBullet("저사양은 D1 잔존 32.0%, 전체의 30.3% 차지", "trap");
+check("분모가 다른 비율을 나란히 쓰면 경고", mixed.some((i) => i.rule === "분모 혼동"), mixed.map((i) => i.rule).join(",") || "경고 없음");
 const bulletEndings = rep.findings.flatMap((f) => f.evidence.map((e) => e.text.trim()));
 check("근거 항목은 서술형으로 끝나지 않음, 요약은 서술형", !bulletEndings.some((t) => /(습니다|입니다|합니다|됩니다)\.?$/.test(t)) && /(습니다|입니다)\.$/.test(rep.summary.trim()),
   `근거 ${bulletEndings.length}개 중 서술형 종결 ${bulletEndings.filter((t) => /(습니다|입니다)\.?$/.test(t)).length}개`);

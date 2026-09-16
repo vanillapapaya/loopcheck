@@ -135,7 +135,7 @@ export function Legend({ items }: { items: { label: string; swatch: "bar" | "lin
 export function ChannelChart({ channels, worstKey }: { channels: SegmentStat[]; worstKey: string | null }) {
   const rows = [...channels].sort((a, b) => b.d7.rate - a.d7.rate);
   const max = Math.max(...rows.map((r) => r.d7.rate), 0.01);
-  const L = 110, W = 300, rowH = 36;
+  const L = 110, W = 260, rowH = 44;
   const H = rows.length * rowH + 8;
   return (
     <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="획득 채널별 D7 리텐션" style={{ display: "block", minWidth: 480 }}>
@@ -145,11 +145,12 @@ export function ChannelChart({ channels, worstKey }: { channels: SegmentStat[]; 
         const worst = r.key === worstKey;
         return (
           <g key={r.key}>
-            <text x={0} y={yy + 15} {...SANS} fill={worst ? "var(--ink)" : SANS.fill} fontWeight={worst ? 600 : 400}>{r.key}</text>
-            <path d={barPath(L, yy + 3, w, 18)} fill={worst ? "var(--danger)" : "var(--series)"} />
-            <text x={L + w + 8} y={yy + 16} {...LABEL} fill="var(--ink)" fontWeight={worst ? 600 : 400}>{pct(r.d7.rate)}</text>
-            <text x={560} y={yy + 16} textAnchor="end" {...TICK}>D1 {pct(r.d1.rate)} · {pct(r.share, 0)}</text>
-            {worst && <text x={L + w + 56} y={yy + 16} {...SANS} fontSize={11} fill="var(--danger-ink)">확인 필요</text>}
+            <text x={0} y={yy + 14} {...SANS} fill={worst ? "var(--ink)" : SANS.fill} fontWeight={worst ? 600 : 400}>{r.key}</text>
+            {worst && <text x={0} y={yy + 28} {...SANS} fontSize={11} fill="var(--danger-ink)">확인 필요</text>}
+            <path d={barPath(L, yy + 5, w, 18)} fill={worst ? "var(--danger)" : "var(--series)"} />
+            <text x={L + w + 8} y={yy + 18} {...LABEL} fill="var(--ink)" fontWeight={worst ? 600 : 400}>D7 잔존 {pct(r.d7.rate)}</text>
+            <text x={560} y={yy + 13} textAnchor="end" {...LABEL} fill="var(--muted)">D1 잔존 {pct(r.d1.rate)}</text>
+            <text x={560} y={yy + 27} textAnchor="end" {...LABEL} fill="var(--muted)">설치 비중 {pct(r.share)}</text>
             <rect x={0} y={yy} width={560} height={rowH - 4} fill="transparent">
               <title>{`${r.key} · 설치 ${r.users.toLocaleString("ko-KR")}명 (${pct(r.share)})\n${rateTitle("D1", r.d1)}\n${rateTitle("D7", r.d7)}`}</title>
             </rect>
@@ -167,7 +168,7 @@ export function DeviceChart({ tiers }: { tiers: SegmentStat[] }) {
   const order = ["high", "mid", "low"];
   const rows = [...tiers].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   const max = Math.max(...rows.map((r) => r.avgSessionMin ?? 0), 1);
-  const L = 70, W = 330, rowH = 44;
+  const L = 70, W = 300, rowH = 44;
   const H = rows.length * rowH + 8;
   return (
     <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="기기 등급별 평균 세션 길이" style={{ display: "block", minWidth: 480 }}>
@@ -181,7 +182,8 @@ export function DeviceChart({ tiers }: { tiers: SegmentStat[] }) {
             <text x={0} y={yy + 18} {...SANS} fill={low ? "var(--ink)" : SANS.fill} fontWeight={low ? 600 : 400}>{TIER_LABEL[r.key] ?? r.key}</text>
             <path d={barPath(L, yy + 5, w, 20)} fill={low ? "var(--warn)" : "var(--series)"} />
             <text x={L + w + 8} y={yy + 19} {...LABEL} fill="var(--ink)" fontWeight={low ? 600 : 400}>{v.toFixed(1)}분</text>
-            <text x={560} y={yy + 19} textAnchor="end" {...LABEL} fill={low ? "var(--ink)" : "var(--muted)"} fontWeight={low ? 600 : 400}>D1 {pct(r.d1.rate)}</text>
+            <text x={560} y={yy + 14} textAnchor="end" {...LABEL} fill={low ? "var(--ink)" : "var(--muted)"} fontWeight={low ? 600 : 400}>D1 잔존 {pct(r.d1.rate)}</text>
+            <text x={560} y={yy + 28} textAnchor="end" {...LABEL} fill="var(--muted)">설치 비중 {pct(r.share)}</text>
             <rect x={0} y={yy} width={560} height={rowH - 4} fill="transparent">
               <title>{`${TIER_LABEL[r.key] ?? r.key} · 설치 ${r.users.toLocaleString("ko-KR")}명 (${pct(r.share)})\n평균 세션 ${v.toFixed(2)}분\n${rateTitle("D1", r.d1)}`}</title>
             </rect>
@@ -205,12 +207,14 @@ export function MiniColumns({
   digits?: number;
 }) {
   const L = 30, R = 452, T = 24, B = 146;
+  const H = items.some((it) => it.note) ? 190 : 178;
   const slot = (R - L) / items.length;
   const bw = Math.min(24, slot - 12);
   const y = (r: number) => B - (B - T) * Math.min(1, r / max);
   const ticks = max === 1 ? [0, 50, 100] : [0];
   return (
-    <svg width="100%" viewBox="0 0 460 190" role="img" aria-label={caption} style={{ display: "block", maxWidth: 560, minWidth: 300 }}>
+    <figure style={{ margin: 0 }}>
+    <svg width="100%" viewBox={`0 0 460 ${H}`} role="img" aria-label={caption} style={{ display: "block", maxWidth: 560, minWidth: 300 }}>
       {ticks.map((t) => {
         const yy = B - (B - T) * (t / 100);
         return (
@@ -237,8 +241,9 @@ export function MiniColumns({
           </g>
         );
       })}
-      {caption && <text x={L} y={186} {...SANS} fontSize={11} fill="var(--muted)">{caption}</text>}
     </svg>
+    {caption && <figcaption style={{ marginTop: 8, fontSize: 12, lineHeight: 1.6, color: "var(--muted)", maxWidth: 560 }}>{caption}</figcaption>}
+    </figure>
   );
 }
 
