@@ -10,8 +10,8 @@ const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
 const PLATFORM = ["iOS", "Android", "PC", "복수"];
 const STAGE = ["출시 전", "소프트론칭", "출시 후"];
 
-type Form = { genre: string; core_loop: string; monetization: string; platform: string; stage: string; team_size: string };
-const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform: "복수", stage: "출시 전", team_size: "3" };
+type Form = { genre: string; core_loop: string; monetization: string; platform: string; stage: string };
+const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform: "복수", stage: "출시 전" };
 
 const field: React.CSSProperties = {
   width: "100%", fontFamily: "var(--sans)", fontSize: 14, color: "var(--ink)",
@@ -54,7 +54,7 @@ export default function DesignPage() {
       const res = await fetch("/api/design", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...form, team_size: Number(form.team_size) }),
+        body: JSON.stringify(form),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.result) {
@@ -185,10 +185,6 @@ export default function DesignPage() {
                   <div>
                     <label htmlFor="stage" style={labelStyle}>출시 단계</label>
                     <select id="stage" value={form.stage} onChange={set("stage")} style={field}>{STAGE.map((v) => <option key={v}>{v}</option>)}</select>
-                  </div>
-                  <div>
-                    <label htmlFor="team_size" style={labelStyle}>팀 규모 (명)</label>
-                    <input id="team_size" type="number" required min={1} max={500} value={form.team_size} onChange={set("team_size")} className="mono" style={field} />
                   </div>
                 </div>
 

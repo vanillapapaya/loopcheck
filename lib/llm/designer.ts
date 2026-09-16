@@ -87,7 +87,6 @@ export type DesignInput = {
   monetization: string;
   platform: string;
   stage: string;
-  team_size: number;
 };
 
 export const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
@@ -100,7 +99,6 @@ export function designUserPrompt(i: DesignInput) {
 수익화: ${i.monetization}
 플랫폼: ${i.platform}
 출시 단계: ${i.stage}
-팀 규모: ${i.team_size}명
 
 위 게임의 지표 체계를 설계하라.`;
 }
@@ -114,7 +112,6 @@ export function parseDesignInput(v: unknown): { ok: true; input: DesignInput } |
     monetization: s("monetization"),
     platform: s("platform"),
     stage: s("stage"),
-    team_size: Math.round(Number(o.team_size)),
   };
   if (input.genre.length < 2 || input.genre.length > 60) return { ok: false, message: "장르를 2-60자로 적어 주세요" };
   if (input.core_loop.length < 30) return { ok: false, message: "핵심 루프를 두세 문장(30자 이상)으로 적어 주세요. 유저가 무엇을 반복하고, 어디서 성공·실패하는지가 들어가면 좋습니다" };
@@ -122,7 +119,6 @@ export function parseDesignInput(v: unknown): { ok: true; input: DesignInput } |
   if (!MONETIZATION.includes(input.monetization)) return { ok: false, message: "수익화 모델을 골라 주세요" };
   if (!PLATFORM.includes(input.platform)) return { ok: false, message: "플랫폼을 골라 주세요" };
   if (!STAGE.includes(input.stage)) return { ok: false, message: "출시 단계를 골라 주세요" };
-  if (!Number.isFinite(input.team_size) || input.team_size < 1 || input.team_size > 500) return { ok: false, message: "팀 규모는 1-500명으로 적어 주세요" };
   return { ok: true, input };
 }
 
