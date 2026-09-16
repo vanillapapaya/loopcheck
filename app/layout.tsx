@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "루프체크 — 게임 지표 설계와 진단",
+  title: "게임 지표 설계와 진단",
   description:
-    "분석가 없는 게임 팀을 위해 무엇을 쌓아야 하는지 정해 주고, 쌓인 데이터에서 무엇을 먼저 고쳐야 하는지 읽어 줍니다.",
+    "게임 개발을 위해 어떤 데이터를 쌓아야 하는지 정해 주고, 쌓인 데이터를 기반으로 무엇을 먼저 고쳐야 하는지 읽어 줍니다.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -185,6 +185,10 @@ check("업로드: 유저·세션만 올려도 계산·리포트·사실표 생�
 const presetDir = join(import.meta.dirname, "../public/presets");
 const presetResults = ["puzzle", "idle", "gacha-rpg", "roguelike"].map((p) => [p, validateDesign(JSON.parse(readFileSync(join(presetDir, `${p}.json`), "utf8")))]);
 check("설계기 검증: 프리셋 4종 통과", presetResults.every(([, v]) => v.ok), presetResults.map(([p, v]) => `${p}:${v.ok ? "ok" : v.errors.join("|")}`).join(" "));
+const units = presetResults.map(([p]) => [p, JSON.parse(readFileSync(join(presetDir, `${p}.json`), "utf8")).ab_test.unit]);
+check("설계기 첫 검증 설계가 유저를 나누지 않는 비교 방식", units.every(([, u]) => /비교군|영향군|처치군|고노출|이중차분|DiD/.test(u)),
+  units.map(([p, u]) => `${p}:${/비교군|영향군|처치군|고노출|이중차분|DiD/.test(u) ? "ok" : u.slice(0, 40)}`).join(" "));
+
 const tooMany = JSON.parse(readFileSync(join(presetDir, "puzzle.json"), "utf8"));
 tooMany.events.push(tooMany.events[0]);
 delete tooMany.sql_ddl;

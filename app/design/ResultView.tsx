@@ -8,7 +8,7 @@ type Tab = "events" | "kpis" | "ab" | "ddl";
 const TABS: { id: Tab; label: string }[] = [
   { id: "events", label: "이벤트 스키마" },
   { id: "kpis", label: "KPI 정의서" },
-  { id: "ab", label: "A/B 설계안" },
+  { id: "ab", label: "첫 검증 설계" },
   { id: "ddl", label: "SQL DDL" },
 ];
 
@@ -206,11 +206,11 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                   <span style={{ textAlign: "right" }}>{data.ab_test.primary_metric}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span style={{ color: "#A79E90" }}>배정 단위</span>
+                  <span style={{ color: "#A79E90" }}>비교 방식</span>
                   <span style={{ textAlign: "right" }}>{data.ab_test.unit}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span style={{ color: "#A79E90" }}>최소 기간</span>
+                  <span style={{ color: "#A79E90" }}>관측 기간</span>
                   <span>{data.ab_test.min_duration_days}일</span>
                 </div>
               </div>
@@ -224,11 +224,11 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                   ))}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 12, lineHeight: 1.6 }}>
-                  이 중 하나라도 악화되면 1차 지표가 올라도 실험을 중단하세요.
+                  이 중 하나라도 악화되면 1차 지표가 올라도 변경을 되돌리세요.
                 </div>
               </div>
               <div className="card" style={{ padding: "22px 24px" }}>
-                <div className="eyebrow" style={{ marginBottom: 12 }}>표본 크기</div>
+                <div className="eyebrow" style={{ marginBottom: 12 }}>표본과 기간 계획</div>
                 <div style={{ fontSize: 13, lineHeight: 1.8, color: "var(--ink-2)", whiteSpace: "pre-wrap" }}>{data.ab_test.sample_size_note}</div>
               </div>
             </div>

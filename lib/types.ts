@@ -17,6 +17,7 @@ export type Kpi = {
   watch_out: string;
 };
 
+/** 첫 검증 설계. A/B가 아니라 전원 적용 후 영향군·비교군의 변화량 차이로 읽는 설계를 담는다 */
 export type AbTest = {
   hypothesis: string;
   primary_metric: string;

@@ -17,23 +17,23 @@ export default function Home() {
         <section style={{ padding: "72px 0 64px", maxWidth: 720 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 28, padding: "0 11px", border: "1px solid var(--line-3)", borderRadius: 999, fontSize: 12, color: "var(--ink-2)", marginBottom: 26 }}>
             <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--ok)" }} />
-            분석가 없는 게임 팀을 위해
+            소규모 게임 팀을 위한 지표 설계와 진단 도구
           </div>
           <h1 style={{ fontSize: "clamp(34px, 5.4vw, 52px)", lineHeight: 1.2, fontWeight: 600, marginBottom: 22, textWrap: "balance" }}>
             쌓을 것을 정하고,
             <br />
-            쌓인 것을 읽는다
+            쌓인 것을 읽습니다.
           </h1>
           <p style={{ fontSize: 17, lineHeight: 1.8, color: "var(--ink-2)", marginBottom: 32 }}>
-            장르와 핵심 루프를 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다. 그 스키마로 쌓은
-            데이터를 올리면, 어디서 유저가 빠지는지와 무엇을 먼저 고쳐야 하는지를 한국어로 읽어 드립니다.
+            게임 장르와 핵심 루프를 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다.
+            그 스키마로 쌓은 데이터를 올리면, 어디서 유저가 빠지는지와 무엇을 먼저 고쳐야 하는지를 읽어 드립니다.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             <Link href="/design" className="btn">무료로 지표 설계하기</Link>
             <a href="#how" className="btn-ghost">어떻게 다른가</a>
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 18 }}>
-            설계 단계는 회원가입이 필요 없습니다. 업로드한 데이터는 처리 후 즉시 폐기합니다.
+            지표 설계 단계는 회원가입이 필요 없습니다. 업로드한 데이터는 처리 후 즉시 폐기합니다.
           </p>
         </section>
 
@@ -45,12 +45,12 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              아직 로그를 안 쌓고 있어도 됩니다. 이 게임의 루프에서 무엇을 이벤트로 남겨야 하는지부터 정해 드립니다.
+              어떤 로그를 쌓아야 할지 모르신다면 이 게임의 루프에서 무엇을 이벤트로 남겨야 하는지부터 정해 드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />로그 이벤트 스키마와 SQL DDL</div>
               <div style={{ display: "flex", gap: 9 }}><Check />이 게임에서 봐야 할 KPI 정의서</div>
-              <div style={{ display: "flex", gap: 9 }}><Check />첫 A/B 테스트 설계안</div>
+              <div style={{ display: "flex", gap: 9 }}><Check />유저를 나누지 않는 첫 검증 설계</div>
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              쌓인 CSV를 올리면 리텐션, 레벨 이탈, 결제, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
+              데이터를 업로드하면 리텐션, 레벨 이탈, 결제, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />코호트 리텐션과 이탈 구간 특정</div>
@@ -75,8 +75,8 @@ export default function Home() {
 
         <section id="how" style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 6, padding: "48px 40px", marginBottom: 72 }}>
           <div className="eyebrow" style={{ color: "#A79E90", marginBottom: 16 }}>왜 다른가</div>
-          <h2 style={{ fontSize: "clamp(24px, 3.4vw, 32px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 620 }}>
-            기존 분석 도구는 이미 데이터가 있는 팀을 전제합니다
+          <h2 style={{ fontSize: "clamp(24px, 3.4vw, 32px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 720 }}>
+            기존 분석 도구는 이미 데이터가 있는 팀을 전제합니다.
           </h2>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: "#BDB4A6", maxWidth: 720, marginBottom: 34 }}>
             SDK를 붙이려면 무엇을 찍을지 먼저 알아야 하는데, 대부분의 소규모 팀이 거기서 막힙니다.
@@ -101,7 +101,7 @@ export default function Home() {
           <div>
             <h2 style={{ fontSize: 26, fontWeight: 600, marginBottom: 8 }}>설계부터 해 보세요</h2>
             <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0 }}>
-              장르를 고르면 바로 스키마가 나옵니다.
+              게임 장르를 고르면 바로 데이터 스키마가 나옵니다.
             </p>
           </div>
           <Link href="/design" className="btn">무료로 지표 설계하기</Link>
@@ -109,7 +109,7 @@ export default function Home() {
 
         <footer style={{ borderTop: "1px solid var(--line)", padding: "24px 0 56px", fontSize: 13, color: "var(--muted)", display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between" }}>
           <span>루프체크 · 게임 지표 설계와 진단</span>
-          <span>진단 리포트 문의: [연락처 미정]</span>
+          <span>진단 리포트 문의: seunghoc94@gmail.com</span>
         </footer>
       </main>
     </>
