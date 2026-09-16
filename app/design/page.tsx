@@ -104,7 +104,7 @@ export default function DesignPage() {
             </div>
 
             {error && (
-              <div role="alert" style={{ marginBottom: 20, padding: "14px 18px", background: "#FBE9E7", border: "1px solid #F2CFC9", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+              <div role="alert" style={{ marginBottom: 20, padding: "14px 18px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
                 {error}
               </div>
             )}
@@ -182,7 +182,7 @@ export default function DesignPage() {
                 </div>
 
                 {aiError && (
-                  <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "#FBE9E7", border: "1px solid #F2CFC9", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+                  <div role="alert" style={{ marginBottom: 16, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
                     {aiError}
                   </div>
                 )}

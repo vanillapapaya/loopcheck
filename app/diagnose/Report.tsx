@@ -25,7 +25,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function WarnIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B5822A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }} aria-hidden>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }} aria-hidden>
       <path d="M12 8v5" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" />
     </svg>
   );
@@ -68,7 +68,7 @@ function DesignBlock({ d }: { d: Design }) {
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 600 }}>검증 설계</span>
         <span style={{ fontSize: 11, padding: "2px 7px", border: "1px solid var(--line-3)", borderRadius: 3, color: "var(--ink-2)" }}>유저를 나누지 않음</span>
-        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 3, background: d.feasible ? "#ECF3EC" : "#FDF8EE", color: d.feasible ? "#2F6B2F" : "#8A6520" }}>
+        <span className="mono" style={{ fontSize: 11, padding: "2px 7px", borderRadius: 3, background: d.feasible ? "var(--ok-bg)" : "var(--warn-bg)", color: d.feasible ? "var(--ok)" : "var(--warn-ink)" }}>
           {d.feasible ? `이 규모에서 확인 가능 · 최소 ${d.mdePp.toFixed(1)}%p` : `이 규모에서는 확인 어려움 · 최소 ${d.mdePp.toFixed(1)}%p`}
         </span>
       </div>
@@ -98,7 +98,7 @@ function FindingCard({ f, rank }: { f: CardFinding; rank: number }) {
         <div style={{ flexGrow: 1, minWidth: 0 }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 10px", marginBottom: 8 }}>
             <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.45 }}>{f.title}</h3>
-            {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "#FBE9E7", color: "var(--danger-ink)", borderRadius: 3 }}>{f.tag}</span>}
+            {f.tag && <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 8px", background: "var(--danger-bg)", color: "var(--danger-ink)", borderRadius: 3 }}>{f.tag}</span>}
           </div>
           <p style={{ margin: "0 0 16px", fontSize: 14, lineHeight: 1.75, color: "var(--ink-2)", maxWidth: 940 }}>{f.body}</p>
           {!!f.options?.length && (
@@ -280,7 +280,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
             </div>
           </div>
           {rep.ads.last.lowSample && (
-            <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "#FDF8EE", borderRadius: 4 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 18, padding: "14px 16px", background: "var(--warn-bg)", borderRadius: 4 }}>
               <WarnIcon />
               <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
                 <strong style={{ fontWeight: 600, color: "var(--ink)" }}>단 {rep.ads.last.label} 구간은 n이 {num(rep.ads.last.n)}로 결론을 내리기에 부족합니다.</strong>{" "}
@@ -366,7 +366,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
               <thead><tr><th style={{ ...th, textAlign: "left" }}>레벨</th><th style={th}>도달</th><th style={th}>시도 대비</th><th style={th}>도달자 대비</th><th style={th}>미도달</th></tr></thead>
               <tbody>
                 {m.levels.slice(0, 20).map((l) => (
-                  <tr key={l.level} style={l.level === rep.wall?.level.level ? { background: "#FBE9E7" } : undefined}>
+                  <tr key={l.level} style={l.level === rep.wall?.level.level ? { background: "var(--danger-bg)" } : undefined}>
                     <td style={{ ...td, textAlign: "left" }}>{l.level}</td><td style={td}>{num(l.reached)}</td><td style={td}>{pct(l.attemptClear.rate)}</td><td style={td}>{pct(l.reachClear.rate)}</td><td style={td}>{pct(l.stuck.rate)}</td>
                   </tr>
                 ))}

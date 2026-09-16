@@ -103,11 +103,12 @@ Node 22(nvm)로 바꾸고 클린 재설치하니 빌드가 통과했다. `.nvmrc
 
 `app/globals.css`의 CSS 변수를 쓴다. 새 색을 만들지 않는다.
 
-- 서체: IBM Plex Sans KR (본문) + IBM Plex Mono (숫자·코드·이벤트명). `layout.tsx`에서 link로 로드
-- 바탕 `--bg` 따뜻한 종이색, 먹색 `--ink` 하나, 신호색은 발견·경고에만
+- 목표하는 인상은 **인쇄된 분석 보고서**다. 크림 배경 + IBM Plex + 둥근 카드 조합은 AI가 만든 화면의 기본값이라 걷어냈다 (2026-09-17)
+- 서체: 제목 Noto Serif KR(`--serif`), 본문 Pretendard(`--sans`), 숫자·코드 JetBrains Mono(`--mono`). `layout.tsx`에서 link로 로드
+- 바탕 `--bg` 무채색 종이(#F6F6F4), 먹색 `--ink` 하나, 신호색은 발견·경고에만
 - 인라인 스타일을 쓰고 있다. Tailwind 도입하지 말 것 (의존성과 빌드 시간)
 - 숫자는 `className="mono"` (tabular-nums 포함)
-- 차트 색: 시리즈 `--series` #2a78d6, 위험 `--danger` #D03B3B, 주의 `--warn` #EC835A
+- 차트 색: 시리즈 `--series` #2a78d6, 위험 `--danger` #B42318, 주의 `--warn` #B5822A (주황 계열은 Claude 기본 팔레트와 겹쳐서 뺐다)
   - 2계열 이상이면 범례 필수, 단일 계열이면 범례 없음
   - 상태색은 아이콘이나 직접 라벨과 함께 쓴다. 색만으로 의미를 전달하지 않는다
 

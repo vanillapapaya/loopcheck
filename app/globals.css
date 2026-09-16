@@ -1,21 +1,32 @@
+/* 인쇄된 분석 보고서의 인상을 목표로 한다.
+   크림색 배경과 IBM Plex 조합은 AI가 만든 화면의 기본값이라 걷어냈다. */
 :root {
-  --bg: #F7F5F1;
-  --surface: #FFFDFA;
-  --surface-2: #FBF8F3;
-  --ink: #1A1714;
-  --ink-2: #5A544C;
-  --muted: #8C8479;
-  --line: #E3DED4;
-  --line-2: #F0ECE4;
-  --line-3: #D6CFC2;
+  --bg: #F6F6F4;
+  --surface: #FFFFFF;
+  --surface-2: #FAFAF8;
+  --ink: #17171A;
+  --ink-2: #4C4C52;
+  --muted: #7C7C82;
+  --line: #E2E2DE;
+  --line-2: #EFEFEB;
+  --line-3: #CFCFC9;
   --link: #1D4E89;
-  --danger: #D03B3B;
-  --danger-ink: #A32B2B;
-  --warn: #EC835A;
-  --ok: #0CA30C;
+  --danger: #B42318;
+  --danger-ink: #8F1D13;
+  --warn: #B5822A;
+  --ok: #2F6B2F;
   --series: #2a78d6;
-  --sans: 'IBM Plex Sans KR', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* 옅은 배경과 먹색 위 보조색. 하드코딩된 색을 없애려고 토큰으로 뺐다 */
+  --danger-bg: #FBEBE9;
+  --danger-line: #EFD2CE;
+  --warn-bg: #FAF3E4;
+  --warn-ink: #85611F;
+  --ok-bg: #EDF3ED;
+  --surface-3: #F1F1EC;
+  --on-ink: #9C9C95;
+  --serif: 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+  --sans: Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -73,7 +84,12 @@ a:hover { color: #123761; }
 
 .logo { display: flex; align-items: center; gap: 10px; color: var(--ink); font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 
-h1, h2, h3 { letter-spacing: -0.025em; margin: 0; }
+h1, h2, h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
 
 @media (max-width: 760px) {
   .wrap { padding: 0 16px; }

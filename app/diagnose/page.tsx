@@ -29,7 +29,7 @@ const paint = () => new Promise((r) => setTimeout(r, 30));
 const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
 
 function Mark({ kind }: { kind: "ok" | "warn" | "empty" }) {
-  const stroke = kind === "ok" ? "var(--ok)" : kind === "warn" ? "#B5822A" : "var(--line-3)";
+  const stroke = kind === "ok" ? "var(--ok)" : kind === "warn" ? "var(--warn)" : "var(--line-3)";
   return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden>
       {kind === "ok" ? <path d="M20 6L9 17l-5-5" /> : kind === "warn" ? <><path d="M12 8v5" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" /></> : <circle cx="12" cy="12" r="9" />}
@@ -171,7 +171,7 @@ export default function DiagnosePage() {
         {state.kind === "done" ? (
           <>
             {state.notes.length > 0 && (
-              <div style={{ marginBottom: 20, padding: "12px 16px", background: "#FDF8EE", borderRadius: 4, fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
+              <div style={{ marginBottom: 20, padding: "12px 16px", background: "var(--warn-bg)", borderRadius: 4, fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
                 {state.notes.map((n) => <div key={n}>{n}</div>)}
               </div>
             )}
@@ -211,7 +211,7 @@ export default function DiagnosePage() {
               </div>
 
               {state.kind === "error" && (
-                <div role="alert" style={{ marginBottom: 14, padding: "12px 16px", background: "#FBE9E7", border: "1px solid #F2CFC9", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
+                <div role="alert" style={{ marginBottom: 14, padding: "12px 16px", background: "var(--danger-bg)", border: "1px solid var(--danger-line)", borderRadius: 4, fontSize: 14, color: "var(--danger-ink)" }}>
                   {state.message}
                 </div>
               )}
@@ -226,7 +226,7 @@ export default function DiagnosePage() {
                   const f = byTable(t.key);
                   const missing = f ? missingRequired(t.key, f.mapping) : [];
                   return (
-                    <div key={t.key} style={{ borderBottom: "1px solid var(--line-2)", background: missing.length ? "#FDF8EE" : undefined }}>
+                    <div key={t.key} style={{ borderBottom: "1px solid var(--line-2)", background: missing.length ? "var(--warn-bg)" : undefined }}>
                       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px 14px", padding: "13px 20px" }}>
                         <Mark kind={!f ? "empty" : missing.length ? "warn" : "ok"} />
                         <span style={{ width: 170, fontSize: 13 }}><span style={{ fontWeight: 600 }}>{t.label}</span> <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>{t.file}</span></span>
@@ -268,7 +268,7 @@ export default function DiagnosePage() {
                   );
                 })}
                 {files.filter((f) => !f.table).map((f) => (
-                  <div key={f.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "13px 20px", background: "#FDF8EE", borderBottom: "1px solid var(--line-2)" }}>
+                  <div key={f.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "13px 20px", background: "var(--warn-bg)", borderBottom: "1px solid var(--line-2)" }}>
                     <Mark kind="warn" />
                     <span className="mono" style={{ fontSize: 13 }}>{f.name}</span>
                     <span style={{ fontSize: 12, color: "var(--ink-2)" }}>어떤 데이터인지 알아보지 못했습니다</span>
@@ -327,7 +327,7 @@ export default function DiagnosePage() {
                   {SAMPLE.map(([, f]) => <a key={f} href={`/sample/${f}`} className="mono" style={{ fontSize: 12 }}>{f}</a>)}
                 </div>
               </div>
-              <div style={{ background: "#F1EDE5", border: "1px solid var(--line)", borderRadius: 6, padding: "20px 22px" }}>
+              <div style={{ background: "var(--surface-3)", border: "1px solid var(--line)", borderRadius: 6, padding: "20px 22px" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>아직 로그가 없다면</div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 10 }}>지표 설계기로 먼저 스키마를 받아 두세요. 그대로 쌓으면 이 화면에서 매핑 없이 바로 진단할 수 있습니다.</div>
                 <Link href="/design" style={{ fontSize: 13, fontWeight: 500 }}>지표 설계기로 가기 →</Link>

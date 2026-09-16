@@ -163,7 +163,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
 
               <div className="card" style={{ padding: "20px 22px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B5822A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 17h.01" />
                   </svg>
                   <span style={{ fontSize: 13, fontWeight: 600 }}>주의사항</span>
@@ -188,7 +188,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
                 </div>
                 <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 12 }}>{k.why_this_game}</div>
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", paddingTop: 12, borderTop: "1px solid var(--line-2)" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B5822A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }}>
                     <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 17h.01" />
                   </svg>
                   <div style={{ fontSize: 12, lineHeight: 1.7, color: "var(--ink-2)" }}>{k.watch_out}</div>
@@ -201,19 +201,19 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         {tab === "ab" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, alignItems: "start" }}>
             <div style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 6, padding: "26px 28px" }}>
-              <div className="eyebrow" style={{ color: "#A79E90", marginBottom: 12 }}>가설</div>
+              <div className="eyebrow" style={{ color: "var(--on-ink)", marginBottom: 12 }}>가설</div>
               <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.6, marginBottom: 20 }}>{data.ab_test.hypothesis}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span style={{ color: "#A79E90" }}>1차 지표</span>
+                  <span style={{ color: "var(--on-ink)" }}>1차 지표</span>
                   <span style={{ textAlign: "right" }}>{data.ab_test.primary_metric}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span style={{ color: "#A79E90" }}>비교 방식</span>
+                  <span style={{ color: "var(--on-ink)" }}>비교 방식</span>
                   <span style={{ textAlign: "right" }}>{data.ab_test.unit}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                  <span style={{ color: "#A79E90" }}>관측 기간</span>
+                  <span style={{ color: "var(--on-ink)" }}>관측 기간</span>
                   <span>{data.ab_test.min_duration_days}일</span>
                 </div>
               </div>

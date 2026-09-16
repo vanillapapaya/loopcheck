@@ -74,7 +74,7 @@ export default function Home() {
           <h2 style={{ fontSize: "clamp(24px, 3.4vw, 32px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 720 }}>
             기존 분석 도구는 이미 데이터가 있는 팀을 전제합니다.
           </h2>
-          <p style={{ fontSize: 15, lineHeight: 1.85, color: "#BDB4A6", maxWidth: 720, marginBottom: 34 }}>
+          <p style={{ fontSize: 15, lineHeight: 1.85, color: "var(--on-ink)", maxWidth: 720, marginBottom: 34 }}>
             SDK를 붙이려면 무엇을 찍을지 먼저 알아야 하는데, 대부분의 소규모 팀이 거기서 막힙니다.
             루프체크는 그 앞단계에서 시작해, 쌓인 다음에는 한국어로 무엇을 먼저 고쳐야 하는지까지 이어 줍니다.
           </p>
@@ -85,9 +85,9 @@ export default function Home() {
               ["표본이 모자라면 모자라다고 씁니다", "구간 표본이 수십 개뿐이면 결론 대신 단서를 답니다. 확신을 파는 대신 확신의 근거를 같이 보여 드립니다."],
               ["상충하는 지표를 같이 놓습니다", "난이도 벽은 최대 이탈 지점이면서 최대 결제 지점이기도 합니다. 한쪽만 보고 내린 개선안은 다른 쪽을 무너뜨립니다."],
             ].map(([t, d]) => (
-              <div key={t} style={{ border: "1px solid #38322B", borderRadius: 4, padding: "18px 20px" }}>
+              <div key={t} style={{ border: "1px solid #35353A", borderRadius: 4, padding: "18px 20px" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.7, color: "#A79E90" }}>{d}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--on-ink)" }}>{d}</div>
               </div>
             ))}
           </div>
