@@ -33,7 +33,7 @@ export default function Home() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>01</span>
             </div>
-            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
+            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>지표 설계</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
               어떤 로그를 쌓아야 할지 모르신다면 이 게임의 루프에서 무엇을 이벤트로 남겨야 하는지부터 정해 드립니다.
             </p>

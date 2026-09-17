@@ -10,10 +10,9 @@ export default function Header({ right }: { right?: React.ReactNode }) {
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           {right ?? (
             <>
-              <Link href="/diagnose" style={{ fontSize: 14, color: "var(--ink-2)" }}>진단 리포트</Link>
-              <Link href="/design" className="btn" style={{ height: 38, padding: "0 18px", fontSize: 14 }}>
-                지표 설계
-              </Link>
+              {/* 설계가 입구, 진단이 출구다. 이 순서를 모든 화면에서 같게 쓴다 */}
+              <Link href="/design" style={{ fontSize: 14, color: "var(--ink)" }}>지표 설계</Link>
+              <Link href="/diagnose" style={{ fontSize: 14, color: "var(--ink)" }}>진단 리포트</Link>
             </>
           )}
         </div>
