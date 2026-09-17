@@ -45,6 +45,8 @@ body {
   /* 한국어는 어절 단위로 끊는다. 기본값은 글자 중간에서 자른다 */
   word-break: keep-all;
   overflow-wrap: break-word;
+  /* 어절로만 끊으면 줄 끝이 들쭉날쭉해진다. 줄 나눔을 고르게 하고 외톨이 단어를 줄인다 */
+  text-wrap: pretty;
 }
 
 
@@ -104,8 +106,9 @@ a:hover { color: #123761; }
   .aside { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 20px; }
 }
 
-/* 읽는 글의 폭. 표와 차트만 이 폭을 넘는다 */
-.prose { max-width: 68ch; }
+/* 읽는 글의 폭. 표와 차트만 이 폭을 넘는다.
+   ch는 "0" 기준이라 한글 폭의 절반이다. 한글은 em으로 재야 한 줄 글자 수가 맞는다 */
+.prose { max-width: 40em; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
