@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ResultView from "./ResultView";
@@ -27,7 +27,7 @@ export default function DesignPage() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [aiError, setAiError] = useState<string | null>(null);
 
-  async function loadPreset(p: Preset) {
+  const loadPreset = useCallback(async function loadPreset(p: Preset) {
     setLoading(p.id);
     setError(null);
     try {
@@ -43,7 +43,14 @@ export default function DesignPage() {
     } finally {
       setLoading(null);
     }
-  }
+  }, []);
+
+  // /design?preset=puzzle 로 들어오면 그 설계 결과를 바로 연다
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("preset");
+    const p = PRESETS.find((x) => x.id === id);
+    if (p) loadPreset(p);
+  }, [loadPreset]);
 
   async function submitCustom(e: React.FormEvent) {
     e.preventDefault();
