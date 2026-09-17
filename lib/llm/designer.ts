@@ -98,7 +98,7 @@ export type DesignInput = {
   platform: string;
 };
 
-export const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
+export const MONETIZATION = ["인앱 결제", "광고 보상", "광고 + 인앱 결제", "구독", "유료 구매", "미정"];
 export const PLATFORM = ["iOS", "Android", "PC", "복수"];
 
 export function designUserPrompt(i: DesignInput) {

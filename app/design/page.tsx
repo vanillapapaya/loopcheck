@@ -6,11 +6,11 @@ import Header from "@/components/Header";
 import ResultView from "./ResultView";
 import { PRESETS, type DesignResult, type Preset } from "@/lib/types";
 
-const MONETIZATION = ["IAP", "광고", "혼합", "구독", "미정"];
+const MONETIZATION = ["인앱 결제", "광고 보상", "광고 + 인앱 결제", "구독", "유료 구매", "미정"];
 const PLATFORM = ["iOS", "Android", "PC", "복수"];
 
 type Form = { genre: string; core_loop: string; monetization: string; platform: string };
-const EMPTY: Form = { genre: "", core_loop: "", monetization: "혼합", platform: "복수" };
+const EMPTY: Form = { genre: "", core_loop: "", monetization: "광고 + 인앱 결제", platform: "복수" };
 
 const field: React.CSSProperties = {
   width: "100%", fontFamily: "var(--sans)", fontSize: 14, color: "var(--ink)",
@@ -137,7 +137,10 @@ export default function DesignPage() {
                     )}
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{p.coreLoop}</div>
-                  <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.monetization} · {p.platform}</div>
+                  <div style={{ fontSize: 12, lineHeight: 1.65, color: "var(--muted)", marginTop: 4, paddingTop: 10, borderTop: "1px solid var(--line-2)" }}>
+                    <div>수익화 : {p.monetization}</div>
+                    <div>플랫폼 : {p.platform}</div>
+                  </div>
                 </button>
               ))}
             </div>
