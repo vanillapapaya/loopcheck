@@ -180,14 +180,12 @@ function FindingCard({ f, rank, ed }: { f: CardFinding; rank: number; ed: EditAp
 function Figure({ n, title, note, sub, children }: { n: number; title: string; note?: string; sub?: string; children: React.ReactNode }) {
   return (
     <figure style={{ margin: 0, minWidth: 0, paddingTop: 18, borderTop: "1px solid var(--line)" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 12 }}>
-        <div>
-          <span className="figure-num">[ 그림 {n} ]</span>
-          <span className="figure-title">{title}</span>
-        </div>
-        {note && <span style={{ fontSize: 12, color: "var(--muted)" }}>{note}</span>}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "2px 8px", marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid var(--line-2)" }}>
+        <span className="figure-num">[ 그림 {n} ]</span>
+        <span className="figure-title">{title}</span>
+        {note && <span style={{ fontSize: 12, color: "var(--muted)" }}>({note})</span>}
       </div>
-      <div style={{ overflowX: "auto" }}>{children}</div>
+      <div className="figure-body" style={{ overflowX: "auto" }}>{children}</div>
       {sub && <figcaption style={{ marginTop: 10, fontSize: 12, lineHeight: 1.6, color: "var(--muted)" }}>{sub}</figcaption>}
     </figure>
   );

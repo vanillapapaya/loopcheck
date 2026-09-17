@@ -145,6 +145,10 @@ h1, h2, h3 {
 }
 
 /* 인쇄 = PDF 저장. 지원사업 보고서에 넣을 산출물이 되게 한다. */
+/* 차트는 칸 가운데. viewBox 폭을 넘기지 않으므로 남는 여백을 양쪽으로 나눈다 */
+.figure-body > svg, .figure-body > figure > svg { margin-inline: auto; }
+.figure-body > .legend { justify-content: center; }
+
 /* 사람이 고칠 수 있는 산문. 편집 중일 때만 표시가 붙는다 */
 .editable { outline: 1px dashed var(--line-3); outline-offset: 4px; border-radius: 2px; cursor: text; }
 .editable:focus { outline: 1px solid var(--ink); background: var(--surface-2); }

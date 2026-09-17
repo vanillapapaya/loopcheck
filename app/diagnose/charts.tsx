@@ -1,4 +1,6 @@
 // 리포트용 SVG 차트. 의존성 없이 viewBox로 폭에 맞춘다.
+// 주의: viewBox 안의 글자는 차트와 같은 비율로 커진다. 그래서 각 차트의 maxWidth를
+// viewBox 폭에 맞춰 확대를 막고, 글자 크기는 본문(14)·각주(12) 아래에 오도록 잡았다.
 // 막대는 24px 이하, 데이터 끝만 둥글게. 값 라벨은 강조할 곳에만. 상태색은 늘 글자 라벨과 함께.
 // 모든 마크에 <title>을 달아 호버로 정확한 값과 분모를 보여준다.
 
@@ -7,8 +9,8 @@ import { pct } from "@/lib/diagnose/findings";
 
 const GRID = "var(--line)";
 const AXIS = "var(--line-3)";
-const TICK = { fontFamily: "var(--mono)", fontSize: 10, fill: "var(--muted)" } as const;
-const LABEL = { fontFamily: "var(--mono)", fontSize: 11, fill: "var(--ink-2)" } as const;
+const TICK = { fontFamily: "var(--mono)", fontSize: 11, fill: "var(--muted)" } as const;
+const LABEL = { fontFamily: "var(--mono)", fontSize: 12, fill: "var(--ink-2)" } as const;
 const SANS = { fontFamily: "var(--sans)", fontSize: 12, fill: "var(--ink-2)" } as const;
 
 /** 위쪽만 둥근 세로 막대 (바닥은 각지게) */
@@ -53,7 +55,7 @@ export function RetentionChart({ m }: { m: DiagnosisMetrics }) {
   const d7 = pts.find((p) => p.day === 7);
   const ticks = [0, 1, 3, 7, 14, 21, 28].filter((t) => t <= maxDay);
   return (
-    <svg width="100%" viewBox="0 0 640 222" role="img" aria-label="일별 classic 리텐션 곡선" style={{ display: "block", minWidth: 480 }}>
+    <svg width="100%" viewBox="0 0 640 222" role="img" aria-label="일별 classic 리텐션 곡선" style={{ display: "block", minWidth: 480, maxWidth: 640 }}>
       <YGrid x1={L} x2={R} top={T} bottom={B} ticks={[0, 25, 50, 75, 100]} />
       <path d={`${d} L${x(maxDay)} ${B} L${L} ${B}Z`} fill="var(--series)" opacity={0.08} />
       <path d={d} fill="none" stroke="var(--series)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
@@ -83,7 +85,7 @@ export function LevelChart({ levels, wallLevel }: { levels: LevelStat[]; wallLev
   const y = (r: number) => B - (B - T) * r;
   const line = shown.map((l, i) => `${i ? "L" : "M"}${(L + slot * i + slot / 2).toFixed(1)} ${y(l.reachClear.rate).toFixed(1)}`).join(" ");
   return (
-    <svg width="100%" viewBox="0 0 640 214" role="img" aria-label="레벨별 클리어율, 시도 대비와 도달자 대비" style={{ display: "block", minWidth: 480 }}>
+    <svg width="100%" viewBox="0 0 640 214" role="img" aria-label="레벨별 클리어율, 시도 대비와 도달자 대비" style={{ display: "block", minWidth: 480, maxWidth: 640 }}>
       <YGrid x1={L} x2={R} top={T} bottom={B} ticks={[0, 25, 50, 75, 100]} />
       {shown.map((l, i) => {
         const cx = L + slot * i + slot / 2;
@@ -119,7 +121,7 @@ export function LevelChart({ levels, wallLevel }: { levels: LevelStat[]; wallLev
 
 export function Legend({ items }: { items: { label: string; swatch: "bar" | "line"; color: string }[] }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-2)", marginBottom: 10 }}>
+    <div className="legend" style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12, color: "var(--ink-2)", marginBottom: 10 }}>
       {items.map((it) => (
         <span key={it.label} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
           <span style={it.swatch === "bar"
@@ -138,7 +140,7 @@ export function ChannelChart({ channels, worstKey }: { channels: SegmentStat[]; 
   const L = 110, W = 260, rowH = 44;
   const H = rows.length * rowH + 8;
   return (
-    <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="획득 채널별 D7 리텐션" style={{ display: "block", minWidth: 480 }}>
+    <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="획득 채널별 D7 리텐션" style={{ display: "block", minWidth: 480, maxWidth: 560 }}>
       {rows.map((r, i) => {
         const yy = 6 + i * rowH;
         const w = (W * r.d7.rate) / max;
@@ -146,7 +148,7 @@ export function ChannelChart({ channels, worstKey }: { channels: SegmentStat[]; 
         return (
           <g key={r.key}>
             <text x={0} y={yy + 14} {...SANS} fill={worst ? "var(--ink)" : SANS.fill} fontWeight={worst ? 600 : 400}>{r.key}</text>
-            {worst && <text x={0} y={yy + 28} {...SANS} fontSize={11} fill="var(--danger-ink)">확인 필요</text>}
+            {worst && <text x={0} y={yy + 28} {...SANS} fontSize={12} fill="var(--danger-ink)">확인 필요</text>}
             <path d={barPath(L, yy + 5, w, 18)} fill={worst ? "var(--danger)" : "var(--series)"} />
             <text x={L + w + 8} y={yy + 18} {...LABEL} fill="var(--ink)" fontWeight={worst ? 600 : 400}>D7 잔존 {pct(r.d7.rate)}</text>
             <text x={560} y={yy + 13} textAnchor="end" {...LABEL} fill="var(--muted)">D1 잔존 {pct(r.d1.rate)}</text>
@@ -171,7 +173,7 @@ export function DeviceChart({ tiers }: { tiers: SegmentStat[] }) {
   const L = 70, W = 300, rowH = 44;
   const H = rows.length * rowH + 8;
   return (
-    <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="기기 등급별 평균 세션 길이" style={{ display: "block", minWidth: 480 }}>
+    <svg width="100%" viewBox={`0 0 560 ${H}`} role="img" aria-label="기기 등급별 평균 세션 길이" style={{ display: "block", minWidth: 480, maxWidth: 560 }}>
       {rows.map((r, i) => {
         const yy = 6 + i * rowH;
         const v = r.avgSessionMin ?? 0;
@@ -213,8 +215,8 @@ export function MiniColumns({
   const y = (r: number) => B - (B - T) * Math.min(1, r / max);
   const ticks = max === 1 ? [0, 50, 100] : [0];
   return (
-    <figure style={{ margin: 0 }}>
-    <svg width="100%" viewBox={`0 0 460 ${H}`} role="img" aria-label={caption} style={{ display: "block", maxWidth: 560, minWidth: 300 }}>
+    <figure style={{ margin: "0 auto", maxWidth: 460 }}>
+    <svg width="100%" viewBox={`0 0 460 ${H}`} role="img" aria-label={caption} style={{ display: "block", maxWidth: 460, minWidth: 300 }}>
       {ticks.map((t) => {
         const yy = B - (B - T) * (t / 100);
         return (
@@ -230,7 +232,7 @@ export function MiniColumns({
         return (
           <g key={it.label}>
             <path d={colPath(cx - bw / 2, y(it.r.rate), bw, B - y(it.r.rate))} fill={color} opacity={it.faded ? 0.4 : 1} />
-            <text x={cx} y={y(it.r.rate) - 6} textAnchor="middle" {...TICK} fontSize={11} fill={em ? "var(--ink)" : "var(--ink-2)"} fontWeight={em ? 600 : 400}>
+            <text x={cx} y={y(it.r.rate) - 6} textAnchor="middle" {...TICK} fontSize={12} fill={em ? "var(--ink)" : "var(--ink-2)"} fontWeight={em ? 600 : 400}>
               {(it.r.rate * 100).toFixed(digits)}
             </text>
             <text x={cx} y={B + 15} textAnchor="middle" {...TICK}>{it.label}</text>
@@ -242,7 +244,7 @@ export function MiniColumns({
         );
       })}
     </svg>
-    {caption && <figcaption style={{ marginTop: 8, fontSize: 12, lineHeight: 1.6, color: "var(--muted)", maxWidth: 560 }}>{caption}</figcaption>}
+    {caption && <figcaption style={{ marginTop: 8, fontSize: 12, lineHeight: 1.6, color: "var(--muted)", maxWidth: 460 }}>{caption}</figcaption>}
     </figure>
   );
 }
