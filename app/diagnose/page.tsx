@@ -28,13 +28,10 @@ type State =
 const paint = () => new Promise((r) => setTimeout(r, 30));
 const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
 
+/** 업로드 상태. 색이 아니라 글자로 읽히게 둔다 */
 function Mark({ kind }: { kind: "ok" | "warn" | "empty" }) {
-  const stroke = kind === "ok" ? "var(--ok)" : kind === "warn" ? "var(--warn)" : "var(--line-3)";
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden>
-      {kind === "ok" ? <path d="M20 6L9 17l-5-5" /> : kind === "warn" ? <><path d="M12 8v5" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="9" /></> : <circle cx="12" cy="12" r="9" />}
-    </svg>
-  );
+  const [text, color] = kind === "ok" ? ["확인", "var(--ok)"] : kind === "warn" ? ["지정 필요", "var(--warn-ink)"] : ["없음", "var(--muted)"];
+  return <span style={{ flexShrink: 0, width: 54, fontSize: 12, fontWeight: kind === "empty" ? 400 : 600, color }}>{text}</span>;
 }
 
 export default function DiagnosePage() {
@@ -202,9 +199,6 @@ export default function DiagnosePage() {
                 onDrop={(e) => { e.preventDefault(); setDrag(false); if (!busy) addFiles(e.dataTransfer.files); }}
                 style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
               >
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M12 16V4" /><path d="M7 9l5-5 5 5" /><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                </svg>
                 <div style={{ fontSize: 15, fontWeight: 500 }}>{reading ?? "여기에 CSV를 끌어다 놓으세요"}</div>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>또는 <span style={{ color: "var(--link)", fontWeight: 500 }}>파일 선택</span> · 여러 개 한 번에 · 합계 {kb(MAX_TOTAL_BYTES)}까지</div>
                 <input ref={inputRef} type="file" accept=".csv,text/csv" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
@@ -313,7 +307,7 @@ export default function DiagnosePage() {
                   "탭 종료 시 읽은 데이터도 함께 소멸. 별도 저장 없음",
                 ].map((t) => (
                   <div key={t} style={{ display: "flex", gap: 10, marginBottom: 10 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 3, flexShrink: 0 }} aria-hidden><path d="M20 6L9 17l-5-5" /></svg>
+                    <span aria-hidden style={{ color: "var(--muted)", flexShrink: 0 }}>-</span>
                     <div style={{ lineHeight: 1.65 }}>{t}</div>
                   </div>
                 ))}
