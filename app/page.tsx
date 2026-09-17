@@ -11,10 +11,7 @@ export default function Home() {
       <Header />
       <main className="wrap">
         <section style={{ padding: "72px 0 64px", maxWidth: 720 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, height: 28, padding: "0 11px", border: "1px solid var(--line-3)", borderRadius: 2, fontSize: 12, color: "var(--ink-2)", marginBottom: 26 }}>
-            <span style={{ width: 6, height: 6, borderRadius: 2, background: "var(--ok)" }} />
-            소규모 게임 팀을 위한 지표 설계와 진단 도구
-          </div>
+          <div className="eyebrow" style={{ marginBottom: 20 }}>소규모 게임 팀을 위한 지표 설계와 진단 도구</div>
           <h1 style={{ fontSize: "clamp(32px, 5.2vw, 52px)", lineHeight: 1.25, fontWeight: 600, marginBottom: 22, textWrap: "balance", maxWidth: "10em" }}>
             쌓을 것을 정하고, 쌓인 것을 읽습니다.
           </h1>
