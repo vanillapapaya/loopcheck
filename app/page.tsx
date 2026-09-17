@@ -71,7 +71,7 @@ export default function Home() {
           </h2>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: "var(--on-ink)", maxWidth: 720, marginBottom: 34 }}>
             SDK를 붙이려면 무엇을 찍을지 먼저 알아야 하는데, 대부분의 소규모 팀이 거기서 막힙니다.
-            루프체크는 그 앞단계에서 시작해, 쌓인 다음에는 한국어로 무엇을 먼저 고쳐야 하는지까지 이어 줍니다.
+            이 도구는 그 앞단계에서 시작해, 쌓인 다음에는 한국어로 무엇을 먼저 고쳐야 하는지까지 이어 줍니다.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 14 }}>
             {[
