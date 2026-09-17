@@ -20,10 +20,11 @@ export default function Home() {
             그 스키마로 쌓은 데이터를 올리면, 어디서 유저가 빠지는지와 무엇을 먼저 고쳐야 하는지를 읽어 드립니다.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <Link href="/design" className="btn">무료로 지표 설계하기</Link>
+            <Link href="/design" className="btn">지표 설계 시작하기</Link>
+            <Link href="/diagnose" className="btn-ghost">진단 리포트 만들기</Link>
           </div>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 18 }}>
-            지표 설계 단계는 회원가입이 필요 없습니다. 업로드한 데이터는 처리 후 즉시 폐기합니다.
+            업로드한 데이터는 브라우저 안에서만 계산하고 서버에 저장하지 않습니다.
           </p>
         </section>
 
@@ -49,7 +50,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              데이터를 업로드하면 리텐션, 레벨 이탈, 결제, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
+              쌓아 둔 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 이 브라우저에서 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다. 컬럼 이름이 달라도 맞춰 읽습니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />코호트 리텐션과 이탈 구간 특정</div>
@@ -57,7 +58,10 @@ export default function Home() {
               <div style={{ display: "flex", gap: 9 }}><Check />우선순위가 매겨진 개선 가설</div>
               <div style={{ display: "flex", gap: 9 }}><Check />효과를 확인하는 검증 설계</div>
             </div>
-            <Link href="/diagnose?sample" style={{ display: "inline-block", marginTop: 20, fontSize: 14, fontWeight: 500 }}>샘플 게임 리포트 보기 →</Link>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 18px", marginTop: 20, fontSize: 14 }}>
+              <Link href="/diagnose" style={{ fontWeight: 500 }}>내 데이터로 리포트 만들기</Link>
+              <Link href="/diagnose?sample" style={{ color: "var(--ink-2)" }}>샘플 게임 리포트 보기</Link>
+            </div>
           </div>
         </section>
 
@@ -86,12 +90,15 @@ export default function Home() {
 
         <section style={{ borderTop: "1px solid var(--line)", padding: "48px 0 72px", display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>설계부터 해 보세요</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>어느 쪽이든 시작할 수 있습니다</h2>
             <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0 }}>
-              게임 장르를 고르면 바로 데이터 스키마가 나옵니다.
+              아직 로그가 없다면 설계부터, 이미 쌓아 둔 CSV가 있다면 진단부터 하시면 됩니다.
             </p>
           </div>
-          <Link href="/design" className="btn">무료로 지표 설계하기</Link>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+            <Link href="/design" className="btn">지표 설계 시작하기</Link>
+            <Link href="/diagnose" className="btn-ghost">진단 리포트 만들기</Link>
+          </div>
         </section>
 
         <footer style={{ borderTop: "1px solid var(--line)", padding: "24px 0 56px", fontSize: 13, color: "var(--muted)", display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between" }}>
