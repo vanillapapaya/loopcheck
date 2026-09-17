@@ -189,19 +189,16 @@ export default function DiagnosePage() {
                 컬럼 이름이 달라도 됩니다. 무엇인지만 알려 주시면 맞춰 읽습니다.
               </p>
 
-              {/* 드롭존 */}
+              {/* 드롭존. 누르는 곳은 버튼 하나로 두고, 면 전체는 끌어다 놓는 자리로 쓴다 */}
               <div
-                role="button" tabIndex={0}
-                onClick={() => !busy && inputRef.current?.click()}
-                onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !busy) { e.preventDefault(); inputRef.current?.click(); } }}
                 onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
                 onDragLeave={() => setDrag(false)}
                 onDrop={(e) => { e.preventDefault(); setDrag(false); if (!busy) addFiles(e.dataTransfer.files); }}
-                style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
+                style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, marginBottom: 14, textAlign: "center" }}
               >
-                <div style={{ fontSize: 15, fontWeight: 500 }}>
-                  {reading ?? <span style={{ color: "var(--link)" }}>CSV 파일 선택</span>}
-                </div>
+                <button type="button" className="btn" disabled={busy} onClick={() => inputRef.current?.click()} style={{ height: 42, fontSize: 14 }}>
+                  {reading ?? "CSV 파일 선택"}
+                </button>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>또는 여기에 파일을 끌어다 놓기 (합계 {kb(MAX_TOTAL_BYTES)} 제한)</div>
                 <input ref={inputRef} type="file" accept=".csv,text/csv" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
               </div>
