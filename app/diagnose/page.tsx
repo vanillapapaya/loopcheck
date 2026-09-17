@@ -26,7 +26,7 @@ type State =
 
 // 브라우저가 진행 문구를 그릴 틈을 준다
 const paint = () => new Promise((r) => setTimeout(r, 30));
-const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
+const kb = (n: number) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1).replace(/\.0$/, "")}MB` : `${Math.max(1, Math.round(n / 1024))}KB`);
 
 /** 업로드 상태. 색이 아니라 글자로 읽히게 둔다 */
 function Mark({ kind }: { kind: "ok" | "warn" | "empty" }) {
@@ -199,8 +199,10 @@ export default function DiagnosePage() {
                 onDrop={(e) => { e.preventDefault(); setDrag(false); if (!busy) addFiles(e.dataTransfer.files); }}
                 style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
               >
-                <div style={{ fontSize: 15, fontWeight: 500 }}>{reading ?? "여기에 CSV를 끌어다 놓으세요"}</div>
-                <div style={{ fontSize: 13, color: "var(--muted)" }}>또는 <span style={{ color: "var(--link)", fontWeight: 500 }}>파일 선택</span> · 여러 개 한 번에 · 합계 {kb(MAX_TOTAL_BYTES)}까지</div>
+                <div style={{ fontSize: 15, fontWeight: 500 }}>
+                  {reading ?? <><span style={{ color: "var(--link)" }}>CSV 파일 선택</span> <span style={{ fontWeight: 400, color: "var(--ink-2)" }}>(여러 개 한 번에)</span></>}
+                </div>
+                <div style={{ fontSize: 13, color: "var(--muted)" }}>또는 여기에 파일을 끌어다 놓기 (합계 {kb(MAX_TOTAL_BYTES)} 제한)</div>
                 <input ref={inputRef} type="file" accept=".csv,text/csv" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
               </div>
 
