@@ -16,7 +16,7 @@ const SAMPLE: [keyof RawTables, string][] = [
 ];
 const MAX_TOTAL_BYTES = 150 * 1024 * 1024;
 
-type Uploaded = { id: number; name: string; size: number; headers: string[]; rows: Row[]; table: TableKey | null; mapping: Record<string, string> };
+type Uploaded = { id: number; name: string; size: number; headers: string[]; rows: Row[]; table: TableKey | null; mapping: Record<string, string>; skip?: boolean };
 
 type State =
   | { kind: "idle" }
@@ -105,23 +105,27 @@ export default function DiagnosePage() {
 
   const update = (id: number, patch: Partial<Uploaded>) => setFiles((fs) => fs.map((f) => (f.id === id ? { ...f, ...patch } : f)));
   // 파일의 데이터 종류를 바꾼다. 그 종류를 쓰던 다른 파일은 "종류 고르기"로 돌린다.
-  const retype = (id: number, k: TableKey | "") =>
+  const retype = (id: number, k: TableKey | "" | "skip") =>
     setFiles((fs) => fs.map((f) => {
-      if (f.id === id) return { ...f, table: k || null, mapping: k ? autoMap(k, f.headers) : {} };
-      if (k && f.table === k) return { ...f, table: null, mapping: {} };
+      if (f.id === id) {
+        if (k === "skip") return { ...f, table: null, mapping: {}, skip: true };
+        return { ...f, table: k || null, mapping: k ? autoMap(k, f.headers) : {}, skip: false };
+      }
+      if (k && k !== "skip" && f.table === k) return { ...f, table: null, mapping: {}, skip: false };
       return f;
     }));
   const typeSelect = (f: Uploaded, strong: boolean) => (
-    <select aria-label={`${f.name}의 데이터 종류`} value={f.table ?? ""} onChange={(e) => retype(f.id, e.target.value as TableKey | "")}
-      style={{ fontSize: 12, padding: "5px 8px", border: `1px solid ${strong ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface)" }}>
+    <select aria-label={`${f.name}의 데이터 종류`} value={f.skip ? "skip" : f.table ?? ""} onChange={(e) => retype(f.id, e.target.value as TableKey | "" | "skip")}
+      style={{ fontSize: 12, padding: "5px 8px", border: `1px solid ${strong && !f.skip ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface)" }}>
       <option value="">종류 고르기</option>
       {TABLES.map((t) => <option key={t.key} value={t.key}>{t.label} ({t.file})</option>)}
+      <option value="skip">이번 진단에서 제외</option>
     </select>
   );
   const byTable = (k: TableKey) => files.find((f) => f.table === k);
   const blockers = [
     ...TABLES.filter((t) => t.required && !byTable(t.key)).map((t) => `${t.label}(${t.file}) 파일이 필요합니다`),
-    ...files.filter((f) => !f.table).map((f) => `${f.name}이 어떤 데이터인지 골라 주세요`),
+    ...files.filter((f) => !f.table && !f.skip).map((f) => `${f.name}이 어떤 데이터인지 골라 주세요`),
     ...files.filter((f) => f.table).flatMap((f) => missingRequired(f.table!, f.mapping).map((col) => `${f.name}의 ${col} 컬럼을 지정해 주세요`)),
   ];
   const dupTables = TABLES.filter((t) => files.filter((f) => f.table === t.key).length > 1);
@@ -160,7 +164,7 @@ export default function DiagnosePage() {
           state.kind === "done" ? (
             <button className="btn-ghost" style={{ height: 38, fontSize: 14 }} onClick={() => setState({ kind: "idle" })}>처음으로</button>
           ) : (
-            <span style={{ fontSize: 13, color: "var(--muted)" }}>계산은 브라우저에서 · 원본은 서버로 가지 않음</span>
+            <span style={{ fontSize: 13, color: "var(--muted)" }}>원본 파일은 브라우저에서만 읽고 계산 후 폐기됩니다</span>
           )
         }
       />
@@ -261,10 +265,12 @@ export default function DiagnosePage() {
                   );
                 })}
                 {files.filter((f) => !f.table).map((f) => (
-                  <div key={f.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "13px 20px", background: "var(--warn-bg)", borderBottom: "1px solid var(--line-2)" }}>
-                    <Mark kind="warn" />
+                  <div key={f.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, padding: "13px 20px", background: f.skip ? undefined : "var(--warn-bg)", borderBottom: "1px solid var(--line-2)", opacity: f.skip ? 0.7 : 1 }}>
+                    <Mark kind={f.skip ? "empty" : "warn"} />
                     <span className="mono" style={{ fontSize: 13 }}>{f.name}</span>
-                    <span style={{ fontSize: 12, color: "var(--ink-2)" }}>어떤 데이터인지 알아보지 못했습니다</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-2)" }}>
+                      {f.skip ? "이번 진단에서 제외. 계산에 쓰지 않습니다" : "어떤 데이터인지 알아보지 못했습니다. 종류를 고르거나 제외하시면 됩니다"}
+                    </span>
                     {typeSelect(f, true)}
                     <button onClick={() => setFiles((fs) => fs.filter((x) => x.id !== f.id))} style={{ background: "none", border: "none", fontSize: 12, color: "var(--link)", cursor: "pointer", fontFamily: "var(--sans)" }}>빼기</button>
                   </div>
