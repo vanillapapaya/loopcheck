@@ -200,7 +200,7 @@ export default function DiagnosePage() {
                 style={{ border: `1.5px dashed ${drag ? "var(--ink)" : "var(--line-3)"}`, borderRadius: 2, background: "var(--surface-2)", padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: busy ? "wait" : "pointer", marginBottom: 14, textAlign: "center" }}
               >
                 <div style={{ fontSize: 15, fontWeight: 500 }}>
-                  {reading ?? <><span style={{ color: "var(--link)" }}>CSV 파일 선택</span> <span style={{ fontWeight: 400, color: "var(--ink-2)" }}>(여러 개 한 번에)</span></>}
+                  {reading ?? <span style={{ color: "var(--link)" }}>CSV 파일 선택</span>}
                 </div>
                 <div style={{ fontSize: 13, color: "var(--muted)" }}>또는 여기에 파일을 끌어다 놓기 (합계 {kb(MAX_TOTAL_BYTES)} 제한)</div>
                 <input ref={inputRef} type="file" accept=".csv,text/csv" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
