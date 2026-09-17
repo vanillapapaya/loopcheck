@@ -101,9 +101,8 @@ export default function Home() {
           </div>
         </section>
 
-        <footer style={{ borderTop: "1px solid var(--line)", padding: "24px 0 56px", fontSize: 13, color: "var(--muted)", display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between" }}>
-          <span>루프체크 · 게임 지표 설계와 진단</span>
-          <span>진단 리포트 문의: seunghoc94@gmail.com</span>
+        <footer style={{ borderTop: "1px solid var(--line)", padding: "24px 0 56px", fontSize: 13, color: "var(--muted)" }}>
+          진단 리포트 문의: seunghoc94@gmail.com
         </footer>
       </main>
     </>
