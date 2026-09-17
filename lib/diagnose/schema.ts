@@ -15,7 +15,7 @@ const c = (name: string, required: boolean, hint: string, ...aliases: string[]):
 
 export const TABLES: TableSpec[] = [
   {
-    key: "users", label: "유저", file: "users.csv", required: true, missingNote: "필수 · 설치일과 세그먼트의 기준입니다",
+    key: "users", label: "유저", file: "users.csv", required: true, missingNote: "필수 · 설치일과 세그먼트의 기준",
     signature: ["install_date", "install_ts", "installed_at", "first_open", "first_seen", "signup_date", "register_date", "acquisition_channel", "device_tier"],
     columns: [
       c("user_id", true, "유저 식별자", "uid", "userid", "player_id", "account_id", "member_id"),
@@ -27,7 +27,7 @@ export const TABLES: TableSpec[] = [
     ],
   },
   {
-    key: "sessions", label: "세션", file: "sessions.csv", required: true, missingNote: "필수 · 리텐션과 세션 길이의 기준입니다",
+    key: "sessions", label: "세션", file: "sessions.csv", required: true, missingNote: "필수 · 리텐션과 세션 길이의 기준",
     signature: ["session_start", "started_at", "start_time", "login_at", "session_length", "day_n", "days_since_install"],
     columns: [
       c("user_id", true, "유저 식별자", "uid", "userid", "player_id", "account_id"),
@@ -38,7 +38,7 @@ export const TABLES: TableSpec[] = [
     ],
   },
   {
-    key: "attempts", label: "레벨 시도", file: "level_attempts.csv", required: false, missingNote: "선택 · 없으면 레벨 난이도 분석이 빠집니다",
+    key: "attempts", label: "레벨 시도", file: "level_attempts.csv", required: false, missingNote: "선택 · 레벨 난이도 분석 시 필요",
     signature: ["result", "is_success", "success", "cleared", "is_clear", "outcome", "win", "level_id", "stage_no", "stage_id", "level_no", "boosters_used"],
     columns: [
       c("user_id", true, "유저 식별자", "uid", "userid", "player_id", "account_id"),
@@ -50,7 +50,7 @@ export const TABLES: TableSpec[] = [
     ],
   },
   {
-    key: "purchases", label: "결제", file: "purchases.csv", required: false, missingNote: "선택 · 없으면 수익화 분석이 빠집니다",
+    key: "purchases", label: "결제", file: "purchases.csv", required: false, missingNote: "선택 · 수익화 분석 시 필요",
     signature: ["price_krw", "price", "amount", "revenue", "revenue_krw", "amount_krw", "product_id", "sku", "purchase_id", "transaction_id"],
     columns: [
       c("user_id", true, "유저 식별자", "uid", "userid", "player_id", "account_id"),
@@ -62,7 +62,7 @@ export const TABLES: TableSpec[] = [
     ],
   },
   {
-    key: "ads", label: "광고 시청", file: "ad_views.csv", required: false, missingNote: "선택 · 광고를 쓰지 않으면 건너뛰세요",
+    key: "ads", label: "광고 시청", file: "ad_views.csv", required: false, missingNote: "선택 · 광고 빈도 분석 시 필요",
     signature: ["placement", "ad_placement", "ad_unit", "reward_claimed", "rewarded", "ad_view_id", "ad_network"],
     columns: [
       c("user_id", true, "유저 식별자", "uid", "userid", "player_id", "account_id"),

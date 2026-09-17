@@ -287,12 +287,7 @@ export default function DiagnosePage() {
               </div>
 
               <div className="tile" style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", justifyContent: "space-between", padding: "20px 24px" }}>
-                <div style={{ maxWidth: 520 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 5 }}>샘플 게임으로 리포트 보기</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-2)" }}>
-                    가상 퍼즐 게임의 30일치 로그 · 설치 6,000명 · 레벨 시도 16만 건. 내려받기(약 3MB)와 계산까지 몇 초면 끝납니다.
-                  </div>
-                </div>
+                <div style={{ maxWidth: 520, fontSize: 15, fontWeight: 600 }}>샘플 게임으로 리포트 보기</div>
                 <button className="btn-ghost" onClick={runSample} disabled={busy} style={{ minWidth: 160 }}>샘플 리포트 열기</button>
               </div>
             </div>
