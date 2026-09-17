@@ -162,7 +162,7 @@ function FindingCard({ f, rank, ed }: { f: CardFinding; rank: number; ed: EditAp
             </div>
           )}
           {f.design && <DesignBlock d={f.design} />}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, paddingTop: 14, marginTop: 14, borderTop: "1px solid var(--line-2)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 16, paddingTop: 14, marginTop: 14, borderTop: "1px solid var(--line-2)" }}>
             {f.evidence.map((e, i) => (
               <div key={`${i}-${e.label}`}>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>{e.label}</div>
@@ -372,7 +372,7 @@ export default function Report({ m, title, sourceNote }: { m: DiagnosisMetrics; 
         <p style={{ margin: "0 0 20px", fontSize: 12, color: "var(--muted)" }}>
           {m.meta.purchases ? "※ 결제 전환율 : 분모는 설치 유저 수. ARPPU : 분모는 결제자 수" : "※ 결제 데이터 미포함으로 수익화 수치 계산 제외"}
         </p>
-        {m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
+        {m.meta.purchases > 0 && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))", gap: 20 }}>
           <div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>결제자</div>
             <div className="mono" style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>{num(m.monetization.payers.num)}명</div>

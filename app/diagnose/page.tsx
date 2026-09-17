@@ -186,7 +186,7 @@ export default function DiagnosePage() {
         ) : (
           <div className="two-col">
             <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontSize: 34, fontWeight: 600, marginBottom: 14 }}>진단 리포트</h1>
+              <h1 style={{ fontSize: "clamp(24px, 3.2vw, 28px)", fontWeight: 600, marginBottom: 14 }}>진단 리포트</h1>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--ink-2)", margin: "0 0 26px" }}>
                 쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리해 드립니다.
                 컬럼 이름이 달라도 됩니다. 무엇인지만 알려 주시면 맞춰 읽습니다.

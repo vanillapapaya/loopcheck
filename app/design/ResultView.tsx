@@ -186,7 +186,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         )}
 
         {tab === "kpis" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 16 }}>
             {data.kpis.map((k) => (
               <div key={k.name} className="card" style={{ padding: "22px 24px" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{k.name}</h3>
@@ -204,7 +204,7 @@ export default function ResultView({ data, label, source }: { data: DesignResult
         )}
 
         {tab === "ab" && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 16, alignItems: "start" }}>
             <div style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "26px 28px" }}>
               <div className="eyebrow" style={{ color: "var(--on-ink)", marginBottom: 12 }}>가설</div>
               <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.7, marginBottom: 20 }}>{data.ab_test.hypothesis}</div>

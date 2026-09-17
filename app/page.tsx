@@ -2,11 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 
 function Check() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 4, flexShrink: 0 }}>
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-  );
+  return <span aria-hidden style={{ color: "var(--muted)", flexShrink: 0 }}>-</span>;
 }
 
 export default function Home() {
@@ -19,10 +15,8 @@ export default function Home() {
             <span style={{ width: 6, height: 6, borderRadius: 2, background: "var(--ok)" }} />
             소규모 게임 팀을 위한 지표 설계와 진단 도구
           </div>
-          <h1 style={{ fontSize: "clamp(34px, 5.6vw, 56px)", lineHeight: 1.2, fontWeight: 600, marginBottom: 22, textWrap: "balance" }}>
-            쌓을 것을 정하고,
-            <br />
-            쌓인 것을 읽습니다.
+          <h1 style={{ fontSize: "clamp(32px, 5.2vw, 52px)", lineHeight: 1.25, fontWeight: 600, marginBottom: 22, textWrap: "balance", maxWidth: "10em" }}>
+            쌓을 것을 정하고, 쌓인 것을 읽습니다.
           </h1>
           <p className="prose" style={{ fontSize: 17, lineHeight: 1.85, color: "var(--ink-2)", marginBottom: 32 }}>
             게임 장르와 핵심 루프를 적으면 로그 이벤트 스키마와 KPI 정의서가 나옵니다.
@@ -36,12 +30,12 @@ export default function Home() {
           </p>
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 18, paddingBottom: 72 }}>
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 18, paddingBottom: 72 }}>
           <div className="card" style={{ padding: 30 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>01</span>
             </div>
-            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
+            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>지표 설계기</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
               어떤 로그를 쌓아야 할지 모르신다면 이 게임의 루프에서 무엇을 이벤트로 남겨야 하는지부터 정해 드립니다.
             </p>
@@ -56,7 +50,7 @@ export default function Home() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <span className="mono" style={{ fontSize: 12, color: "var(--muted)" }}>02</span>
             </div>
-            <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
+            <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
               데이터를 업로드하면 리텐션, 레벨 이탈, 결제, 세그먼트를 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다.
             </p>
@@ -70,7 +64,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="how" style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "48px 40px", marginBottom: 72 }}>
+        <section id="how" style={{ background: "var(--ink)", color: "var(--bg)", borderRadius: 2, padding: "clamp(28px, 5vw, 48px) clamp(20px, 4vw, 40px)", marginBottom: 72 }}>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 34px)", lineHeight: 1.35, fontWeight: 600, marginBottom: 18, maxWidth: 720 }}>
             기존 분석 도구는 이미 데이터가 있는 팀을 전제합니다.
           </h2>
@@ -78,7 +72,7 @@ export default function Home() {
             SDK를 붙이려면 무엇을 찍을지 먼저 알아야 하는데, 대부분의 소규모 팀이 거기서 막힙니다.
             루프체크는 그 앞단계에서 시작해, 쌓인 다음에는 한국어로 무엇을 먼저 고쳐야 하는지까지 이어 줍니다.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 14 }}>
             {[
               ["무엇을 쌓을지 정하는 앞단계부터 합니다", "분석 도구는 이벤트가 이미 찍히고 있다고 전제합니다. 이 게임의 루프에서 무엇을 이벤트로 남길지 정하는 단계는 비어 있습니다. 거기서부터 시작합니다."],
               ["상관관계를 인과로 읽지 않습니다", "누적 광고 시청량으로 집계하면 “많이 볼수록 잔존이 높다”가 나옵니다. 오래 남은 유저일수록 시청 누적량이 커지는 구조라, 누적량은 잔존의 원인이 아니라 결과입니다. 경과일을 고정해 다시 집계합니다."],
@@ -95,7 +89,7 @@ export default function Home() {
 
         <section style={{ borderTop: "1px solid var(--line)", padding: "48px 0 72px", display: "flex", flexWrap: "wrap", gap: 24, alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <h2 style={{ fontSize: 26, fontWeight: 600, marginBottom: 8 }}>설계부터 해 보세요</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>설계부터 해 보세요</h2>
             <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0 }}>
               게임 장르를 고르면 바로 데이터 스키마가 나옵니다.
             </p>

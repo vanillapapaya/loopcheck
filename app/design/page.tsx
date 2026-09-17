@@ -96,10 +96,10 @@ export default function DesignPage() {
         ) : (
           <>
             <div style={{ maxWidth: 640, marginBottom: 32 }}>
-              <h1 style={{ fontSize: 34, fontWeight: 600, marginBottom: 14 }}>장르 선택</h1>
+              <h1 style={{ fontSize: "clamp(24px, 3.2vw, 28px)", fontWeight: 600, marginBottom: 14 }}>장르 선택</h1>
               <p style={{ fontSize: 15, color: "var(--ink-2)", lineHeight: 1.75, margin: 0 }}>
                 장르를 고르면 그 장르의 핵심 루프에 맞춘 이벤트 스키마, KPI 정의서, 첫 검증 설계가
-                바로 나옵니다. 목록에 없으면 아래에 핵심 루프를 적어 AI에게 설계를 받으세요.
+                바로 나옵니다. 목록에 없으면 아래에 핵심 루프를 적어 AI 설계를 받을 수 있습니다.
               </p>
             </div>
 
@@ -109,7 +109,7 @@ export default function DesignPage() {
               </div>
             )}
 
-            <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 14 }}>지표 설계 예시</h2>
+            <h2 style={{ fontSize: 17, fontFamily: "var(--serif)", fontWeight: 600, marginBottom: 14 }}>지표 설계 예시</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16, marginBottom: 40 }}>
               {PRESETS.map((p) => (
                 <button
@@ -129,33 +129,25 @@ export default function DesignPage() {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                    <span style={{ fontSize: 18, fontWeight: 600 }}>{p.label}</span>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{p.label}</span>
                     {loading === p.id ? (
                       <span style={{ fontSize: 12, color: "var(--muted)" }}>여는 중…</span>
                     ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14" /><path d="M13 6l6 6-6 6" />
-                      </svg>
+                      <span style={{ fontSize: 12, color: "var(--muted)", flexShrink: 0 }}>열기</span>
                     )}
                   </div>
                   <div style={{ fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>{p.coreLoop}</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-                    {[p.monetization, p.platform].map((t, i) => (
-                      <span key={`${i}-${t}`} style={{ fontSize: 11, padding: "3px 8px", border: "1px solid var(--line-3)", borderRadius: 2, color: "var(--muted)" }}>
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+                  <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.monetization} · {p.platform}</div>
                 </button>
               ))}
             </div>
 
             <div className="card" style={{ padding: "28px 30px" }}>
               <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600 }}>목록에 없는 새로운 게임을 만드신다면</h2>
+                <h2 style={{ fontSize: 17, fontFamily: "var(--serif)", fontWeight: 600 }}>목록에 없는 새로운 게임을 만드신다면</h2>
               </div>
               <p style={{ fontSize: 14, lineHeight: 1.7, color: "var(--ink-2)", margin: "0 0 22px", maxWidth: 720 }}>
-                핵심 루프를 두세 문장으로 적어 주세요. 유저가  무엇을 반복하는지, 어디서 성공하고 실패하는지, 무엇으로 돈을 쓰는지가 들어가면 설계가 정확해집니다.
+                핵심 루프를 두세 문장으로 적어 주세요. 유저가 무엇을 반복하는지, 어디서 성공하고 실패하는지, 무엇으로 돈을 쓰는지가 들어가면 설계가 정확해집니다.
               </p>
 
               <form onSubmit={submitCustom}>
@@ -169,7 +161,7 @@ export default function DesignPage() {
                     <textarea id="core_loop" required minLength={30} maxLength={1000} rows={4} value={form.core_loop} onChange={set("core_loop")}
                       placeholder="예: 유저가 던전에 입장해 몬스터를 처치하고 장비를 얻는다. 막히면 장비를 강화하거나 동료를 뽑아 다시 도전한다. 매일 입장권이 충전되고, 입장권이 떨어지면 광고를 보거나 결제로 충전한다."
                       style={{ ...field, resize: "vertical", lineHeight: 1.65 }} />
-                    <div className="mono" style={{ fontSize: 11, color: "var(--muted)", textAlign: "right", marginTop: 4 }}>{form.core_loop.length} / 1000</div>
+                    <div className="mono" style={{ fontSize: 12, color: "var(--muted)", textAlign: "right", marginTop: 4 }}>{form.core_loop.length} / 1000</div>
                   </div>
                   <div>
                     <label htmlFor="monetization" style={labelStyle}>수익화</label>
@@ -192,7 +184,7 @@ export default function DesignPage() {
                     {loading === "custom" ? "설계하는 중…" : "AI로 설계 받기"}
                   </button>
                   {loading === "custom" ? (
-                    <span role="status" style={{ fontSize: 13, color: "var(--ink-2)" }}>이벤트 스키마와 DDL까지 쓰느라 1분 가까이 걸릴 수 있습니다. 창을 닫지 마세요.</span>
+                    <span role="status" style={{ fontSize: 13, color: "var(--ink-2)" }}>이벤트 스키마와 DDL까지 쓰느라 1분 가까이 걸릴 수 있습니다. 창을 닫지 않으시면 됩니다.</span>
                   ) : (
                     <Link href="/" style={{ fontSize: 13 }}>소개로 돌아가기</Link>
                   )}
