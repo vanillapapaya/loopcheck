@@ -50,7 +50,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>진단 리포트</h3>
             <p style={{ fontSize: 15, lineHeight: 1.7, color: "var(--ink-2)", marginBottom: 20 }}>
-              쌓아 둔 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 이 브라우저에서 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다. 컬럼 이름이 달라도 맞춰 읽습니다.
+              쌓아 둔 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 이 브라우저에서 계산하고 무엇을 먼저 고쳐야 하는지 순서대로 정리해 드립니다. 컬럼 이름은 자동으로 맞춰 읽고, 못 찾은 항목만 화면에서 골라 주시면 됩니다.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
               <div style={{ display: "flex", gap: 9 }}><Check />코호트 리텐션과 이탈 구간 특정</div>

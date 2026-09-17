@@ -186,7 +186,7 @@ export default function DiagnosePage() {
               <h1 style={{ fontSize: "clamp(24px, 3.2vw, 28px)", fontWeight: 600, marginBottom: 14 }}>진단 리포트</h1>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "var(--ink-2)", margin: "0 0 26px" }}>
                 쌓인 로그 CSV를 올리면 리텐션, 레벨 이탈, 결제, 광고 빈도, 세그먼트를 계산하고 무엇을 먼저 고칠지 정리해 드립니다.
-                컬럼 이름이 달라도 됩니다. 무엇인지만 알려 주시면 맞춰 읽습니다.
+                컬럼 이름은 자동으로 맞춰 읽습니다. 못 찾은 항목이 있으면 아래 목록에 표시되니 어떤 컬럼인지만 골라 주시면 됩니다.
               </p>
 
               {/* 드롭존. 누르는 곳은 버튼 하나로 두고, 면 전체는 끌어다 놓는 자리로 쓴다 */}
